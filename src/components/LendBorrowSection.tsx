@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, CheckCircle, Clock, Trash2 } from "lucide-react";
+import { Plus, CheckCircle, Clock, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface LendBorrowRecord {
   id: string;
@@ -31,10 +31,11 @@ interface PersonGroup {
 export const LendBorrowSection = ({ userId }: { userId: string }) => {
   const [records, setRecords] = useState<LendBorrowRecord[]>([]);
   const [open, setOpen] = useState(false);
+  const [expandedPerson, setExpandedPerson] = useState<string | null>(null);
+  const [quickAddForms, setQuickAddForms] = useState<Record<string, { amount: string; description: string }>>({});
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    type: "lent",
     person_name: "",
     amount: "",
     description: "",
@@ -66,7 +67,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
 
       const { error } = await supabase.from("lend_borrow").insert({
         user_id: user.id,
-        type: formData.type,
+        type: "lent",
         person_name: formData.person_name,
         amount: parseFloat(formData.amount),
         description: formData.description || null,
@@ -78,17 +79,59 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
 
       toast({
         title: "Success!",
-        description: "Record added successfully.",
+        description: "Person added successfully.",
       });
 
       setOpen(false);
       setFormData({
-        type: "lent",
         person_name: "",
         amount: "",
         description: "",
         date: new Date().toISOString().split("T")[0],
       });
+      fetchRecords();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleQuickAdd = async (personName: string, type: "lent" | "borrowed") => {
+    const form = quickAddForms[personName];
+    if (!form?.amount) {
+      toast({
+        title: "Error",
+        description: "Please enter an amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase.from("lend_borrow").insert({
+        user_id: user.id,
+        type,
+        person_name: personName,
+        amount: parseFloat(form.amount),
+        description: form.description || null,
+        date: new Date().toISOString().split("T")[0],
+        status: "pending",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: `Transaction added successfully.`,
+      });
+
+      setQuickAddForms({ ...quickAddForms, [personName]: { amount: "", description: "" } });
       fetchRecords();
     } catch (error: any) {
       toast({
@@ -150,11 +193,11 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
   const pendingRecords = records.filter((r) => r.status === "pending");
   const settledRecords = records.filter((r) => r.status === "settled");
 
-  // Group pending records by person
-  const groupedPending: PersonGroup[] = [];
+  // Group all records by person (pending + settled)
+  const allGrouped: PersonGroup[] = [];
   const personMap = new Map<string, PersonGroup>();
 
-  pendingRecords.forEach((record) => {
+  records.forEach((record) => {
     if (!personMap.has(record.person_name)) {
       personMap.set(record.person_name, {
         personName: record.person_name,
@@ -165,11 +208,13 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
     }
     const group = personMap.get(record.person_name)!;
     group.records.push(record);
-    group.totalAmount += record.amount;
+    if (record.status === "pending") {
+      group.totalAmount += record.type === "lent" ? record.amount : -record.amount;
+    }
   });
 
   personMap.forEach((value) => {
-    groupedPending.push(value);
+    allGrouped.push(value);
   });
 
   const totalLent = pendingRecords
@@ -204,35 +249,19 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
       </div>
 
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Pending Transactions</h3>
+        <h3 className="text-lg font-semibold">People</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Add Record
+              Add Person
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Lend/Borrow Record</DialogTitle>
+              <DialogTitle>Add New Person</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="lent">I Lent Money</SelectItem>
-                    <SelectItem value="borrowed">I Borrowed Money</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="person">Person Name</Label>
                 <Input
@@ -247,7 +276,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount (₹)</Label>
+                <Label htmlFor="amount">Initial Amount (₹)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -283,7 +312,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
               </div>
 
               <Button type="submit" className="w-full">
-                Add Record
+                Add Person
               </Button>
             </form>
           </DialogContent>
@@ -291,126 +320,174 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
       </div>
 
       <div className="space-y-4">
-        {groupedPending.length === 0 ? (
+        {allGrouped.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              No pending transactions. All settled!
+              No people added yet. Click "Add Person" to start tracking!
             </CardContent>
           </Card>
         ) : (
-          groupedPending.map((group) => (
-            <Card key={group.personName} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {/* Person Header with Clear All button */}
-                  <div className="flex items-center justify-between pb-3 border-b">
-                    <div>
-                      <h4 className="font-semibold text-lg">{group.personName}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {group.records.length} transaction{group.records.length > 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p
-                          className={`text-xl font-bold ${
-                            group.type === "lent" ? "text-success" : "text-accent"
-                          }`}
-                        >
-                          ₹{group.totalAmount.toFixed(2)}
-                        </p>
-                        <Badge variant="outline" className="mt-1">
-                          {group.type === "lent" ? "You Lent" : "You Borrowed"}
-                        </Badge>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleClearAll(group.personName)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Clear All
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Individual transactions */}
-                  <div className="space-y-2">
-                    {group.records.map((record) => (
-                      <div
-                        key={record.id}
-                        className="flex items-center justify-between p-2 rounded bg-muted/50"
-                      >
+          allGrouped.map((group) => {
+            const form = quickAddForms[group.personName] || { amount: "", description: "" };
+            const isExpanded = expandedPerson === group.personName;
+            
+            return (
+              <Card key={group.personName} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <Collapsible open={isExpanded} onOpenChange={() => setExpandedPerson(isExpanded ? null : group.personName)}>
+                    {/* Person Header */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <CollapsibleTrigger asChild>
+                          <div className="flex items-center gap-2 cursor-pointer flex-1">
+                            <div>
+                              <h4 className="font-semibold text-lg">{group.personName}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {group.records.filter(r => r.status === "pending").length} pending
+                              </p>
+                            </div>
+                            {isExpanded ? <ChevronUp className="w-5 h-5 ml-2" /> : <ChevronDown className="w-5 h-5 ml-2" />}
+                          </div>
+                        </CollapsibleTrigger>
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              record.type === "lent" ? "bg-success/10" : "bg-accent/10"
-                            }`}
-                          >
-                            <Clock className="w-4 h-4" />
-                          </div>
-                          <div>
-                            {record.description && (
-                              <p className="text-sm font-medium">{record.description}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground">
-                              {format(new Date(record.date), "MMM d, yyyy")}
+                          <div className="text-right">
+                            <p
+                              className={`text-xl font-bold ${
+                                group.totalAmount >= 0 ? "text-success" : "text-accent"
+                              }`}
+                            >
+                              ₹{Math.abs(group.totalAmount).toFixed(2)}
                             </p>
+                            <Badge variant="outline" className="mt-1">
+                              {group.totalAmount >= 0 ? "You'll Get" : "You Owe"}
+                            </Badge>
                           </div>
+                          {group.records.some(r => r.status === "pending") && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleClearAll(group.personName)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Clear All
+                            </Button>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold">₹{record.amount.toFixed(2)}</p>
+                      </div>
+
+                      {/* Quick Add Form */}
+                      <div className="bg-muted/30 p-3 rounded-lg space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            placeholder="Amount (₹)"
+                            type="number"
+                            step="0.01"
+                            value={form.amount}
+                            onChange={(e) =>
+                              setQuickAddForms({
+                                ...quickAddForms,
+                                [group.personName]: { ...form, amount: e.target.value },
+                              })
+                            }
+                          />
+                          <Input
+                            placeholder="Description (optional)"
+                            value={form.description}
+                            onChange={(e) =>
+                              setQuickAddForms({
+                                ...quickAddForms,
+                                [group.personName]: { ...form, description: e.target.value },
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="flex gap-2">
                           <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleSettle(record.id)}
+                            className="flex-1 bg-success hover:bg-success/90"
+                            onClick={() => handleQuickAdd(group.personName, "lent")}
                           >
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Settle
+                            Given
+                          </Button>
+                          <Button
+                            className="flex-1 bg-accent hover:bg-accent/90"
+                            onClick={() => handleQuickAdd(group.personName, "borrowed")}
+                          >
+                            Taken
                           </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                    </div>
 
-      {settledRecords.length > 0 && (
-        <>
-          <h3 className="text-lg font-semibold mt-8">Settled Transactions</h3>
-          <div className="space-y-2 opacity-60">
-            {settledRecords.map((record) => (
-              <Card key={record.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted">
-                        <CheckCircle className="w-5 h-5 text-muted-foreground" />
+                    {/* Transaction History */}
+                    <CollapsibleContent>
+                      <div className="space-y-2 mt-4 pt-4 border-t">
+                        <h5 className="text-sm font-semibold text-muted-foreground">Transaction History</h5>
+                        {group.records.map((record) => (
+                          <div
+                            key={record.id}
+                            className={`flex items-center justify-between p-2 rounded ${
+                              record.status === "pending" ? "bg-muted/50" : "opacity-50"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                  record.status === "settled"
+                                    ? "bg-muted"
+                                    : record.type === "lent"
+                                    ? "bg-success/10"
+                                    : "bg-accent/10"
+                                }`}
+                              >
+                                {record.status === "settled" ? (
+                                  <CheckCircle className="w-4 h-4" />
+                                ) : (
+                                  <Clock className="w-4 h-4" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium">
+                                    {record.type === "lent" ? "Given" : "Taken"}
+                                  </p>
+                                  {record.description && (
+                                    <p className="text-xs text-muted-foreground">• {record.description}</p>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(new Date(record.date), "MMM d, yyyy")}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm font-semibold ${record.type === "lent" ? "text-success" : "text-accent"}`}>
+                                {record.type === "lent" ? "+" : "-"}₹{record.amount.toFixed(2)}
+                              </p>
+                              {record.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSettle(record.id)}
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Settle
+                                </Button>
+                              )}
+                              {record.status === "settled" && (
+                                <Badge variant="secondary" className="text-xs">Settled</Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <p className="font-medium">{record.person_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(record.date), "MMM d, yyyy")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-muted-foreground">
-                        ₹{record.amount.toFixed(2)}
-                      </p>
-                      <Badge variant="secondary">Settled</Badge>
-                    </div>
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </>
-      )}
+            );
+          })
+        )}
+      </div>
     </div>
   );
 };
