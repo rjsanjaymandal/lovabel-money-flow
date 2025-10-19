@@ -7,9 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Plus, TrendingUp, TrendingDown, Users, Wallet } from "lucide-react";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
 import { TransactionList } from "@/components/TransactionList";
-import { LendBorrowSection } from "@/components/LendBorrowSection";
 import { SpendingChart } from "@/components/SpendingChart";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { PeopleSidebar } from "@/components/PeopleSidebar";
+import { PersonDetails } from "@/components/PersonDetails";
+
+interface Person {
+  name: string;
+  balance: number;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -21,6 +28,8 @@ const Dashboard = () => {
     totalExpenses: 0,
     balance: 0,
   });
+  const [people, setPeople] = useState<Person[]>([]);
+  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -31,6 +40,7 @@ const Dashboard = () => {
       }
       setUser(session.user);
       await fetchStats(session.user.id);
+      await fetchPeople(session.user.id);
       setLoading(false);
     };
 
@@ -42,6 +52,7 @@ const Dashboard = () => {
       } else {
         setUser(session.user);
         fetchStats(session.user.id);
+        fetchPeople(session.user.id);
       }
     });
 
@@ -67,6 +78,40 @@ const Dashboard = () => {
         totalExpenses: expenses,
         balance: income - expenses,
       });
+    }
+  };
+
+  const fetchPeople = async (userId: string) => {
+    const { data: records } = await supabase
+      .from("lend_borrow")
+      .select("person_name, type, amount, status")
+      .eq("user_id", userId);
+
+    if (records) {
+      const personMap = new Map<string, number>();
+
+      records.forEach((record) => {
+        if (record.status === "pending") {
+          const current = personMap.get(record.person_name) || 0;
+          const amount = record.type === "lent" ? record.amount : -record.amount;
+          personMap.set(record.person_name, current + amount);
+        } else if (!personMap.has(record.person_name)) {
+          personMap.set(record.person_name, 0);
+        }
+      });
+
+      const peopleList: Person[] = Array.from(personMap.entries()).map(([name, balance]) => ({
+        name,
+        balance,
+      }));
+
+      peopleList.sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
+
+      setPeople(peopleList);
+      
+      if (peopleList.length > 0 && !selectedPerson) {
+        setSelectedPerson(peopleList[0].name);
+      }
     }
   };
 
@@ -169,8 +214,31 @@ const Dashboard = () => {
             <TransactionList userId={user?.id} />
           </TabsContent>
 
-          <TabsContent value="lend-borrow">
-            <LendBorrowSection userId={user?.id} />
+          <TabsContent value="lend-borrow" className="mt-0">
+            <SidebarProvider>
+              <div className="flex min-h-[calc(100vh-24rem)] w-full border rounded-lg overflow-hidden">
+                <PeopleSidebar
+                  people={people}
+                  selectedPerson={selectedPerson}
+                  onSelectPerson={setSelectedPerson}
+                  onPersonAdded={() => fetchPeople(user.id)}
+                />
+                <div className="flex-1 p-6 overflow-auto">
+                  <div className="flex items-center gap-2 mb-4">
+                    <SidebarTrigger />
+                  </div>
+                  {selectedPerson ? (
+                    <PersonDetails personName={selectedPerson} userId={user?.id} />
+                  ) : (
+                    <Card>
+                      <CardContent className="p-8 text-center text-muted-foreground">
+                        Select a contact from the sidebar to view their transactions
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </SidebarProvider>
           </TabsContent>
         </Tabs>
       </main>
