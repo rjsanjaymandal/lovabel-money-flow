@@ -129,62 +129,83 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Wallet className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">EasyExpense</h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+              <Wallet className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                EasyExpense
+              </h1>
+              <p className="text-xs text-muted-foreground">Track smarter, save better 💰</p>
+            </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+          <Button variant="ghost" size="icon" onClick={handleSignOut} className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full">
             <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="bg-gradient-to-br from-success/10 to-success/5">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-              <TrendingUp className="w-4 h-4 text-success" />
+          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+            <div className="absolute inset-0 gradient-success opacity-5 group-hover:opacity-10 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-semibold">Total Income</CardTitle>
+              <div className="w-10 h-10 rounded-full gradient-success flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-success">
                 ₹{stats.totalIncome.toFixed(2)}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Keep it up! 📈</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-accent/10 to-accent/5">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-              <TrendingDown className="w-4 h-4 text-accent" />
+          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+            <div className="absolute inset-0 gradient-accent opacity-5 group-hover:opacity-10 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-semibold">Total Expenses</CardTitle>
+              <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
+                <TrendingDown className="w-5 h-5 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-accent">
                 ₹{stats.totalExpenses.toFixed(2)}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Watch your spending 👀</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Balance</CardTitle>
-              <Wallet className="w-4 h-4 text-primary" />
+          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+            <div className="absolute inset-0 gradient-primary opacity-5 group-hover:opacity-10 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+              <CardTitle className="text-sm font-semibold">Balance</CardTitle>
+              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-primary">
                 ₹{stats.balance.toFixed(2)}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Your net worth 💎</p>
             </CardContent>
           </Card>
         </div>
 
         <div className="mb-8">
-          <Card>
+          <Card className="border-2 shadow-md">
             <CardHeader>
-              <CardTitle>Spending Overview</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                Spending Overview 📊
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <SpendingChart userId={user?.id} />
@@ -192,10 +213,12 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="lend-borrow">
+        <Tabs defaultValue="transactions" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-muted/50 rounded-xl">
+            <TabsTrigger value="transactions" className="rounded-lg data-[state=active]:shadow-md data-[state=active]:bg-card transition-all">
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="lend-borrow" className="rounded-lg data-[state=active]:shadow-md data-[state=active]:bg-card transition-all">
               <Users className="w-4 h-4 mr-2" />
               Lend/Borrow
             </TabsTrigger>
@@ -203,9 +226,9 @@ const Dashboard = () => {
 
           <TabsContent value="transactions" className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Recent Transactions</h2>
+              <h2 className="text-2xl font-bold">Recent Transactions 💸</h2>
               <AddTransactionDialog onSuccess={() => fetchStats(user.id)}>
-                <Button>
+                <Button className="gradient-primary hover:opacity-90 transition-all hover:scale-105">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Transaction
                 </Button>
@@ -215,24 +238,27 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="lend-borrow" className="mt-0">
-            <SidebarProvider>
-              <div className="flex min-h-[calc(100vh-24rem)] w-full border rounded-lg overflow-hidden">
+            <SidebarProvider defaultOpen={true}>
+              <div className="flex min-h-[calc(100vh-24rem)] w-full border-2 rounded-2xl overflow-hidden shadow-lg bg-card">
                 <PeopleSidebar
                   people={people}
                   selectedPerson={selectedPerson}
                   onSelectPerson={setSelectedPerson}
                   onPersonAdded={() => fetchPeople(user.id)}
                 />
-                <div className="flex-1 p-6 overflow-auto">
-                  <div className="flex items-center gap-2 mb-4">
-                    <SidebarTrigger />
-                  </div>
+                <div className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background to-background/50">
                   {selectedPerson ? (
                     <PersonDetails personName={selectedPerson} userId={user?.id} />
                   ) : (
-                    <Card>
-                      <CardContent className="p-8 text-center text-muted-foreground">
-                        Select a contact from the sidebar to view their transactions
+                    <Card className="border-2 border-dashed h-full flex items-center justify-center">
+                      <CardContent className="p-12 text-center space-y-4">
+                        <div className="w-24 h-24 rounded-full gradient-primary mx-auto flex items-center justify-center opacity-20">
+                          <Users className="h-12 w-12 text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xl font-bold">Select a Contact</p>
+                          <p className="text-muted-foreground">Choose someone from the sidebar to view their transactions</p>
+                        </div>
                       </CardContent>
                     </Card>
                   )}
