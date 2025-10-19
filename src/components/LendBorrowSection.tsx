@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, CheckCircle, Clock } from "lucide-react";
+import { Plus, CheckCircle, Clock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface LendBorrowRecord {
@@ -19,6 +19,13 @@ interface LendBorrowRecord {
   description: string;
   date: string;
   status: string;
+}
+
+interface PersonGroup {
+  personName: string;
+  records: LendBorrowRecord[];
+  totalAmount: number;
+  type: string;
 }
 
 export const LendBorrowSection = ({ userId }: { userId: string }) => {
@@ -113,8 +120,57 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
     }
   };
 
+  const handleClearAll = async (personName: string) => {
+    const pendingForPerson = records.filter(
+      (r) => r.person_name === personName && r.status === "pending"
+    );
+
+    const ids = pendingForPerson.map((r) => r.id);
+
+    const { error } = await supabase
+      .from("lend_borrow")
+      .update({ status: "settled" })
+      .in("id", ids);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "All Cleared!",
+        description: `All transactions with ${personName} have been settled.`,
+      });
+      fetchRecords();
+    }
+  };
+
   const pendingRecords = records.filter((r) => r.status === "pending");
   const settledRecords = records.filter((r) => r.status === "settled");
+
+  // Group pending records by person
+  const groupedPending: PersonGroup[] = [];
+  const personMap = new Map<string, PersonGroup>();
+
+  pendingRecords.forEach((record) => {
+    if (!personMap.has(record.person_name)) {
+      personMap.set(record.person_name, {
+        personName: record.person_name,
+        records: [],
+        totalAmount: 0,
+        type: record.type,
+      });
+    }
+    const group = personMap.get(record.person_name)!;
+    group.records.push(record);
+    group.totalAmount += record.amount;
+  });
+
+  personMap.forEach((value) => {
+    groupedPending.push(value);
+  });
 
   const totalLent = pendingRecords
     .filter((r) => r.type === "lent")
@@ -131,7 +187,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
             <CardTitle className="text-sm font-medium">You Lent</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-success">${totalLent.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-success">₹{totalLent.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Outstanding balance</p>
           </CardContent>
         </Card>
@@ -141,7 +197,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
             <CardTitle className="text-sm font-medium">You Borrowed</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-accent">${totalBorrowed.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-accent">₹{totalBorrowed.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Outstanding balance</p>
           </CardContent>
         </Card>
@@ -191,7 +247,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">Amount (₹)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -234,59 +290,87 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
         </Dialog>
       </div>
 
-      <div className="space-y-2">
-        {pendingRecords.length === 0 ? (
+      <div className="space-y-4">
+        {groupedPending.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               No pending transactions. All settled!
             </CardContent>
           </Card>
         ) : (
-          pendingRecords.map((record) => (
-            <Card key={record.id} className="hover:shadow-md transition-shadow">
+          groupedPending.map((group) => (
+            <Card key={group.personName} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        record.type === "lent" ? "bg-success/10" : "bg-accent/10"
-                      }`}
-                    >
-                      <Clock className="w-5 h-5" />
-                    </div>
+                <div className="space-y-3">
+                  {/* Person Header with Clear All button */}
+                  <div className="flex items-center justify-between pb-3 border-b">
                     <div>
-                      <p className="font-medium">{record.person_name}</p>
-                      {record.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {record.description}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(record.date), "MMM d, yyyy")}
+                      <h4 className="font-semibold text-lg">{group.personName}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {group.records.length} transaction{group.records.length > 1 ? "s" : ""}
                       </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p
+                          className={`text-xl font-bold ${
+                            group.type === "lent" ? "text-success" : "text-accent"
+                          }`}
+                        >
+                          ₹{group.totalAmount.toFixed(2)}
+                        </p>
+                        <Badge variant="outline" className="mt-1">
+                          {group.type === "lent" ? "You Lent" : "You Borrowed"}
+                        </Badge>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleClearAll(group.personName)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Clear All
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p
-                        className={`text-lg font-semibold ${
-                          record.type === "lent" ? "text-success" : "text-accent"
-                        }`}
+
+                  {/* Individual transactions */}
+                  <div className="space-y-2">
+                    {group.records.map((record) => (
+                      <div
+                        key={record.id}
+                        className="flex items-center justify-between p-2 rounded bg-muted/50"
                       >
-                        ${record.amount.toFixed(2)}
-                      </p>
-                      <Badge variant="outline">
-                        {record.type === "lent" ? "You Lent" : "You Borrowed"}
-                      </Badge>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleSettle(record.id)}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Settle
-                    </Button>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              record.type === "lent" ? "bg-success/10" : "bg-accent/10"
+                            }`}
+                          >
+                            <Clock className="w-4 h-4" />
+                          </div>
+                          <div>
+                            {record.description && (
+                              <p className="text-sm font-medium">{record.description}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(record.date), "MMM d, yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold">₹{record.amount.toFixed(2)}</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSettle(record.id)}
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Settle
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -316,7 +400,7 @@ export const LendBorrowSection = ({ userId }: { userId: string }) => {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-semibold text-muted-foreground">
-                        ${record.amount.toFixed(2)}
+                        ₹{record.amount.toFixed(2)}
                       </p>
                       <Badge variant="secondary">Settled</Badge>
                     </div>

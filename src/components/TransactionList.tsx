@@ -99,7 +99,7 @@ export const TransactionList = ({ userId }: { userId: string }) => {
                           : "text-accent"
                       }`}
                     >
-                      {transaction.type === "income" ? "+" : "-"}$
+                      {transaction.type === "income" ? "+" : "-"}₹
                       {transaction.amount.toFixed(2)}
                     </p>
                     <Badge variant="outline" className="mt-1">

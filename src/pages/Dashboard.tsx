@@ -106,7 +106,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-success">
-                ${stats.totalIncome.toFixed(2)}
+                ₹{stats.totalIncome.toFixed(2)}
               </div>
             </CardContent>
           </Card>
@@ -118,7 +118,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-accent">
-                ${stats.totalExpenses.toFixed(2)}
+                ₹{stats.totalExpenses.toFixed(2)}
               </div>
             </CardContent>
           </Card>
@@ -130,7 +130,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">
-                ${stats.balance.toFixed(2)}
+                ₹{stats.balance.toFixed(2)}
               </div>
             </CardContent>
           </Card>
