@@ -11,9 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 interface AddTransactionDialogProps {
   children: React.ReactNode;
   onSuccess?: () => void;
+  categories?: string[];
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   "Food & Dining",
   "Transportation",
   "Shopping",
@@ -25,7 +26,7 @@ const CATEGORIES = [
   "Other",
 ];
 
-export const AddTransactionDialog = ({ children, onSuccess }: AddTransactionDialogProps) => {
+export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT_CATEGORIES }: AddTransactionDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -131,7 +132,7 @@ export const AddTransactionDialog = ({ children, onSuccess }: AddTransactionDial
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>

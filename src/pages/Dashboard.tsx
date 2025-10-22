@@ -3,20 +3,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, TrendingUp, TrendingDown, Users, Wallet } from "lucide-react";
+import { LogOut, Plus, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
-import { TransactionList } from "@/components/TransactionList";
 import { SpendingChart } from "@/components/SpendingChart";
 import { useToast } from "@/hooks/use-toast";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { PeopleSidebar } from "@/components/PeopleSidebar";
 import { PersonDetails } from "@/components/PersonDetails";
+import { CategoryManager } from "@/components/CategoryManager";
 
 interface Person {
   name: string;
   balance: number;
 }
+
+const DEFAULT_CATEGORIES = [
+  "Food & Dining",
+  "Transportation",
+  "Shopping",
+  "Entertainment",
+  "Bills & Utilities",
+  "Healthcare",
+  "Education",
+  "Personal",
+  "Other",
+];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,7 +39,9 @@ const Dashboard = () => {
     balance: 0,
   });
   const [people, setPeople] = useState<Person[]>([]);
-  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
+  const [selectedPerson, setSelectedPerson] = useState<string>("");
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -129,78 +141,152 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
-              <Wallet className="w-6 h-6 text-white" />
+    <div className="flex min-h-screen w-full bg-background flex-col md:flex-row">
+      {/* Always Visible Sidebar - Horizontal on mobile, vertical on desktop */}
+      <div className="md:h-screen md:overflow-y-auto border-b md:border-r md:border-b-0">
+        <PeopleSidebar
+          people={people}
+          selectedPerson={selectedPerson}
+          onSelectPerson={setSelectedPerson}
+          onPersonAdded={() => fetchPeople(user.id)}
+          onManageCategories={() => setCategoryManagerOpen(true)}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-auto">
+        {/* Header */}
+        <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                <Wallet className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  EasyExpense
+                </h1>
+                <p className="text-xs text-muted-foreground">Track smarter, save better 💰</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                EasyExpense
-              </h1>
-              <p className="text-xs text-muted-foreground">Track smarter, save better 💰</p>
-            </div>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full">
+              <LogOut className="w-5 h-5" />
+            </Button>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full">
-            <LogOut className="w-5 h-5" />
-          </Button>
-        </div>
-      </header>
+        </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
-            <div className="absolute inset-0 gradient-success opacity-5 group-hover:opacity-10 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-semibold">Total Income</CardTitle>
-              <div className="w-10 h-10 rounded-full gradient-success flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-success">
-                ₹{stats.totalIncome.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Keep it up! 📈</p>
-            </CardContent>
-          </Card>
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 space-y-6">
+          {/* Top Section: Quick Add Transaction + Lend/Borrow */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Quick Add Transaction */}
+            <Card className="border-2 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">Quick Add Transaction</CardTitle>
+                  <AddTransactionDialog 
+                    onSuccess={() => fetchStats(user.id)}
+                    categories={categories}
+                  >
+                    <Button size="sm" className="gradient-primary hover:opacity-90">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add
+                    </Button>
+                  </AddTransactionDialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm">
+                  Track your income and expenses with categories in ₹
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
-            <div className="absolute inset-0 gradient-accent opacity-5 group-hover:opacity-10 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-semibold">Total Expenses</CardTitle>
-              <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
-                <TrendingDown className="w-5 h-5 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-accent">
-                ₹{stats.totalExpenses.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Watch your spending 👀</p>
-            </CardContent>
-          </Card>
+            {/* Lend/Borrow Quick Info */}
+            <Card className="border-2 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl">Lend/Borrow</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedPerson ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Currently viewing: <span className="font-semibold text-foreground">{selectedPerson}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Select a contact from sidebar to view full history and add transactions
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    Select a contact from the sidebar to manage Given/Taken transactions
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
-            <div className="absolute inset-0 gradient-primary opacity-5 group-hover:opacity-10 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-semibold">Balance</CardTitle>
-              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-                <Wallet className="w-5 h-5 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-primary">
-                ₹{stats.balance.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Your net worth 💎</p>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Lend/Borrow Details (when person selected) */}
+          {selectedPerson && (
+            <Card className="border-2 shadow-lg">
+              <CardContent className="p-6">
+                <PersonDetails personName={selectedPerson} userId={user?.id} />
+              </CardContent>
+            </Card>
+          )}
 
-        <div className="mb-8">
+          {/* Stats Cards */}
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+              <div className="absolute inset-0 gradient-success opacity-5 group-hover:opacity-10 transition-opacity" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-semibold">Total Income</CardTitle>
+                <div className="w-10 h-10 rounded-full gradient-success flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-success">
+                  ₹{stats.totalIncome.toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Keep it up! 📈</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+              <div className="absolute inset-0 gradient-accent opacity-5 group-hover:opacity-10 transition-opacity" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-semibold">Total Expenses</CardTitle>
+                <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
+                  <TrendingDown className="w-5 h-5 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-accent">
+                  ₹{stats.totalExpenses.toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Watch your spending 👀</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative group hover:scale-105">
+              <div className="absolute inset-0 gradient-primary opacity-5 group-hover:opacity-10 transition-opacity" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                <CardTitle className="text-sm font-semibold">Balance</CardTitle>
+                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+                  <Wallet className="w-5 h-5 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-primary">
+                  ₹{stats.balance.toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Your net worth 💎</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Spending Overview */}
           <Card className="border-2 shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -211,63 +297,16 @@ const Dashboard = () => {
               <SpendingChart userId={user?.id} />
             </CardContent>
           </Card>
-        </div>
+        </main>
+      </div>
 
-        <Tabs defaultValue="transactions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-muted/50 rounded-xl">
-            <TabsTrigger value="transactions" className="rounded-lg data-[state=active]:shadow-md data-[state=active]:bg-card transition-all">
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="lend-borrow" className="rounded-lg data-[state=active]:shadow-md data-[state=active]:bg-card transition-all">
-              <Users className="w-4 h-4 mr-2" />
-              Lend/Borrow
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="transactions" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Recent Transactions 💸</h2>
-              <AddTransactionDialog onSuccess={() => fetchStats(user.id)}>
-                <Button className="gradient-primary hover:opacity-90 transition-all hover:scale-105">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Transaction
-                </Button>
-              </AddTransactionDialog>
-            </div>
-            <TransactionList userId={user?.id} />
-          </TabsContent>
-
-          <TabsContent value="lend-borrow" className="mt-0">
-            <SidebarProvider defaultOpen={true}>
-              <div className="flex min-h-[calc(100vh-24rem)] w-full border-2 rounded-2xl overflow-hidden shadow-lg bg-card">
-                <PeopleSidebar
-                  people={people}
-                  selectedPerson={selectedPerson}
-                  onSelectPerson={setSelectedPerson}
-                  onPersonAdded={() => fetchPeople(user.id)}
-                />
-                <div className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background to-background/50">
-                  {selectedPerson ? (
-                    <PersonDetails personName={selectedPerson} userId={user?.id} />
-                  ) : (
-                    <Card className="border-2 border-dashed h-full flex items-center justify-center">
-                      <CardContent className="p-12 text-center space-y-4">
-                        <div className="w-24 h-24 rounded-full gradient-primary mx-auto flex items-center justify-center opacity-20">
-                          <Users className="h-12 w-12 text-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-xl font-bold">Select a Contact</p>
-                          <p className="text-muted-foreground">Choose someone from the sidebar to view their transactions</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </SidebarProvider>
-          </TabsContent>
-        </Tabs>
-      </main>
+      {/* Category Manager Modal */}
+      <CategoryManager
+        open={categoryManagerOpen}
+        onOpenChange={setCategoryManagerOpen}
+        categories={categories}
+        onCategoriesChange={setCategories}
+      />
     </div>
   );
 };
