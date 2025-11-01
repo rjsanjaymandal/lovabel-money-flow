@@ -15,7 +15,7 @@ interface Transaction {
   date: string;
 }
 
-export const TransactionList = ({ userId }: { userId: string }) => {
+export const TransactionList = ({ userId, limit }: { userId: string; limit?: number }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
 
@@ -23,15 +23,20 @@ export const TransactionList = ({ userId }: { userId: string }) => {
     if (userId) {
       fetchTransactions();
     }
-  }, [userId]);
+  }, [userId, limit]);
 
   const fetchTransactions = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from("transactions")
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: false });
+    
+    if (limit) {
+      query = query.limit(limit);
+    }
 
+    const { data } = await query;
     if (data) setTransactions(data);
   };
 

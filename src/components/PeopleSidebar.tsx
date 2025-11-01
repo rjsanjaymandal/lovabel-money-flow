@@ -47,22 +47,26 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Validate amount
-      const parsedAmount = parseFloat(formData.amount);
-      const validationResult = amountSchema.safeParse(parsedAmount);
-      
-      if (!validationResult.success) {
-        throw new Error(validationResult.error.errors[0].message);
+      // Validate amount only if provided
+      let validatedAmount = 0;
+      if (formData.amount) {
+        const parsedAmount = parseFloat(formData.amount);
+        const validationResult = amountSchema.safeParse(parsedAmount);
+        
+        if (!validationResult.success) {
+          throw new Error(validationResult.error.errors[0].message);
+        }
+        validatedAmount = validationResult.data;
       }
 
       const { error } = await supabase.from("lend_borrow").insert({
         user_id: user.id,
         type: "lent",
         person_name: formData.person_name,
-        amount: validationResult.data,
+        amount: validatedAmount,
         description: formData.description || null,
         date: formData.date,
-        status: "pending",
+        status: validatedAmount > 0 ? "pending" : "settled",
       });
 
       if (error) throw error;
@@ -172,7 +176,7 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Initial Amount (₹)</Label>
+                    <Label htmlFor="amount">Initial Amount (₹) - Optional</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -182,7 +186,6 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       placeholder="0.00"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      required
                       className="h-11"
                     />
                   </div>
