@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowUpRight, ArrowDownRight, CheckCircle, Trash2, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+
+const amountSchema = z.number()
+  .positive({ message: "Amount must be greater than zero" })
+  .finite({ message: "Amount must be a valid number" })
+  .max(99999999.99, { message: "Amount is too large" });
 
 interface LendBorrowRecord {
   id: string;
@@ -60,11 +66,19 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate amount
+      const parsedAmount = parseFloat(quickAddForm.amount);
+      const validationResult = amountSchema.safeParse(parsedAmount);
+      
+      if (!validationResult.success) {
+        throw new Error(validationResult.error.errors[0].message);
+      }
+
       const { error } = await supabase.from("lend_borrow").insert({
         user_id: user.id,
         type,
         person_name: personName,
-        amount: parseFloat(quickAddForm.amount),
+        amount: validationResult.data,
         description: quickAddForm.description || null,
         date: new Date().toISOString().split("T")[0],
         status: "pending",
@@ -80,9 +94,12 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
       setQuickAddForm({ amount: "", description: "" });
       fetchRecords();
     } catch (error: any) {
+      const message = error.message.includes("Amount") 
+        ? error.message 
+        : "Unable to add transaction. Please try again.";
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -204,6 +221,8 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
                 placeholder="0.00"
                 type="number"
                 step="0.01"
+                min="0.01"
+                max="99999999.99"
                 value={quickAddForm.amount}
                 onChange={(e) => setQuickAddForm({ ...quickAddForm, amount: e.target.value })}
                 className="h-11 text-lg"

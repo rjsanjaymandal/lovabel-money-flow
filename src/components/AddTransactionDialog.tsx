@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -26,6 +27,11 @@ const DEFAULT_CATEGORIES = [
   "Other",
 ];
 
+const amountSchema = z.number()
+  .positive({ message: "Amount must be greater than zero" })
+  .finite({ message: "Amount must be a valid number" })
+  .max(99999999.99, { message: "Amount is too large" });
+
 export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT_CATEGORIES }: AddTransactionDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,10 +53,18 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate amount
+      const parsedAmount = parseFloat(formData.amount);
+      const validationResult = amountSchema.safeParse(parsedAmount);
+      
+      if (!validationResult.success) {
+        throw new Error(validationResult.error.errors[0].message);
+      }
+
       const { error } = await supabase.from("transactions").insert({
         user_id: user.id,
         type: formData.type,
-        amount: parseFloat(formData.amount),
+        amount: validationResult.data,
         category: formData.category,
         description: formData.description || null,
         date: formData.date,
@@ -74,9 +88,12 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
       
       if (onSuccess) onSuccess();
     } catch (error: any) {
+      const message = error.message.includes("Amount") 
+        ? error.message 
+        : "Unable to add transaction. Please try again.";
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -114,6 +131,8 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
               id="amount"
               type="number"
               step="0.01"
+              min="0.01"
+              max="99999999.99"
               placeholder="0.00"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}

@@ -1,5 +1,6 @@
 import { Users, Plus, TrendingUp, TrendingDown, Home, Receipt, HandCoins, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,6 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const amountSchema = z.number()
+  .positive({ message: "Amount must be greater than zero" })
+  .finite({ message: "Amount must be a valid number" })
+  .max(99999999.99, { message: "Amount is too large" });
 
 interface Person {
   name: string;
@@ -41,11 +47,19 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate amount
+      const parsedAmount = parseFloat(formData.amount);
+      const validationResult = amountSchema.safeParse(parsedAmount);
+      
+      if (!validationResult.success) {
+        throw new Error(validationResult.error.errors[0].message);
+      }
+
       const { error } = await supabase.from("lend_borrow").insert({
         user_id: user.id,
         type: "lent",
         person_name: formData.person_name,
-        amount: parseFloat(formData.amount),
+        amount: validationResult.data,
         description: formData.description || null,
         date: formData.date,
         status: "pending",
@@ -67,9 +81,12 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
       });
       onPersonAdded();
     } catch (error: any) {
+      const message = error.message.includes("Amount") 
+        ? error.message 
+        : "Unable to add contact. Please try again.";
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     }
@@ -159,6 +176,8 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       id="amount"
                       type="number"
                       step="0.01"
+                      min="0.01"
+                      max="99999999.99"
                       placeholder="0.00"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
