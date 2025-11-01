@@ -161,6 +161,7 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                     <Input
                       id="person"
                       placeholder="John Doe"
+                      maxLength={100}
                       value={formData.person_name}
                       onChange={(e) =>
                         setFormData({ ...formData, person_name: e.target.value })
@@ -203,6 +204,7 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                     <Input
                       id="description"
                       placeholder="Add notes..."
+                      maxLength={500}
                       value={formData.description}
                       onChange={(e) =>
                         setFormData({ ...formData, description: e.target.value })

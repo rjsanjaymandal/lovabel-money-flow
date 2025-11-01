@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowUpRight, ArrowDownRight, CheckCircle, Trash2, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { getSafeErrorMessage } from "@/lib/error-handler";
 
 const amountSchema = z.number()
   .positive({ message: "Amount must be greater than zero" })
@@ -114,7 +115,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
     if (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } else {
@@ -145,7 +146,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
     if (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } else {
@@ -233,6 +234,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
               <Input
                 id="description"
                 placeholder="What's this for?"
+                maxLength={500}
                 value={quickAddForm.description}
                 onChange={(e) => setQuickAddForm({ ...quickAddForm, description: e.target.value })}
                 className="h-11"

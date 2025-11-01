@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Wallet } from "lucide-react";
+import { getSafeErrorMessage } from "@/lib/error-handler";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -45,7 +46,7 @@ const Auth = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } finally {

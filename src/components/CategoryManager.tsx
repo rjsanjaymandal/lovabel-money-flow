@@ -101,6 +101,7 @@ export function CategoryManager({ open, onOpenChange, categories, onCategoriesCh
             <div className="flex gap-2">
               <Input
                 placeholder="Enter category name"
+                maxLength={100}
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleAddCategory()}
@@ -120,6 +121,7 @@ export function CategoryManager({ open, onOpenChange, categories, onCategoriesCh
                   <>
                     <Input
                       value={editValue}
+                      maxLength={100}
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && handleEditCategory(index)}
                       className="flex-1"

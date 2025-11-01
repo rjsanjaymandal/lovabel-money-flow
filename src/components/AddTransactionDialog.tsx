@@ -176,6 +176,7 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
             <Textarea
               id="description"
               placeholder="Add notes..."
+              maxLength={500}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
