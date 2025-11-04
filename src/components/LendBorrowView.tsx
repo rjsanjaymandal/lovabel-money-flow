@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { PersonDetails } from "@/components/PersonDetails";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const amountSchema = z.number()
@@ -29,8 +29,8 @@ interface LendBorrowViewProps {
 
 export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowViewProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [selectedPerson, setSelectedPerson] = useState<string>("");
   const [formData, setFormData] = useState({
     person_name: "",
     amount: "",
@@ -188,7 +188,7 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
       </Card>
 
       {/* Contacts List */}
-      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
         {people.length === 0 ? (
           <Card className="border shadow-sm col-span-full">
             <CardContent className="py-8 sm:py-12 text-center space-y-2 sm:space-y-3">
@@ -203,12 +203,8 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
           people.map((person) => (
             <Card
               key={person.name}
-              onClick={() => setSelectedPerson(person.name)}
-              className={`cursor-pointer transition-all duration-200 border touch-manipulation active:scale-95 sm:hover:shadow-md ${
-                selectedPerson === person.name
-                  ? "ring-2 ring-primary/50 shadow-md sm:shadow-lg"
-                  : "hover:border-primary/30"
-              }`}
+              onClick={() => navigate(`/person/${encodeURIComponent(person.name)}`)}
+              className="cursor-pointer transition-all duration-200 border touch-manipulation active:scale-[0.98] hover:shadow-md hover:border-primary/30"
             >
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -245,15 +241,6 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
           ))
         )}
       </div>
-
-      {/* Person Details */}
-      {selectedPerson && (
-        <Card className="border shadow-sm sm:shadow-lg">
-          <CardContent className="p-3 sm:p-4 md:p-6">
-            <PersonDetails personName={selectedPerson} userId={userId} />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

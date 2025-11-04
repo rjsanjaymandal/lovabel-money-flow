@@ -8,7 +8,9 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AllTransactions from "./pages/AllTransactions";
 import AllLendBorrow from "./pages/AllLendBorrow";
+import PersonHistory from "./pages/PersonHistory";
 import NotFound from "./pages/NotFound";
+import { BottomNav } from "./components/BottomNav";
 
 const queryClient = new QueryClient();
 
@@ -24,9 +26,11 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<AllTransactions />} />
           <Route path="/lend-borrow" element={<AllLendBorrow />} />
+          <Route path="/person/:personName" element={<PersonHistory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <BottomNav />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

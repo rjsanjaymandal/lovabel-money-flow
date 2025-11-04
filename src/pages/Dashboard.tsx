@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Wallet, Receipt, HandCoins, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,7 @@ const DEFAULT_CATEGORIES = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ const Dashboard = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
-  const [activeTab, setActiveTab] = useState("transactions");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "lending" ? "lending" : "transactions");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -126,6 +127,15 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "lending") {
+      setSearchParams({ tab: "lending" });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -173,14 +183,14 @@ const Dashboard = () => {
 
       {/* Main Content with Tabs */}
       <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-20 sm:pb-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-14 sm:h-12 md:h-14 sticky top-[60px] sm:top-[64px] z-10 bg-background/95 backdrop-blur-sm">
-            <TabsTrigger value="transactions" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-md">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-12 sm:h-11 md:h-12 sticky top-[57px] sm:top-[64px] z-10 bg-background/95 backdrop-blur-sm shadow-sm">
+            <TabsTrigger value="transactions" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-sm">
               <Receipt className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               <span className="hidden xs:inline">Transactions</span>
               <span className="xs:hidden">Spend</span>
             </TabsTrigger>
-            <TabsTrigger value="lending" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-md">
+            <TabsTrigger value="lending" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-sm">
               <HandCoins className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               <span className="hidden xs:inline">Lending/Borrowing</span>
               <span className="xs:hidden">Lend</span>
