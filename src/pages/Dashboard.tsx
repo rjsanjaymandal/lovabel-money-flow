@@ -135,53 +135,55 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col">
+    <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
       {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
-        <div className="px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
-              <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white" />
+      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm safe-top">
+        <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h1 className="text-base sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 EasyExpense
               </h1>
-              <p className="text-[10px] md:text-xs text-muted-foreground hidden sm:block">Track smarter, save better 💰</p>
+              <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground hidden xs:block">Track smarter, save better</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setCategoryManagerOpen(true)}
-              className="hover:bg-muted rounded-full h-8 w-8 md:h-10 md:w-10"
+              className="hover:bg-muted rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
             >
-              <Settings className="w-4 h-4 md:w-5 md:h-5" />
+              <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleSignOut} 
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full h-8 w-8 md:h-10 md:w-10"
+              className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
             >
-              <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+              <LogOut className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content with Tabs */}
-      <main className="flex-1 p-4 md:p-6">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-20 sm:pb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 h-12 md:h-14">
-            <TabsTrigger value="transactions" className="text-sm md:text-base flex items-center gap-2">
-              <Receipt className="w-4 h-4" />
-              <span>Transactions</span>
+          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-14 sm:h-12 md:h-14 sticky top-[60px] sm:top-[64px] z-10 bg-background/95 backdrop-blur-sm">
+            <TabsTrigger value="transactions" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-md">
+              <Receipt className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <span className="hidden xs:inline">Transactions</span>
+              <span className="xs:hidden">Spend</span>
             </TabsTrigger>
-            <TabsTrigger value="lending" className="text-sm md:text-base flex items-center gap-2">
-              <HandCoins className="w-4 h-4" />
-              <span>Lending/Borrowing</span>
+            <TabsTrigger value="lending" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-md">
+              <HandCoins className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <span className="hidden xs:inline">Lending/Borrowing</span>
+              <span className="xs:hidden">Lend</span>
             </TabsTrigger>
           </TabsList>
           
