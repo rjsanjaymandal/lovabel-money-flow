@@ -17,8 +17,12 @@ export function BottomNav() {
   const location = useLocation();
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const isTransactions = location.pathname === "/dashboard" && !location.search.includes("lending");
-  const isLending = location.pathname === "/dashboard" && location.search.includes("lending");
+  // Get current tab from URL
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab') || 'spend';
+
+  const isSpend = location.pathname === "/dashboard" && currentTab === "spend";
+  const isLend = location.pathname === "/dashboard" && currentTab === "lend";
   const isTransactionsPage = location.pathname === "/transactions";
   const isLendBorrowPage = location.pathname === "/lend-borrow";
 
@@ -31,14 +35,14 @@ export function BottomNav() {
     {
       icon: Receipt,
       label: "Spend",
-      isActive: isTransactions,
-      onClick: () => navigate("/dashboard"),
+      isActive: isSpend,
+      onClick: () => navigate("/dashboard?tab=spend"),
     },
     {
       icon: HandCoins,
       label: "Lend",
-      isActive: isLending,
-      onClick: () => navigate("/dashboard?tab=lending"),
+      isActive: isLend,
+      onClick: () => navigate("/dashboard?tab=lend"),
     },
     {
       icon: LayoutGrid,
@@ -47,6 +51,11 @@ export function BottomNav() {
       onClick: () => navigate("/transactions"),
     },
   ];
+
+  // Don't show on auth, index, or detail pages
+  if (location.pathname === "/auth" || location.pathname === "/" || location.pathname.startsWith("/person/")) {
+    return null;
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 bg-card/98 backdrop-blur-lg border-t border-border/50 sm:hidden pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">

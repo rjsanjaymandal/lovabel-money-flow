@@ -34,7 +34,7 @@ const PersonHistory = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard?tab=lend')}
             className="rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation active:scale-95 transition-transform"
           >
             <ArrowLeft className="h-5 w-5" />
