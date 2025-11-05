@@ -146,10 +146,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
-      {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm safe-top">
-        <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      {/* Header - Simplified for mobile */}
+      <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-20 shadow-sm safe-top">
+        <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-3.5 md:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
               <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
@@ -160,12 +160,13 @@ const Dashboard = () => {
               <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground hidden xs:block">Track smarter, save better</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Desktop only buttons */}
+          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setCategoryManagerOpen(true)}
-              className="hover:bg-muted rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
+              className="hover:bg-muted rounded-full h-9 w-9 sm:h-10 sm:w-10"
             >
               <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </Button>
@@ -173,7 +174,7 @@ const Dashboard = () => {
               variant="ghost" 
               size="icon" 
               onClick={handleSignOut} 
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
+              className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full h-9 w-9 sm:h-10 sm:w-10"
             >
               <LogOut className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </Button>
@@ -184,16 +185,15 @@ const Dashboard = () => {
       {/* Main Content with Tabs */}
       <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-20 sm:pb-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-12 sm:h-11 md:h-12 sticky top-[57px] sm:top-[64px] z-10 bg-background/95 backdrop-blur-sm shadow-sm">
-            <TabsTrigger value="transactions" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-sm">
-              <Receipt className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-              <span className="hidden xs:inline">Transactions</span>
-              <span className="xs:hidden">Spend</span>
+          {/* Desktop tabs only */}
+          <TabsList className="hidden sm:grid w-full grid-cols-2 mb-4 sm:mb-6 h-12 sticky top-[64px] z-10 bg-background/95 backdrop-blur-sm shadow-sm">
+            <TabsTrigger value="transactions" className="text-sm md:text-base flex items-center gap-2">
+              <Receipt className="w-4.5 h-4.5" />
+              Transactions
             </TabsTrigger>
-            <TabsTrigger value="lending" className="text-xs sm:text-sm md:text-base flex items-center gap-1.5 sm:gap-2 touch-manipulation data-[state=active]:shadow-sm">
-              <HandCoins className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-              <span className="hidden xs:inline">Lending/Borrowing</span>
-              <span className="xs:hidden">Lend</span>
+            <TabsTrigger value="lending" className="text-sm md:text-base flex items-center gap-2">
+              <HandCoins className="w-4.5 h-4.5" />
+              Lending/Borrowing
             </TabsTrigger>
           </TabsList>
           
