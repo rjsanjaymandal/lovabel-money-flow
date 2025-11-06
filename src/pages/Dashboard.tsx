@@ -40,7 +40,7 @@ const Dashboard = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "lending" ? "lending" : "transactions");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "lend" ? "lend" : "spend");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -129,11 +129,7 @@ const Dashboard = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    if (value === "lending") {
-      setSearchParams({ tab: "lending" });
-    } else {
-      setSearchParams({});
-    }
+    setSearchParams({ tab: value });
   };
 
   if (loading) {
@@ -146,58 +142,66 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
-      {/* Header - Simplified for mobile */}
-      <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-20 shadow-sm safe-top">
+      {/* Header */}
+      <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-20 shadow-lg safe-top animate-slide-in">
         <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-3.5 md:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-primary flex items-center justify-center shadow-lg animate-glow">
               <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-base sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
                 EasyExpense
               </h1>
               <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground hidden xs:block">Track smarter, save better</p>
             </div>
           </div>
-          {/* Desktop only buttons */}
-          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
+
+          {/* Desktop Navigation */}
+          <nav className="hidden sm:flex items-center gap-2">
+            <Button
+              variant={activeTab === "spend" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => handleTabChange("spend")}
+              className="gap-2 transition-all hover:scale-105"
+            >
+              <Receipt className="w-4 h-4" />
+              Transactions
+            </Button>
+            <Button
+              variant={activeTab === "lend" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => handleTabChange("lend")}
+              className="gap-2 transition-all hover:scale-105"
+            >
+              <HandCoins className="w-4 h-4" />
+              Lend/Borrow
+            </Button>
+            <div className="w-px h-6 bg-border mx-1" />
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setCategoryManagerOpen(true)}
-              className="hover:bg-muted rounded-full h-9 w-9 sm:h-10 sm:w-10"
+              className="hover:bg-muted rounded-full h-9 w-9 transition-all hover:scale-110"
             >
-              <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              <Settings className="w-4.5 h-4.5" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleSignOut} 
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full h-9 w-9 sm:h-10 sm:w-10"
+              className="hover:bg-destructive/10 hover:text-destructive transition-all hover:scale-110 rounded-full h-9 w-9"
             >
-              <LogOut className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              <LogOut className="w-4.5 h-4.5" />
             </Button>
-          </div>
+          </nav>
         </div>
       </header>
 
-      {/* Main Content with Tabs */}
-      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 pb-20 sm:pb-6">
+      {/* Main Content */}
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-4 sm:pt-6 pb-20 sm:pb-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          {/* Desktop tabs only */}
-          <TabsList className="hidden sm:grid w-full grid-cols-2 mb-4 sm:mb-6 h-12 sticky top-[64px] z-10 bg-background/95 backdrop-blur-sm shadow-sm">
-            <TabsTrigger value="transactions" className="text-sm md:text-base flex items-center gap-2">
-              <Receipt className="w-4.5 h-4.5" />
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="lending" className="text-sm md:text-base flex items-center gap-2">
-              <HandCoins className="w-4.5 h-4.5" />
-              Lending/Borrowing
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="transactions" className="mt-0">
+          <TabsContent value="spend" className="mt-0 animate-slide-in">
             <TransactionView 
               userId={user?.id}
               stats={stats}
@@ -206,7 +210,7 @@ const Dashboard = () => {
             />
           </TabsContent>
           
-          <TabsContent value="lending" className="mt-0">
+          <TabsContent value="lend" className="mt-0 animate-slide-in">
             <LendBorrowView 
               people={people}
               userId={user?.id}
