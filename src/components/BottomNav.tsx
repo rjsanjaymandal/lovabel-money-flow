@@ -35,20 +35,20 @@ export function BottomNav() {
     {
       icon: Receipt,
       label: "Spend",
-      isActive: isTransactionsPage,
-      onClick: () => navigate("/transactions"),
+      isActive: isSpend,
+      onClick: () => navigate("/dashboard?tab=spend"),
     },
     {
       icon: HandCoins,
       label: "Lend",
-      isActive: isLendBorrowPage,
-      onClick: () => navigate("/lend-borrow"),
+      isActive: isLend,
+      onClick: () => navigate("/dashboard?tab=lend"),
     },
     {
       icon: LayoutGrid,
       label: "All",
-      isActive: isSpend || isLend,
-      onClick: () => navigate("/dashboard?tab=spend"),
+      isActive: isTransactionsPage || isLendBorrowPage,
+      onClick: () => navigate("/transactions"),
     },
   ];
 
