@@ -44,12 +44,6 @@ export function BottomNav() {
       isActive: isLend,
       onClick: () => navigate("/dashboard?tab=lend"),
     },
-    {
-      icon: LayoutGrid,
-      label: "All",
-      isActive: isTransactionsPage || isLendBorrowPage,
-      onClick: () => navigate("/transactions"),
-    },
   ];
 
   // Don't show on auth, index, or detail pages
@@ -59,7 +53,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 glass-effect border-t border-border/50 sm:hidden pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.12)]">
-      <div className="grid grid-cols-4 h-16 px-1">
+      <div className="grid grid-cols-3 h-16 px-1">
         {navItems.map((item, index) => (
           <button
             key={index}
