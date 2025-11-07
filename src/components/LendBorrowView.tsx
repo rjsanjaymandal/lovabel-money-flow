@@ -95,25 +95,36 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-6">
-      {/* Contacts Header */}
-      <Card className="border shadow-md sm:shadow-lg">
-        <CardContent className="p-3 sm:p-4 md:p-6">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      {/* Contacts Header - Redesigned */}
+      <Card className="border-2 border-primary/20 shadow-xl bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
+        <CardContent className="p-4 sm:p-6 relative">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
+                <Users className="h-6 w-6 sm:h-7 sm:w-7 text-white drop-shadow-md" />
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold">Contacts</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{people.length} people</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  My Contacts
+                </h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                    {people.length} {people.length === 1 ? 'person' : 'people'}
+                  </p>
+                </div>
               </div>
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="gradient-primary hover:opacity-90 transition-opacity h-9 sm:h-10 touch-manipulation">
-                  <Plus className="h-4 w-4 sm:mr-1.5" />
-                  <span className="hidden xs:inline ml-1.5">Add Contact</span>
+                <Button 
+                  size="sm" 
+                  className="gradient-primary hover:opacity-90 transition-all duration-300 h-10 sm:h-11 touch-manipulation hover:scale-105 active:scale-95 shadow-lg px-3 sm:px-4"
+                >
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                  <span className="hidden sm:inline font-semibold">Add</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -187,55 +198,78 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
         </CardContent>
       </Card>
 
-      {/* Contacts List */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3">
+      {/* Contacts List - Redesigned */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {people.length === 0 ? (
-          <Card className="border shadow-sm col-span-full">
-            <CardContent className="py-8 sm:py-12 text-center space-y-2 sm:space-y-3">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted mx-auto flex items-center justify-center">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+          <Card className="border-2 border-dashed border-muted-foreground/20 shadow-sm col-span-full bg-gradient-to-br from-muted/30 to-muted/10 overflow-hidden relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.1),transparent_50%)]" />
+            <CardContent className="py-12 sm:py-16 text-center space-y-4 relative">
+              <div className="relative inline-block">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mx-auto flex items-center justify-center animate-pulse shadow-lg">
+                  <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent animate-bounce shadow-md flex items-center justify-center">
+                  <Plus className="h-4 w-4 text-white" />
+                </div>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground">No contacts yet</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Add someone to get started!</p>
+              <div className="space-y-2">
+                <p className="text-sm sm:text-base font-semibold text-foreground">No contacts yet</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-xs mx-auto">
+                  Start tracking by adding your first contact above! 👆
+                </p>
+              </div>
             </CardContent>
           </Card>
         ) : (
-          people.map((person) => (
+          people.map((person, index) => (
             <Card
               key={person.name}
               onClick={() => navigate(`/person/${encodeURIComponent(person.name)}`)}
-              className="cursor-pointer transition-all duration-200 border touch-manipulation active:scale-[0.98] hover:shadow-md hover:border-primary/30"
+              className="cursor-pointer transition-all duration-300 border-2 hover:border-primary/50 touch-manipulation active:scale-95 hover:scale-[1.02] hover:shadow-xl group overflow-hidden relative animate-fade-in bg-gradient-to-br from-card to-card/50"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-accent/0 opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+              <CardContent className="p-4 sm:p-5 relative">
+                <div className="flex items-start gap-3 mb-3">
                   <div
-                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg transition-transform duration-300 group-hover:scale-110 ${
                       person.balance >= 0 ? "gradient-success" : "gradient-accent"
                     }`}
                   >
                     {person.balance >= 0 ? (
-                      <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                      <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-white drop-shadow-md" />
                     ) : (
-                      <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                      <TrendingDown className="h-6 w-6 sm:h-7 sm:w-7 text-white drop-shadow-md" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm sm:text-base font-semibold truncate">{person.name}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">
-                      {person.balance >= 0 ? "You'll get" : "You owe"}
+                  <div className="flex-1 min-w-0 pt-1">
+                    <p className="text-base sm:text-lg font-bold truncate mb-1 group-hover:text-primary transition-colors">
+                      {person.name}
                     </p>
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-1.5 h-1.5 rounded-full ${person.balance >= 0 ? 'bg-success' : 'bg-accent'} animate-pulse`} />
+                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">
+                        {person.balance >= 0 ? "You'll receive" : "You owe them"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={`w-full justify-center font-bold text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 ${
-                    person.balance >= 0
-                      ? "border-success/30 bg-success/10 text-success"
-                      : "border-accent/30 bg-accent/10 text-accent"
-                  }`}
-                >
-                  {person.balance >= 0 ? "+" : "-"}₹{Math.abs(person.balance).toFixed(0)}
-                </Badge>
+                <div className={`rounded-xl p-3 sm:p-3.5 text-center transition-all duration-300 ${
+                  person.balance >= 0
+                    ? "bg-gradient-to-br from-success/15 to-success/5 border border-success/20 group-hover:from-success/20 group-hover:to-success/10"
+                    : "bg-gradient-to-br from-accent/15 to-accent/5 border border-accent/20 group-hover:from-accent/20 group-hover:to-accent/10"
+                }`}>
+                  <div className="flex items-center justify-center gap-1">
+                    <span className={`text-xl sm:text-2xl font-bold ${
+                      person.balance >= 0 ? "text-success" : "text-accent"
+                    }`}>
+                      {person.balance >= 0 ? "+" : "-"}₹{Math.abs(person.balance).toFixed(0)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-1">
+                    Outstanding Balance
+                  </p>
+                </div>
               </CardContent>
             </Card>
           ))
