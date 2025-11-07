@@ -52,32 +52,32 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 glass-effect border-t border-border/50 sm:hidden pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.12)]">
-      <div className="grid grid-cols-3 h-16 px-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border sm:hidden pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.15)]">
+      <div className="grid grid-cols-3 h-16 px-2">
         {navItems.map((item, index) => (
           <button
             key={index}
             onClick={item.onClick}
-            className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-300 touch-manipulation ${
+            className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-300 touch-manipulation rounded-lg mx-1 ${
               item.isActive
-                ? "text-primary scale-105"
-                : "text-muted-foreground active:scale-95"
+                ? "text-primary"
+                : "text-muted-foreground active:scale-95 hover:bg-accent/10"
             }`}
           >
-            <div className={`rounded-2xl p-2 transition-all duration-300 ${
-              item.isActive ? "bg-gradient-to-br from-primary/20 to-accent/20 scale-110" : ""
+            <div className={`rounded-xl p-2.5 transition-all duration-300 ${
+              item.isActive ? "bg-primary/15" : ""
             }`}>
               <item.icon className={`h-5 w-5 transition-all duration-300 ${
-                item.isActive ? "scale-110 drop-shadow-lg" : ""
+                item.isActive ? "scale-110" : ""
               }`} />
             </div>
             <span className={`text-[10px] font-semibold transition-all duration-300 ${
-              item.isActive ? "opacity-100 scale-105" : "opacity-70"
+              item.isActive ? "opacity-100" : "opacity-70"
             }`}>
               {item.label}
             </span>
             {item.isActive && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 gradient-primary rounded-b-full shadow-lg" />
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
             )}
           </button>
         ))}
@@ -85,9 +85,9 @@ export function BottomNav() {
         <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
           <SheetTrigger asChild>
             <button
-              className="relative flex flex-col items-center justify-center gap-1 text-muted-foreground touch-manipulation active:scale-95 transition-all duration-300"
+              className="relative flex flex-col items-center justify-center gap-1 text-muted-foreground touch-manipulation active:scale-95 hover:bg-accent/10 transition-all duration-300 rounded-lg mx-1"
             >
-              <div className="rounded-2xl p-2">
+              <div className="rounded-xl p-2.5">
                 <User className="h-5 w-5" />
               </div>
               <span className="text-[10px] font-semibold opacity-70">Profile</span>

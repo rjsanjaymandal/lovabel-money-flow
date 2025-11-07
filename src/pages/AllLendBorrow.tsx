@@ -56,7 +56,7 @@ export default function AllLendBorrow() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8 pb-20 sm:pb-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <Button onClick={() => navigate("/dashboard")} variant="ghost" size="sm">
