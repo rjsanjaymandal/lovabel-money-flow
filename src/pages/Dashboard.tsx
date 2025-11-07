@@ -70,6 +70,12 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Sync activeTab with URL changes
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    setActiveTab(tab === "lend" ? "lend" : "spend");
+  }, [searchParams]);
+
   const fetchStats = async (userId: string) => {
     const { data: transactions } = await supabase
       .from("transactions")
