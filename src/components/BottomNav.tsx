@@ -46,8 +46,8 @@ export function BottomNav() {
     },
   ];
 
-  // Don't show on auth, index, or detail pages
-  if (location.pathname === "/auth" || location.pathname === "/" || location.pathname.startsWith("/person/")) {
+  // Only hide on auth and index pages
+  if (location.pathname === "/auth" || location.pathname === "/") {
     return null;
   }
 
