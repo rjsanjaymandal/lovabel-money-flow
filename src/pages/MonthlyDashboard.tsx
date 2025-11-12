@@ -35,7 +35,6 @@ const MonthlyDashboard = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
-  const [addTransactionOpen, setAddTransactionOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -138,13 +137,12 @@ const MonthlyDashboard = () => {
         <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
 
         <div className="flex items-center justify-between">
-          <AddTransactionDialog
-            open={addTransactionOpen}
-            onOpenChange={setAddTransactionOpen}
-            userId={user?.id}
-            categories={categories}
-            onTransactionAdded={fetchMonthlyStats}
-          />
+          <AddTransactionDialog onSuccess={fetchMonthlyStats} categories={categories}>
+            <Button className="gap-2 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <span className="text-lg">+</span>
+              Add Transaction
+            </Button>
+          </AddTransactionDialog>
           <ExportButton
             transactions={transactions}
             selectedMonth={selectedMonth}
