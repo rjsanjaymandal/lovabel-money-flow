@@ -88,7 +88,7 @@ export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendB
               <TrendingUp className="w-4 h-4 text-success" />
               <span className="text-sm font-medium text-foreground">You'll Receive</span>
             </div>
-            <span className="text-lg font-bold text-success">${totalPending.lent.toFixed(0)}</span>
+            <span className="text-lg font-bold text-success">₹{totalPending.lent.toFixed(0)}</span>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/5 border border-destructive/20">
@@ -96,7 +96,7 @@ export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendB
               <TrendingDown className="w-4 h-4 text-destructive" />
               <span className="text-sm font-medium text-foreground">You Owe</span>
             </div>
-            <span className="text-lg font-bold text-destructive">${totalPending.borrowed.toFixed(0)}</span>
+            <span className="text-lg font-bold text-destructive">₹{totalPending.borrowed.toFixed(0)}</span>
           </div>
         </div>
 
@@ -107,11 +107,11 @@ export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendB
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="space-y-1">
               <p className="text-muted-foreground text-xs">Lent</p>
-              <p className="font-semibold text-foreground">${monthlyLent.toFixed(0)}</p>
+              <p className="font-semibold text-foreground">₹{monthlyLent.toFixed(0)}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground text-xs">Borrowed</p>
-              <p className="font-semibold text-foreground">${monthlyBorrowed.toFixed(0)}</p>
+              <p className="font-semibold text-foreground">₹{monthlyBorrowed.toFixed(0)}</p>
             </div>
           </div>
         </div>

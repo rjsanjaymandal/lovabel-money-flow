@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Receipt } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, Receipt, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Transaction {
   id: string;
@@ -23,6 +35,8 @@ interface MonthlyTransactionListProps {
 export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLoaded }: MonthlyTransactionListProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchTransactions();
@@ -46,6 +60,28 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
       onTransactionsLoaded?.(data);
     }
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", deleteId);
+
+    if (error) {
+      toast({
+        title: "Failed to delete transaction",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Transaction deleted successfully",
+      });
+      fetchTransactions();
+    }
+    setDeleteId(null);
   };
 
   if (loading) {
@@ -83,6 +119,7 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
   }, {} as Record<string, Transaction[]>);
 
   return (
+    <>
     <Card className="border-border/50 shadow-lg animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -129,16 +166,26 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
                           )}
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-bold text-sm sm:text-base text-foreground">
-                          ${transaction.amount.toFixed(2)}
-                        </p>
-                        <Badge
-                          variant={transaction.type === "income" ? "default" : "destructive"}
-                          className="text-xs"
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="text-right">
+                          <p className="font-bold text-sm sm:text-base text-foreground">
+                            ₹{transaction.amount.toFixed(0)}
+                          </p>
+                          <Badge
+                            variant={transaction.type === "income" ? "default" : "destructive"}
+                            className="text-xs"
+                          >
+                            {transaction.type}
+                          </Badge>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteId(transaction.id)}
+                          className="hover:bg-destructive/10 hover:text-destructive rounded-full h-8 w-8 flex-shrink-0"
                         >
-                          {transaction.type}
-                        </Badge>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -149,5 +196,23 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
         ))}
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
