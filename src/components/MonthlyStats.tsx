@@ -48,7 +48,7 @@ export const MonthlyStats = ({ income, expenses, balance }: MonthlyStatsProps) =
               <div>
                 <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
                 <p className="text-lg sm:text-xl font-bold text-foreground">
-                  ${Math.abs(stat.value).toFixed(0)}
+                  ₹{Math.abs(stat.value).toFixed(0)}
                 </p>
               </div>
             </div>
