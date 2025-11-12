@@ -31,7 +31,15 @@ export function BottomNav() {
     navigate("/auth");
   };
 
+  const isMonthly = location.pathname === "/monthly";
+
   const navItems = [
+    {
+      icon: LayoutGrid,
+      label: "Monthly",
+      isActive: isMonthly,
+      onClick: () => navigate("/monthly"),
+    },
     {
       icon: Receipt,
       label: "Spend",
@@ -53,7 +61,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border sm:hidden pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.15)]">
-      <div className="grid grid-cols-3 h-16 px-2">
+      <div className="grid grid-cols-4 h-16 px-2">
         {navItems.map((item, index) => (
           <button
             key={index}
