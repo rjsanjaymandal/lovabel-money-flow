@@ -82,7 +82,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                ${budget.toFixed(0)}
+                ₹{budget.toFixed(0)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">Target spending</p>
             </div>
@@ -127,7 +127,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Spent</span>
               <span className={`font-semibold ${isOverBudget ? "text-destructive" : "text-foreground"}`}>
-                ${totalExpenses.toFixed(0)} ({percentage.toFixed(0)}%)
+                ₹{totalExpenses.toFixed(0)} ({percentage.toFixed(0)}%)
               </span>
             </div>
             <Progress 
@@ -138,7 +138,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
             {isOverBudget && (
               <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded-lg">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Over budget by ${(totalExpenses - budget).toFixed(0)}</span>
+                <span>Over budget by ₹{(totalExpenses - budget).toFixed(0)}</span>
               </div>
             )}
             {isNearLimit && !isOverBudget && (
