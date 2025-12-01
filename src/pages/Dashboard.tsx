@@ -120,63 +120,96 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe relative overflow-x-hidden">
       {/* Premium Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 glass-panel border-b-0 rounded-b-3xl sm:rounded-none sm:border-b transition-all duration-300 safe-top">
-        <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
+      {/* Floating Island Navbar */}
+      {/* Mobile Header */}
+      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between safe-top transition-all duration-300">
           <div 
-            className="flex items-center gap-3 cursor-pointer group select-none" 
+            className="flex items-center gap-2 cursor-pointer select-none" 
             onClick={() => handleTabChange("spend")}
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 animate-in-up group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25">
+              <Wallet className="w-4 h-4 text-white" />
             </div>
-            <div className="animate-in-up" style={{ animationDelay: "0.1s" }}>
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight group-hover:text-primary transition-colors">
+            <div>
+              <h1 className="text-lg font-bold tracking-tight leading-none">
                 EasyExpense
               </h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground font-medium group-hover:text-primary/70 transition-colors">Financial Freedom</p>
+            </div>
+          </div>
+      </header>
+
+      {/* Floating Island Navbar (Desktop Only) */}
+      <div className="fixed top-4 left-0 right-0 z-50 hidden sm:flex justify-center px-4 pointer-events-none">
+        <header className="pointer-events-auto w-full max-w-5xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
+          
+          {/* Logo Section */}
+          <div 
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2" 
+            onClick={() => handleTabChange("spend")}
+          >
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="text-base font-bold tracking-tight group-hover:text-primary transition-colors leading-none">
+                EasyExpense
+              </h1>
+              <p className="text-[10px] text-muted-foreground font-medium group-hover:text-primary/70 transition-colors">Financial Freedom</p>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden sm:flex items-center gap-1 bg-secondary/50 p-1 rounded-full backdrop-blur-md border border-white/10">
+          {/* Center Navigation Pills */}
+          <nav className="flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5">
             <Button
-              variant={activeTab === "spend" ? "secondary" : "ghost"}
+              variant="ghost"
               size="sm"
               onClick={() => handleTabChange("spend")}
-              className={`gap-2 rounded-full px-4 transition-all duration-300 ${activeTab === "spend" ? "bg-white shadow-sm" : "hover:bg-white/50"}`}
+              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
+                activeTab === "spend" 
+                  ? "bg-background shadow-sm text-foreground scale-105" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              }`}
             >
-              <Receipt className="w-4 h-4" />
+              <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Spends
             </Button>
             <Button
-              variant={activeTab === "lend" ? "secondary" : "ghost"}
+              variant="ghost"
               size="sm"
               onClick={() => handleTabChange("lend")}
-              className={`gap-2 rounded-full px-4 transition-all duration-300 ${activeTab === "lend" ? "bg-white shadow-sm" : "hover:bg-white/50"}`}
+              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
+                activeTab === "lend" 
+                  ? "bg-background shadow-sm text-foreground scale-105" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              }`}
             >
-              <HandCoins className="w-4 h-4" />
-              Lend/Borrow
+              <HandCoins className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Lend
             </Button>
-            <div className="w-px h-5 bg-border mx-2" />
+          </nav>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-1 pr-1">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setCategoryManagerOpen(true)}
-              className="rounded-full hover:bg-white/50 w-8 h-8"
+              className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-muted-foreground" />
             </Button>
+            <div className="w-px h-4 bg-border/50 mx-1" />
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleSignOut} 
-              className="rounded-full hover:bg-destructive/10 hover:text-destructive w-8 h-8"
+              className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-destructive/10 hover:text-destructive hover:scale-105 transition-all"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </Button>
-          </nav>
-        </div>
-      </header>
+          </div>
+        </header>
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-24 sm:pb-8 max-w-7xl mx-auto w-full">
