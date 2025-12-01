@@ -87,6 +87,16 @@ const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactions
     setDeleteId(null);
   }, [deleteId, toast, fetchTransactions]);
 
+  // Memoize grouped transactions - MOVED TO TOP LEVEL to fix hook violation
+  const groupedByDate = useMemo(() => {
+    return transactions.reduce((acc, transaction) => {
+      const date = transaction.date;
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(transaction);
+      return acc;
+    }, {} as Record<string, Transaction[]>);
+  }, [transactions]);
+
   if (loading) {
     return (
       <Card className="border-border/50 shadow-lg">
@@ -113,88 +123,68 @@ const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactions
     );
   }
 
-  // Memoize grouped transactions
-  const groupedByDate = useMemo(() => {
-    return transactions.reduce((acc, transaction) => {
-      const date = transaction.date;
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(transaction);
-      return acc;
-    }, {} as Record<string, Transaction[]>);
-  }, [transactions]);
-
   return (
     <>
     <Card className="border-border/50 shadow-lg animate-fade-in">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Receipt className="w-5 h-5 text-primary" />
           Transactions ({transactions.length})
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 px-3 sm:px-6">
         {Object.entries(groupedByDate).map(([date, dayTransactions]) => (
-          <div key={date} className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <div key={date} className="space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pl-1">
               {format(new Date(date), "EEE, MMM d")}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {dayTransactions.map((transaction) => (
-                <Card
+                <div
                   key={transaction.id}
-                  className="border-border/30 hover:border-primary/30 transition-all hover:shadow-md"
+                  className="group relative flex items-center gap-3 p-3 rounded-xl bg-card border border-border/40 hover:border-primary/20 hover:bg-accent/5 transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            transaction.type === "income"
-                              ? "bg-success/10"
-                              : "bg-destructive/10"
-                          }`}
-                        >
-                          {transaction.type === "income" ? (
-                            <TrendingUp className="w-5 h-5 text-success" />
-                          ) : (
-                            <TrendingDown className="w-5 h-5 text-destructive" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-foreground truncate">
-                            {transaction.category}
-                          </p>
-                          {transaction.description && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {transaction.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="text-right">
-                          <p className="font-bold text-sm sm:text-base text-foreground">
-                            ₹{transaction.amount.toFixed(0)}
-                          </p>
-                          <Badge
-                            variant={transaction.type === "income" ? "default" : "destructive"}
-                            className="text-xs"
-                          >
-                            {transaction.type}
-                          </Badge>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteId(transaction.id)}
-                          className="hover:bg-destructive/10 hover:text-destructive rounded-full h-8 w-8 flex-shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                      transaction.type === "income"
+                        ? "bg-success/10 text-success"
+                        : "bg-destructive/10 text-destructive"
+                    }`}
+                  >
+                    {transaction.type === "income" ? (
+                      <TrendingUp className="w-5 h-5" />
+                    ) : (
+                      <TrendingDown className="w-5 h-5" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold text-sm sm:text-base text-foreground truncate">
+                        {transaction.category}
+                      </p>
+                      <span className={`font-bold text-sm sm:text-base whitespace-nowrap ${
+                        transaction.type === "income" ? "text-success" : "text-foreground"
+                      }`}>
+                        {transaction.type === "income" ? "+" : "-"}₹{transaction.amount.toFixed(0)}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-muted-foreground truncate max-w-[80%]">
+                        {transaction.description || "No description"}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(transaction.id)}
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mr-2"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

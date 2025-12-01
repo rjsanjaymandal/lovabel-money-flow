@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ interface AddTransactionDialogProps {
   children: React.ReactNode;
   onSuccess?: () => void;
   categories?: string[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  defaultValues?: {
+    amount: string;
+    description: string;
+    type: "expense" | "income";
+    category?: string;
+  };
 }
 
 const DEFAULT_CATEGORIES = [
@@ -32,11 +40,22 @@ const amountSchema = z.number()
   .finite({ message: "Amount must be a valid number" })
   .max(99999999.99, { message: "Amount is too large" });
 
-export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT_CATEGORIES }: AddTransactionDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const AddTransactionDialog = ({ 
+  children, 
+  onSuccess, 
+  categories = DEFAULT_CATEGORIES,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  defaultValues
+}: AddTransactionDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
+
   const [formData, setFormData] = useState({
     type: "expense",
     amount: "",
@@ -44,6 +63,38 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
     description: "",
     date: new Date().toISOString().split("T")[0],
   });
+
+  // Update form data when defaultValues change or dialog opens
+  useEffect(() => {
+    if (defaultValues && open) {
+      setFormData(prev => ({
+        ...prev,
+        ...defaultValues,
+        category: defaultValues.category || prev.category
+      }));
+    }
+  }, [defaultValues, open]);
+
+  // Reset or populate on open
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (newOpen && defaultValues) {
+       setFormData(prev => ({
+        ...prev,
+        ...defaultValues,
+        category: defaultValues.category || prev.category
+      }));
+    } else if (newOpen) {
+      // Reset if no default values
+      setFormData({
+        type: "expense",
+        amount: "",
+        category: "",
+        description: "",
+        date: new Date().toISOString().split("T")[0],
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +153,7 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -113,7 +164,7 @@ export const AddTransactionDialog = ({ children, onSuccess, categories = DEFAULT
             <Label>Type</Label>
             <Select
               value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value })}
+              onValueChange={(value) => setFormData({ ...formData, type: value as "expense" | "income" })}
             >
               <SelectTrigger>
                 <SelectValue />

@@ -35,14 +35,8 @@ export function BottomNav() {
 
   const navItems = [
     {
-      icon: LayoutGrid,
-      label: "Monthly",
-      isActive: isMonthly,
-      onClick: () => navigate("/monthly"),
-    },
-    {
       icon: Receipt,
-      label: "Spend",
+      label: "Spends",
       isActive: isSpend,
       onClick: () => navigate("/dashboard?tab=spend"),
     },
@@ -60,96 +54,101 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border sm:hidden pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.15)]">
-      <div className="grid grid-cols-4 h-16 px-2">
+    <nav className="fixed bottom-6 left-4 right-4 z-50 sm:hidden">
+      <div className="glass-panel rounded-2xl p-2 flex items-center justify-between shadow-2xl shadow-primary/10 border border-white/20 backdrop-blur-2xl bg-white/80">
         {navItems.map((item, index) => (
           <button
             key={index}
             onClick={item.onClick}
-            className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-300 touch-manipulation rounded-lg mx-1 ${
+            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl ${
               item.isActive
                 ? "text-primary"
-                : "text-muted-foreground active:scale-95 hover:bg-accent/10"
+                : "text-muted-foreground hover:bg-black/5"
             }`}
           >
-            <div className={`rounded-xl p-2.5 transition-all duration-300 ${
-              item.isActive ? "bg-primary/15" : ""
+            <div className={`p-2 rounded-xl transition-all duration-300 ${
+              item.isActive ? "bg-primary/10 scale-110" : "scale-100"
             }`}>
               <item.icon className={`h-5 w-5 transition-all duration-300 ${
-                item.isActive ? "scale-110" : ""
+                item.isActive ? "stroke-[2.5px]" : "stroke-2"
               }`} />
             </div>
-            <span className={`text-[10px] font-semibold transition-all duration-300 ${
-              item.isActive ? "opacity-100" : "opacity-70"
+            <span className={`text-[10px] font-medium transition-all duration-300 ${
+              item.isActive ? "opacity-100 font-semibold" : "opacity-60"
             }`}>
               {item.label}
             </span>
-            {item.isActive && (
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
-            )}
           </button>
         ))}
 
         <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
           <SheetTrigger asChild>
             <button
-              className="relative flex flex-col items-center justify-center gap-1 text-muted-foreground touch-manipulation active:scale-95 hover:bg-accent/10 transition-all duration-300 rounded-lg mx-1"
+              className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground touch-manipulation hover:bg-black/5 transition-all duration-300 rounded-xl"
             >
-              <div className="rounded-xl p-2.5">
-                <User className="h-5 w-5" />
+              <div className="p-2 rounded-xl">
+                <User className="h-5 w-5 stroke-2" />
               </div>
-              <span className="text-[10px] font-semibold opacity-70">Profile</span>
+              <span className="text-[10px] font-medium opacity-60">Profile</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="pb-safe rounded-t-3xl border-t-4 border-primary animate-slide-in">
+          <SheetContent side="bottom" className="pb-safe rounded-t-[2rem] border-t-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
             <SheetHeader className="mb-6">
-              <SheetTitle className="text-center text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-4" />
+              <SheetTitle className="text-center text-xl font-bold">
                 Profile & Settings
               </SheetTitle>
             </SheetHeader>
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full justify-start gap-3 h-12 text-base touch-manipulation hover:bg-primary/5 transition-all hover:scale-[1.02]"
+                className="w-full justify-start gap-4 h-14 text-base font-medium rounded-2xl border-muted hover:bg-primary/5 hover:border-primary/20 hover:text-primary transition-all"
                 onClick={() => {
                   setProfileOpen(false);
                   navigate("/transactions");
                 }}
               >
-                <Receipt className="h-5 w-5 text-primary" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Receipt className="h-4 w-4 text-primary" />
+                </div>
                 All Transactions
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start gap-3 h-12 text-base touch-manipulation hover:bg-accent/5 transition-all hover:scale-[1.02]"
+                className="w-full justify-start gap-4 h-14 text-base font-medium rounded-2xl border-muted hover:bg-accent/5 hover:border-accent/20 hover:text-accent transition-all"
                 onClick={() => {
                   setProfileOpen(false);
                   navigate("/lend-borrow");
                 }}
               >
-                <HandCoins className="h-5 w-5 text-accent" />
+                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                  <HandCoins className="h-4 w-4 text-accent" />
+                </div>
                 All Lend/Borrow
               </Button>
-              <div className="border-t pt-3 space-y-2">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3 h-12 text-base touch-manipulation hover:bg-muted transition-all"
-                  onClick={() => {
-                    setProfileOpen(false);
-                  }}
-                >
-                  <Settings className="h-5 w-5" />
-                  Settings
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3 h-12 text-base text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation transition-all"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-5 w-5" />
-                  Sign Out
-                </Button>
-              </div>
+              <div className="h-px bg-border my-2" />
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 h-14 text-base font-medium rounded-2xl hover:bg-muted transition-all"
+                onClick={() => {
+                  setProfileOpen(false);
+                }}
+              >
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <Settings className="h-4 w-4" />
+                </div>
+                Settings
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 h-14 text-base font-medium rounded-2xl text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
+                onClick={handleSignOut}
+              >
+                <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <LogOut className="h-4 w-4" />
+                </div>
+                Sign Out
+              </Button>
             </div>
           </SheetContent>
         </Sheet>

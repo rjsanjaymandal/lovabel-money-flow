@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import MonthlyDashboard from "./pages/MonthlyDashboard";
 import AllTransactions from "./pages/AllTransactions";
 import AllLendBorrow from "./pages/AllLendBorrow";
 import PersonHistory from "./pages/PersonHistory";
@@ -20,11 +19,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/monthly" element={<MonthlyDashboard />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<AllTransactions />} />
           <Route path="/lend-borrow" element={<AllLendBorrow />} />

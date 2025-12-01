@@ -4,10 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet } from "lucide-react";
+import { Wallet, ArrowRight, Sparkles } from "lucide-react";
 import { getSafeErrorMessage } from "@/lib/error-handler";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,11 +18,10 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/monthly");
+        navigate("/dashboard?tab=spend");
       }
     };
     checkSession();
@@ -39,13 +38,13 @@ const Auth = () => {
           password,
         });
         if (error) throw error;
-        navigate("/monthly");
+        navigate("/dashboard?tab=spend");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/monthly`,
+            emailRedirectTo: `${window.location.origin}/dashboard?tab=spend`,
           },
         });
         if (error) throw error;
@@ -66,62 +65,113 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Wallet className="w-6 h-6 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-primary/5 rounded-full blur-3xl animate-glow" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-accent/5 rounded-full blur-3xl animate-glow" style={{ animationDelay: "1s" }} />
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-6 relative z-10"
+      >
+        <div className="glass-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/10">
+          <div className="text-center space-y-6 mb-8">
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+              className="mx-auto w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-lg shadow-primary/25"
+            >
+              <Wallet className="w-8 h-8 text-white" />
+            </motion.div>
+            
+            <div className="space-y-2">
+              <motion.h1 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold tracking-tight"
+              >
+                {isLogin ? "Welcome back" : "Create account"}
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-muted-foreground"
+              >
+                {isLogin
+                  ? "Enter your credentials to access your wallet"
+                  : "Start your journey to financial freedom"}
+              </motion.p>
+            </div>
           </div>
-          <CardTitle className="text-2xl">
-            {isLogin ? "Welcome back" : "Create account"}
-          </CardTitle>
-          <CardDescription>
-            {isLogin
-              ? "Sign in to your EasyExpense account"
-              : "Start tracking your expenses today"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+
+          <form onSubmit={handleAuth} className="space-y-5">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="hello@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-12 bg-white/5 border-white/10 focus:border-primary/50 transition-all rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-12 bg-white/5 border-white/10 focus:border-primary/50 transition-all rounded-xl"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Loading..." : isLogin ? "Sign in" : "Sign up"}
+
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-medium rounded-xl bg-gradient-primary hover:opacity-90 transition-all shadow-lg shadow-primary/25" 
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 animate-spin" />
+                  Processing...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  {isLogin ? "Sign In" : "Create Account"}
+                  <ArrowRight className="w-4 h-4" />
+                </span>
+              )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
+
+          <div className="mt-8 text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-primary hover:underline"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto group"
             >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
+              {isLogin ? "New to EasyExpense?" : "Already have an account?"}
+              <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                {isLogin ? "Sign Up" : "Sign In"}
+              </span>
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
     </div>
   );
 };

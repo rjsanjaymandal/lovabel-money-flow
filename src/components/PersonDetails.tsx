@@ -168,8 +168,8 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6 h-full flex flex-col animate-fade-in">
       {/* Mobile-optimized Balance Card */}
-      <Card className={`border-2 shadow-lg overflow-hidden relative ${netBalance >= 0 ? 'border-success/20' : 'border-accent/20'}`}>
-        <div className={`absolute inset-0 ${netBalance >= 0 ? 'gradient-success' : 'gradient-accent'} opacity-5`} />
+      <Card className={`border-2 shadow-lg overflow-hidden relative ${netBalance >= 0 ? 'border-green-500/20' : 'border-red-500/20'}`}>
+        <div className={`absolute inset-0 ${netBalance >= 0 ? 'bg-green-500/5' : 'bg-red-500/5'}`} />
         <CardHeader className="relative pb-3 sm:pb-4">
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-0.5 sm:space-y-1 flex-1 min-w-0">
@@ -195,15 +195,15 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
         </CardHeader>
         <CardContent className="relative pt-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <p className={`text-3xl sm:text-4xl md:text-5xl font-bold ${netBalance >= 0 ? "text-success" : "text-accent"}`}>
+            <p className={`text-3xl sm:text-4xl md:text-5xl font-bold ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}>
               ₹{Math.abs(netBalance).toFixed(2)}
             </p>
             <Badge 
               variant="outline" 
               className={`text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-0.5 sm:py-1 font-semibold ${
                 netBalance >= 0 
-                  ? 'border-success bg-success/10 text-success' 
-                  : 'border-accent bg-accent/10 text-accent'
+                  ? 'border-green-500 bg-green-500/10 text-green-700' 
+                  : 'border-red-500 bg-red-500/10 text-red-700'
               }`}
             >
               {netBalance >= 0 ? "You'll Get 💰" : "You Owe 💸"}
@@ -249,18 +249,18 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Button
-              className="h-12 sm:h-13 gradient-success hover:opacity-90 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
+              className="h-12 sm:h-13 bg-red-500 hover:bg-red-600 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
               onClick={() => handleQuickAdd("lent")}
             >
               <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-              Given
+              Given (Red)
             </Button>
             <Button
-              className="h-12 sm:h-13 gradient-accent hover:opacity-90 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
+              className="h-12 sm:h-13 bg-green-500 hover:bg-green-600 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
               onClick={() => handleQuickAdd("borrowed")}
             >
               <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-              Taken
+              Taken (Green)
             </Button>
           </div>
         </CardContent>
@@ -280,7 +280,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
               {pendingRecords.map((record, index) => (
                 <Card key={record.id} className="hover:shadow-lg transition-all duration-200 border-l-4 hover:scale-[1.01] active:scale-[0.99]"
                   style={{
-                    borderLeftColor: record.type === "lent" ? "hsl(142 76% 36%)" : "hsl(17 88% 62%)",
+                    borderLeftColor: record.type === "lent" ? "#ef4444" : "#22c55e", // Red-500 : Green-500
                     animationDelay: `${index * 0.05}s`,
                   }}
                 >
@@ -290,13 +290,13 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
                       <div className="flex items-start gap-2 sm:gap-3">
                         <div
                           className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            record.type === "lent" ? "gradient-success" : "gradient-accent"
+                            record.type === "lent" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
                           }`}
                         >
                           {record.type === "lent" ? (
-                            <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6" />
                           ) : (
-                            <ArrowDownRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            <ArrowDownRight className="w-5 h-5 sm:w-6 sm:h-6" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -304,8 +304,8 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
                             variant="outline" 
                             className={`font-semibold text-[10px] sm:text-xs mb-1 ${
                               record.type === "lent" 
-                                ? "border-success bg-success/10 text-success" 
-                                : "border-accent bg-accent/10 text-accent"
+                                ? "border-red-200 bg-red-50 text-red-700" 
+                                : "border-green-200 bg-green-50 text-green-700"
                             }`}
                           >
                             {record.type === "lent" ? "Given 📤" : "Taken 📥"}
@@ -321,8 +321,8 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
                       
                       {/* Bottom row: amount and settle button */}
                       <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                        <p className={`text-lg sm:text-xl font-bold ${record.type === "lent" ? "text-success" : "text-accent"}`}>
-                          {record.type === "lent" ? "+" : "-"}₹{record.amount.toFixed(2)}
+                        <p className={`text-lg sm:text-xl font-bold ${record.type === "lent" ? "text-red-600" : "text-green-600"}`}>
+                          {record.type === "lent" ? "-" : "+"}₹{record.amount.toFixed(2)}
                         </p>
                         <Button 
                           size="sm" 
@@ -373,7 +373,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <p className="text-sm sm:text-base font-semibold text-muted-foreground whitespace-nowrap">
-                          {record.type === "lent" ? "+" : "-"}₹{record.amount.toFixed(2)}
+                          {record.type === "lent" ? "-" : "+"}₹{record.amount.toFixed(2)}
                         </p>
                         <Badge variant="secondary" className="text-[9px] sm:text-xs">Settled</Badge>
                       </div>
