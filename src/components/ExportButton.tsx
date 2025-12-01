@@ -1,4 +1,6 @@
 import { useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, File } from "lucide-react";
 import {
@@ -67,10 +69,47 @@ export const ExportButton = ({ transactions, selectedMonth, income, expenses }: 
   };
 
   const exportToPDF = () => {
-    toast({ 
-      title: "PDF export coming soon", 
-      description: "This feature will be available in the next update" 
-    });
+    setIsExporting(true);
+    try {
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(20);
+      doc.text("Monthly Transaction Report", 14, 22);
+
+      // Date
+      doc.setFontSize(11);
+      doc.text(`Month: ${format(selectedMonth, "MMMM yyyy")}`, 14, 30);
+
+      // Summary
+      doc.text(`Total Income: ${income}`, 14, 40);
+      doc.text(`Total Expenses: ${expenses}`, 14, 46);
+      doc.text(`Net Balance: ${income - expenses}`, 14, 52);
+
+      // Table
+      const tableColumn = ["Date", "Type", "Category", "Amount", "Description"];
+      const tableRows = transactions.map((t) => [
+        format(new Date(t.date), "yyyy-MM-dd"),
+        t.type,
+        t.category,
+        t.amount.toString(),
+        t.description || "",
+      ]);
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 60,
+      });
+
+      doc.save(`transactions-${format(selectedMonth, "yyyy-MM")}.pdf`);
+      toast({ title: "Exported to PDF successfully" });
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Failed to export PDF", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (

@@ -122,15 +122,18 @@ const Dashboard = () => {
       {/* Premium Header */}
       <header className="fixed top-0 left-0 right-0 z-40 glass-panel border-b-0 rounded-b-3xl sm:rounded-none sm:border-b transition-all duration-300 safe-top">
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-lg shadow-primary/25 animate-in-up">
+          <div 
+            className="flex items-center gap-3 cursor-pointer group select-none" 
+            onClick={() => handleTabChange("spend")}
+          >
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 animate-in-up group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div className="animate-in-up" style={{ animationDelay: "0.1s" }}>
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight">
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight group-hover:text-primary transition-colors">
                 EasyExpense
               </h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">Financial Freedom</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground font-medium group-hover:text-primary/70 transition-colors">Financial Freedom</p>
             </div>
           </div>
 

@@ -8,6 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon, Tag, FileText, IndianRupee, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface AddTransactionDialogProps {
   children: React.ReactNode;
@@ -57,11 +63,11 @@ export const AddTransactionDialog = ({
   const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
 
   const [formData, setFormData] = useState({
-    type: "expense",
+    type: "expense" as "expense" | "income",
     amount: "",
     category: "",
     description: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(),
   });
 
   // Update form data when defaultValues change or dialog opens
@@ -70,7 +76,8 @@ export const AddTransactionDialog = ({
       setFormData(prev => ({
         ...prev,
         ...defaultValues,
-        category: defaultValues.category || prev.category
+        category: defaultValues.category || prev.category,
+        date: new Date()
       }));
     }
   }, [defaultValues, open]);
@@ -91,7 +98,7 @@ export const AddTransactionDialog = ({
         amount: "",
         category: "",
         description: "",
-        date: new Date().toISOString().split("T")[0],
+        date: new Date(),
       });
     }
   };
@@ -116,9 +123,9 @@ export const AddTransactionDialog = ({
         user_id: user.id,
         type: formData.type,
         amount: validationResult.data,
-        category: formData.category,
+        category: formData.category || "Other",
         description: formData.description || null,
-        date: formData.date,
+        date: format(formData.date, "yyyy-MM-dd"),
       });
 
       if (error) throw error;
@@ -134,7 +141,7 @@ export const AddTransactionDialog = ({
         amount: "",
         category: "",
         description: "",
-        date: new Date().toISOString().split("T")[0],
+        date: new Date(),
       });
       
       if (onSuccess) onSuccess();
@@ -155,87 +162,147 @@ export const AddTransactionDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+      <DialogContent className="sm:max-w-[425px] border-none bg-card/95 backdrop-blur-xl shadow-2xl p-0 overflow-hidden gap-0">
+        <DialogHeader className="p-6 pb-2">
+          <DialogTitle className="text-2xl font-bold text-center">
+            {formData.type === "expense" ? "New Expense" : "New Income"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value as "expense" | "income" })}
+
+        <form onSubmit={handleSubmit} className="space-y-0">
+          <div className="px-6 pb-6">
+            <Tabs 
+              defaultValue="expense" 
+              value={formData.type} 
+              onValueChange={(v) => setFormData({...formData, type: v as "expense" | "income"})}
+              className="w-full mb-6"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
-              </SelectContent>
-            </Select>
+              <TabsList className="grid w-full grid-cols-2 h-12 rounded-xl bg-muted/50 p-1">
+                <TabsTrigger 
+                  value="expense" 
+                  className="rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white transition-all"
+                >
+                  <ArrowDownCircle className="w-4 h-4 mr-2" />
+                  Expense
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="income"
+                  className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white transition-all"
+                >
+                  <ArrowUpCircle className="w-4 h-4 mr-2" />
+                  Income
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Amount Input - Hero Style */}
+            <div className="relative mb-6 group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <IndianRupee className={cn(
+                  "h-8 w-8 transition-colors",
+                  formData.type === "expense" ? "text-rose-500" : "text-emerald-500"
+                )} />
+              </div>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className={cn(
+                  "pl-12 h-20 text-5xl font-bold border-2 border-muted bg-transparent shadow-none focus-visible:ring-0 transition-colors rounded-2xl",
+                  formData.type === "expense" 
+                    ? "focus:border-rose-500 text-rose-500 placeholder:text-rose-200" 
+                    : "focus:border-emerald-500 text-emerald-500 placeholder:text-emerald-200"
+                )}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="space-y-4">
+              {/* Category */}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground ml-1">Category</Label>
+                <div className="relative">
+                  <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    required
+                  >
+                    <SelectTrigger className="pl-10 h-11 rounded-xl bg-muted/30 border-muted-foreground/20">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Date */}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground ml-1">Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal h-11 rounded-xl bg-muted/30 border-muted-foreground/20",
+                        !formData.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                      {formData.date ? format(formData.date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => date && setFormData({ ...formData, date })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground ml-1">Note</Label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Textarea
+                    placeholder="What was this for?"
+                    maxLength={500}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="pl-10 min-h-[80px] rounded-xl bg-muted/30 border-muted-foreground/20 resize-none"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount (₹)</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              max="99999999.99"
-              placeholder="0.00"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => setFormData({ ...formData, category: value })}
-              required
+          <div className="p-6 pt-2 bg-muted/10 border-t">
+            <Button 
+              type="submit" 
+              className={cn(
+                "w-full h-12 rounded-xl text-base font-semibold shadow-lg transition-all hover:scale-[1.02]",
+                formData.type === "expense" 
+                  ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/25" 
+                  : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25"
+              )}
+              disabled={loading}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {loading ? "Saving..." : `Save ${formData.type === "expense" ? "Expense" : "Income"}`}
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Add notes..."
-              maxLength={500}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Adding..." : "Add Transaction"}
-          </Button>
         </form>
       </DialogContent>
     </Dialog>

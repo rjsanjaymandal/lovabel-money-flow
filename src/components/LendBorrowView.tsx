@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { SplitBillDialog } from "@/components/SplitBillDialog";
+import { AddTransactionDialog } from "@/components/AddTransactionDialog";
 
 const amountSchema = z.number()
   .positive({ message: "Amount must be greater than zero" })
@@ -153,6 +154,11 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
         </div>
 
         <div className="flex gap-2">
+          <AddTransactionDialog>
+             <Button variant="outline" size="icon" className="rounded-full w-10 h-10 shadow-sm" title="Add Transaction">
+                <Wallet className="w-5 h-5 text-muted-foreground" />
+             </Button>
+          </AddTransactionDialog>
           <SplitBillDialog people={people} onSuccess={onPersonAdded} />
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
