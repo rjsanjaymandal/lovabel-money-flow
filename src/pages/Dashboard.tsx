@@ -122,7 +122,7 @@ const Dashboard = () => {
       {/* Premium Header */}
       {/* Floating Island Navbar */}
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between safe-top transition-all duration-300">
+      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between safe-top transition-all duration-300">
           <div 
             className="flex items-center gap-2 cursor-pointer select-none" 
             onClick={() => handleTabChange("spend")}
