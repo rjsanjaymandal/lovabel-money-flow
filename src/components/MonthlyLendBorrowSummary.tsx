@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HandCoins, TrendingUp, TrendingDown, Eye } from "lucide-react";
@@ -11,19 +11,20 @@ interface MonthlyLendBorrowSummaryProps {
   selectedMonth: Date;
 }
 
-export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendBorrowSummaryProps) => {
+const MonthlyLendBorrowSummaryComponent = ({ userId, selectedMonth }: MonthlyLendBorrowSummaryProps) => {
   const [monthlyLent, setMonthlyLent] = useState(0);
   const [monthlyBorrowed, setMonthlyBorrowed] = useState(0);
   const [totalPending, setTotalPending] = useState({ lent: 0, borrowed: 0 });
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchMonthlyData();
-  }, [userId, selectedMonth]);
+  // Memoize date range
+  const dateRange = useMemo(() => ({
+    startDate: format(startOfMonth(selectedMonth), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(selectedMonth), "yyyy-MM-dd")
+  }), [selectedMonth]);
 
-  const fetchMonthlyData = async () => {
-    const startDate = format(startOfMonth(selectedMonth), "yyyy-MM-dd");
-    const endDate = format(endOfMonth(selectedMonth), "yyyy-MM-dd");
+  const fetchMonthlyData = useCallback(async () => {
+    const { startDate, endDate } = dateRange;
 
     // Monthly data
     const { data: monthlyData } = await supabase
@@ -60,7 +61,11 @@ export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendB
         .reduce((sum, r) => sum + r.amount, 0);
       setTotalPending({ lent: pendingLent, borrowed: pendingBorrowed });
     }
-  };
+  }, [userId, dateRange]);
+
+  useEffect(() => {
+    fetchMonthlyData();
+  }, [fetchMonthlyData]);
 
   return (
     <Card className="border-border/50 shadow-lg hover:shadow-xl transition-all animate-scale-in">
@@ -119,3 +124,5 @@ export const MonthlyLendBorrowSummary = ({ userId, selectedMonth }: MonthlyLendB
     </Card>
   );
 };
+
+export const MonthlyLendBorrowSummary = memo(MonthlyLendBorrowSummaryComponent);

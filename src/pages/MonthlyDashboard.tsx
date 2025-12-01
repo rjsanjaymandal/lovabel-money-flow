@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { AIInsights } from "@/components/AIInsights";
 import { CategoryManager } from "@/components/CategoryManager";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 const DEFAULT_CATEGORIES = [
   "Food & Dining",
@@ -28,44 +29,35 @@ const DEFAULT_CATEGORIES = [
 
 const MonthlyDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [stats, setStats] = useState({ income: 0, expenses: 0, balance: 0 });
   const [transactions, setTransactions] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchMonthlyStats();
-    }
-  }, [user, selectedMonth]);
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!loading && !user) {
       navigate("/auth");
-      return;
     }
-    setUser(session.user);
-    setLoading(false);
-  };
+  }, [user, loading, navigate]);
 
-  const fetchMonthlyStats = async () => {
-    const startDate = format(startOfMonth(selectedMonth), "yyyy-MM-dd");
-    const endDate = format(endOfMonth(selectedMonth), "yyyy-MM-dd");
+  // Memoize date range calculation
+  const dateRange = useMemo(() => ({
+    startDate: format(startOfMonth(selectedMonth), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(selectedMonth), "yyyy-MM-dd")
+  }), [selectedMonth]);
+
+  const fetchMonthlyStats = useCallback(async () => {
+    if (!user) return;
 
     const { data } = await supabase
       .from("transactions")
       .select("amount, type")
       .eq("user_id", user.id)
-      .gte("date", startDate)
-      .lte("date", endDate);
+      .gte("date", dateRange.startDate)
+      .lte("date", dateRange.endDate);
 
     if (data) {
       const income = data
@@ -76,12 +68,16 @@ const MonthlyDashboard = () => {
         .reduce((sum, t) => sum + t.amount, 0);
       setStats({ income, expenses, balance: income - expenses });
     }
-  };
+  }, [user, dateRange]);
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    fetchMonthlyStats();
+  }, [fetchMonthlyStats]);
+
+  const handleSignOut = useCallback(async () => {
     await supabase.auth.signOut();
     navigate("/auth");
-  };
+  }, [navigate]);
 
   if (loading) {
     return (
