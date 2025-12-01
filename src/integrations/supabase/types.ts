@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_budgets: {
+        Row: {
+          category_budgets: Json | null
+          created_at: string
+          id: string
+          month: string
+          total_budget: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_budgets?: Json | null
+          created_at?: string
+          id?: string
+          month: string
+          total_budget?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_budgets?: Json | null
+          created_at?: string
+          id?: string
+          month?: string
+          total_budget?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

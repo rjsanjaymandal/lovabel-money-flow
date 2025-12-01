@@ -32,7 +32,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
       .select("total_budget")
       .eq("user_id", userId)
       .eq("month", monthKey)
-      .maybeSingle();
+      .maybeSingle() as { data: { total_budget: number } | null };
 
     if (data) {
       setBudget(data.total_budget);
@@ -54,7 +54,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
         user_id: userId,
         month: monthKey,
         total_budget: newBudget,
-      });
+      } as any);
 
     if (error) {
       toast({ title: "Failed to save budget", variant: "destructive" });
