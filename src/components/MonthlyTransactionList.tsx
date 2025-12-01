@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,27 +32,26 @@ interface MonthlyTransactionListProps {
   onTransactionsLoaded?: (transactions: Transaction[]) => void;
 }
 
-export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLoaded }: MonthlyTransactionListProps) => {
+const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactionsLoaded }: MonthlyTransactionListProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [userId, selectedMonth]);
+  // Memoize date range
+  const dateRange = useMemo(() => ({
+    startDate: format(startOfMonth(selectedMonth), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(selectedMonth), "yyyy-MM-dd")
+  }), [selectedMonth]);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
-    const startDate = format(startOfMonth(selectedMonth), "yyyy-MM-dd");
-    const endDate = format(endOfMonth(selectedMonth), "yyyy-MM-dd");
-
     const { data } = await supabase
       .from("transactions")
       .select("*")
       .eq("user_id", userId)
-      .gte("date", startDate)
-      .lte("date", endDate)
+      .gte("date", dateRange.startDate)
+      .lte("date", dateRange.endDate)
       .order("date", { ascending: false });
 
     if (data) {
@@ -60,9 +59,13 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
       onTransactionsLoaded?.(data);
     }
     setLoading(false);
-  };
+  }, [userId, dateRange, onTransactionsLoaded]);
 
-  const handleDelete = async () => {
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     
     const { error } = await supabase
@@ -82,7 +85,7 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
       fetchTransactions();
     }
     setDeleteId(null);
-  };
+  }, [deleteId, toast, fetchTransactions]);
 
   if (loading) {
     return (
@@ -110,13 +113,15 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
     );
   }
 
-  // Group by date
-  const groupedByDate = transactions.reduce((acc, transaction) => {
-    const date = transaction.date;
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(transaction);
-    return acc;
-  }, {} as Record<string, Transaction[]>);
+  // Memoize grouped transactions
+  const groupedByDate = useMemo(() => {
+    return transactions.reduce((acc, transaction) => {
+      const date = transaction.date;
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(transaction);
+      return acc;
+    }, {} as Record<string, Transaction[]>);
+  }, [transactions]);
 
   return (
     <>
@@ -216,3 +221,5 @@ export const MonthlyTransactionList = ({ userId, selectedMonth, onTransactionsLo
     </>
   );
 };
+
+export const MonthlyTransactionList = memo(MonthlyTransactionListComponent);
