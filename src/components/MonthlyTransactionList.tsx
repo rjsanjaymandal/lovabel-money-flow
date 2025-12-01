@@ -30,9 +30,10 @@ interface MonthlyTransactionListProps {
   userId: string;
   selectedMonth: Date;
   onTransactionsLoaded?: (transactions: Transaction[]) => void;
+  searchQuery?: string;
 }
 
-const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactionsLoaded }: MonthlyTransactionListProps) => {
+const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactionsLoaded, searchQuery = "" }: MonthlyTransactionListProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -87,15 +88,26 @@ const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactions
     setDeleteId(null);
   }, [deleteId, toast, fetchTransactions]);
 
-  // Memoize grouped transactions - MOVED TO TOP LEVEL to fix hook violation
+  // Filter transactions based on search query
+  const filteredTransactions = useMemo(() => {
+    if (!searchQuery) return transactions;
+    const lowerQuery = searchQuery.toLowerCase();
+    return transactions.filter(t => 
+      t.category.toLowerCase().includes(lowerQuery) ||
+      (t.description && t.description.toLowerCase().includes(lowerQuery)) ||
+      t.amount.toString().includes(lowerQuery)
+    );
+  }, [transactions, searchQuery]);
+
+  // Memoize grouped transactions
   const groupedByDate = useMemo(() => {
-    return transactions.reduce((acc, transaction) => {
+    return filteredTransactions.reduce((acc, transaction) => {
       const date = transaction.date;
       if (!acc[date]) acc[date] = [];
       acc[date].push(transaction);
       return acc;
     }, {} as Record<string, Transaction[]>);
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   if (loading) {
     return (
@@ -129,7 +141,7 @@ const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactions
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Receipt className="w-5 h-5 text-primary" />
-          Transactions ({transactions.length})
+          Transactions ({filteredTransactions.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 px-3 sm:px-6">
@@ -189,6 +201,11 @@ const MonthlyTransactionListComponent = ({ userId, selectedMonth, onTransactions
             </div>
           </div>
         ))}
+        {filteredTransactions.length === 0 && transactions.length > 0 && (
+           <div className="text-center py-8 text-muted-foreground">
+             No transactions match your search.
+           </div>
+        )}
       </CardContent>
     </Card>
 

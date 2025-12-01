@@ -16,13 +16,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VoiceInput } from "@/components/VoiceInput";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 
+import { SearchResults } from "@/components/SearchResults";
+
 interface TransactionViewProps {
   userId: string;
   categories: string[];
   onTransactionAdded: () => void;
+  searchQuery?: string;
+  onClearSearch?: () => void;
 }
 
-export function TransactionView({ userId, categories, onTransactionAdded }: TransactionViewProps) {
+export function TransactionView({ userId, categories, onTransactionAdded, searchQuery, onClearSearch }: TransactionViewProps) {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [stats, setStats] = useState({ income: 0, expenses: 0, balance: 0 });
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -69,6 +73,16 @@ export function TransactionView({ userId, categories, onTransactionAdded }: Tran
     fetchMonthlyStats();
     onTransactionAdded();
   };
+
+  if (searchQuery) {
+    return (
+      <SearchResults 
+        userId={userId} 
+        searchQuery={searchQuery} 
+        onClose={onClearSearch || (() => {})} 
+      />
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in pb-20">

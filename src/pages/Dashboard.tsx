@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings } from "lucide-react";
+import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
 import { LendBorrowView } from "@/components/LendBorrowView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 interface Person {
   name: string;
@@ -36,6 +37,9 @@ const Dashboard = () => {
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "lend" ? "lend" : "spend");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -68,6 +72,13 @@ const Dashboard = () => {
     const tab = searchParams.get("tab");
     setActiveTab(tab === "lend" ? "lend" : "spend");
   }, [searchParams]);
+
+  // Focus input when search opens
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
 
   const fetchPeople = async (userId: string) => {
     const { data: records } = await supabase
@@ -109,6 +120,13 @@ const Dashboard = () => {
     setSearchParams({ tab: value });
   };
 
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+    if (isSearchOpen) {
+      setSearchQuery("");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -122,29 +140,61 @@ const Dashboard = () => {
       {/* Premium Header */}
       {/* Floating Island Navbar */}
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between safe-top transition-all duration-300">
-          <div 
-            className="flex items-center gap-2 cursor-pointer select-none" 
-            onClick={() => handleTabChange("spend")}
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25">
-              <Wallet className="w-4 h-4 text-white" />
+      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl border-b border-border/5 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300">
+          {isSearchOpen ? (
+            <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <Search className="w-5 h-5 text-primary flex-shrink-0" />
+              <Input 
+                ref={searchInputRef}
+                placeholder="Search transactions..." 
+                className="h-10 text-base bg-muted/50 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-muted-foreground/50"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleSearch}
+                className="h-10 w-10 rounded-full hover:bg-muted flex-shrink-0"
+              >
+                <X className="w-6 h-6 text-muted-foreground" />
+              </Button>
             </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight leading-none">
-                EasyExpense
-              </h1>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div 
+                className="flex items-center gap-2.5 cursor-pointer select-none" 
+                onClick={() => handleTabChange("spend")}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                  <Wallet className="relative w-7 h-7 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight leading-none bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                    EasyExpense
+                  </h1>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleSearch}
+                className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Search className="w-6 h-6" />
+              </Button>
+            </>
+          )}
       </header>
 
       {/* Floating Island Navbar (Desktop Only) */}
       <div className="fixed top-4 left-0 right-0 z-50 hidden sm:flex justify-center px-4 pointer-events-none">
         <header className="pointer-events-auto w-full max-w-5xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
           
-          {/* Logo Section */}
+          {/* Logo Section - Hide when search is open on desktop to save space if needed, or just keep it */}
           <div 
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2" 
+            className={`flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`} 
             onClick={() => handleTabChange("spend")}
           >
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
@@ -158,8 +208,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Center Navigation Pills */}
-          <nav className="flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5">
+          {/* Center Navigation Pills - Hide when search is open */}
+          <nav className={`flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden p-0 border-0' : 'w-auto opacity-100'}`}>
             <Button
               variant="ghost"
               size="sm"
@@ -188,22 +238,55 @@ const Dashboard = () => {
             </Button>
           </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-1 pr-1">
+          {/* Right Actions & Search */}
+          <div className={`flex items-center gap-2 pr-1 transition-all duration-300 ${isSearchOpen ? 'flex-1 pl-2' : ''}`}>
+             {/* Desktop Search */}
+            <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-full' : 'w-9'}`}>
+              <div 
+                className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 ${isSearchOpen ? 'left-3' : 'left-1/2 -translate-x-1/2'}`}
+                onClick={() => !isSearchOpen && setIsSearchOpen(true)}
+              >
+                <Search className={`w-4 h-4 text-muted-foreground cursor-pointer ${isSearchOpen ? '' : 'hover:text-primary'}`} />
+              </div>
+              
+              <Input 
+                ref={isSearchOpen ? searchInputRef : null}
+                placeholder="Search transactions..." 
+                className={`h-9 bg-muted/50 border-0 rounded-full focus-visible:ring-1 focus-visible:ring-primary/50 transition-all duration-300 ${
+                  isSearchOpen ? 'w-full pl-9 pr-9 opacity-100' : 'w-9 opacity-0 cursor-pointer'
+                }`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={() => !isSearchOpen && setIsSearchOpen(true)}
+              />
+              
+              {isSearchOpen && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-9 w-9 rounded-full hover:bg-transparent text-muted-foreground hover:text-foreground"
+                  onClick={toggleSearch}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className={`w-px h-4 bg-border/50 mx-1 ${isSearchOpen ? 'hidden' : 'block'}`} />
+            
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setCategoryManagerOpen(true)}
-              className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all"
+              className={`rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all ${isSearchOpen ? 'hidden' : 'flex'}`}
             >
               <Settings className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-muted-foreground" />
             </Button>
-            <div className="w-px h-4 bg-border/50 mx-1" />
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleSignOut} 
-              className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-destructive/10 hover:text-destructive hover:scale-105 transition-all"
+              className={`rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-destructive/10 hover:text-destructive hover:scale-105 transition-all ${isSearchOpen ? 'hidden' : 'flex'}`}
             >
               <LogOut className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </Button>
@@ -219,6 +302,11 @@ const Dashboard = () => {
               userId={user?.id}
               categories={categories}
               onTransactionAdded={() => {}}
+              searchQuery={searchQuery}
+              onClearSearch={() => {
+                setSearchQuery("");
+                setIsSearchOpen(false);
+              }}
             />
           </TabsContent>
           
