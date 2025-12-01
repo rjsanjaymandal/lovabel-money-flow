@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getSafeErrorMessage } from "@/lib/error-handler";
 
 interface AIInsightsProps {
   userId: string;
@@ -38,7 +39,7 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
       console.error("Error generating insights:", error);
       toast({
         title: "Failed to generate insights",
-        description: error.message || "Please try again later",
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } finally {
