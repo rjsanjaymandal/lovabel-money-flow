@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target } from "lucide-react";
+import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
 import { BudgetView } from "@/components/BudgetView";
 import { LendBorrowView } from "@/components/LendBorrowView";
+import { UserProfile } from "@/components/UserProfile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
@@ -182,14 +183,25 @@ const Dashboard = () => {
                   <p className="text-[10px] text-muted-foreground font-medium">Financial Freedom</p>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleSearch}
-                className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleSearch}
+                  className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Search className="w-5 h-5" />
+                </Button>
+                <UserProfile 
+                  trigger={
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary/20 to-purple-500/20 flex items-center justify-center border border-primary/10">
+                        <User className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                    </Button>
+                  }
+                />
+              </div>
             </>
           )}
       </header>
