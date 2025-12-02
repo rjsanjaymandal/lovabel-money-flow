@@ -273,7 +273,15 @@ const Dashboard = () => {
 
           {/* Right Actions & Search */}
           <div className={`flex items-center gap-2 pr-1 transition-all duration-300 ${isSearchOpen ? 'flex-1 pl-2' : ''}`}>
-             {/* Desktop Search */}
+            
+            {/* Streak Counter (Desktop) */}
+            {!isSearchOpen && (
+              <div className="hidden md:block mr-2">
+                <StreakCounter userId={user?.id} />
+              </div>
+            )}
+
+            {/* Desktop Search */}
             <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-full' : 'w-9'}`}>
               <div 
                 className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 ${isSearchOpen ? 'left-3' : 'left-1/2 -translate-x-1/2'}`}

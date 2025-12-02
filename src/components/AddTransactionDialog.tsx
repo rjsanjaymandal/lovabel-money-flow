@@ -17,6 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScanReceiptButton } from "@/components/ScanReceiptButton";
 import { ScannedReceiptData } from "@/utils/receiptParser";
 import { checkAchievement } from "@/utils/gamification";
+import { VoiceInput } from "@/components/VoiceInput";
+import { VoiceData } from "@/utils/voiceParser";
 
 interface AddTransactionDialogProps {
   children: React.ReactNode;
@@ -117,6 +119,15 @@ export const AddTransactionDialog = ({
     }));
   };
 
+  const handleVoiceResult = (data: VoiceData) => {
+    setFormData(prev => ({
+      ...prev,
+      amount: data.amount || prev.amount,
+      category: data.category || prev.category,
+      description: data.description || prev.description,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -164,8 +175,9 @@ export const AddTransactionDialog = ({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] border-none bg-card/95 backdrop-blur-xl shadow-2xl p-0 overflow-hidden gap-0">
         <DialogHeader className="p-6 pb-2 relative">
-          <div className="absolute left-4 top-4 z-10">
+          <div className="absolute left-4 top-4 z-10 flex gap-2">
             <ScanReceiptButton onScanComplete={handleScanComplete} />
+            <VoiceInput onResult={handleVoiceResult} />
           </div>
           <DialogTitle className="text-2xl font-bold text-center">
             {formData.type === "expense" ? "New Expense" : "New Income"}
