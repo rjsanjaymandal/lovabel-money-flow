@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScanReceiptButton } from "@/components/ScanReceiptButton";
+import { ScannedReceiptData } from "@/utils/receiptParser";
 
 interface AddTransactionDialogProps {
   children: React.ReactNode;
@@ -103,6 +105,16 @@ export const AddTransactionDialog = ({
     }
   };
 
+  const handleScanComplete = (data: ScannedReceiptData) => {
+    setFormData(prev => ({
+      ...prev,
+      amount: data.amount ? data.amount.toString() : prev.amount,
+      date: data.date || prev.date,
+      description: data.merchant || prev.description,
+      type: "expense", // Receipts are usually expenses
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -163,7 +175,10 @@ export const AddTransactionDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] border-none bg-card/95 backdrop-blur-xl shadow-2xl p-0 overflow-hidden gap-0">
-        <DialogHeader className="p-6 pb-2">
+        <DialogHeader className="p-6 pb-2 relative">
+          <div className="absolute right-4 top-4 z-10">
+            <ScanReceiptButton onScanComplete={handleScanComplete} />
+          </div>
           <DialogTitle className="text-2xl font-bold text-center">
             {formData.type === "expense" ? "New Expense" : "New Income"}
           </DialogTitle>
