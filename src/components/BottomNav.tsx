@@ -68,21 +68,24 @@ export function BottomNav() {
           <button
             key={index}
             onClick={item.onClick}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl ${
+            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl group ${
               item.isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:bg-black/5"
             }`}
           >
+            {item.isActive && (
+              <div className="absolute inset-0 bg-primary/10 rounded-xl blur-md -z-10 scale-90 animate-pulse" />
+            )}
             <div className={`p-2 rounded-xl transition-all duration-300 ${
-              item.isActive ? "bg-primary/10 scale-110" : "scale-100"
+              item.isActive ? "bg-primary/10 scale-110 shadow-sm" : "scale-100 group-hover:scale-105"
             }`}>
               <item.icon className={`h-5 w-5 transition-all duration-300 ${
                 item.isActive ? "stroke-[2.5px]" : "stroke-2"
               }`} />
             </div>
             <span className={`text-[10px] font-medium transition-all duration-300 ${
-              item.isActive ? "opacity-100 font-semibold" : "opacity-60"
+              item.isActive ? "opacity-100 font-semibold translate-y-0" : "opacity-60 translate-y-0.5"
             }`}>
               {item.label}
             </span>

@@ -143,7 +143,7 @@ const Dashboard = () => {
       {/* Premium Header */}
       {/* Floating Island Navbar */}
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/80 backdrop-blur-xl border-b border-border/5 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300">
+      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/50 backdrop-blur-xl border-b border-white/10 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300">
           {isSearchOpen ? (
             <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
               <Search className="w-5 h-5 text-primary flex-shrink-0" />
@@ -166,17 +166,20 @@ const Dashboard = () => {
           ) : (
             <>
               <div 
-                className="flex items-center gap-2.5 cursor-pointer select-none" 
+                className="flex items-center gap-3 cursor-pointer select-none" 
                 onClick={() => handleTabChange("spend")}
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                  <Wallet className="relative w-7 h-7 text-primary" />
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
+                    <Wallet className="w-4 h-4 text-white" />
+                  </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight leading-none bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
                     EasyExpense
                   </h1>
+                  <p className="text-[10px] text-muted-foreground font-medium">Financial Freedom</p>
                 </div>
               </div>
               <Button 
@@ -185,7 +188,7 @@ const Dashboard = () => {
                 onClick={toggleSearch}
                 className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
               >
-                <Search className="w-6 h-6" />
+                <Search className="w-5 h-5" />
               </Button>
             </>
           )}

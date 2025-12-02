@@ -100,67 +100,69 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       {/* Overview Card */}
-      <Card className="border-none shadow-lg bg-gradient-to-br from-primary/10 via-purple-500/5 to-background backdrop-blur-xl overflow-hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Target className="w-5 h-5" />
+      <Card className="border-none shadow-2xl bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#d946ef] text-white overflow-hidden relative">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-white/5 backdrop-blur-[1px]"></div>
+        
+        <CardHeader className="pb-2 relative z-10">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white/90">
+            <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
+              <Target className="w-5 h-5 text-white" />
             </div>
             Total Monthly Budget
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6">
+        <CardContent className="p-4 sm:p-6 relative z-10">
           <div className="flex flex-col items-center justify-center py-2 sm:py-4">
-            <div className="relative w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center">
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center">
               {/* Circular Progress Background */}
-              <svg className="w-full h-full transform -rotate-90">
+              <svg className="w-full h-full transform -rotate-90 drop-shadow-2xl">
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="45%"
+                  r="42%"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="10%"
-                  className="text-muted/20"
+                  strokeWidth="8%"
+                  className="text-white/10"
                 />
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="45%"
+                  r="42%"
                   fill="none"
-                  stroke="currentColor"
-                  strokeWidth="10%"
-                  strokeDasharray={2 * Math.PI * 45} // Approximate radius percentage
-                  strokeDashoffset={0} // Dynamic calculation needed if using percentage
+                  stroke="white"
+                  strokeWidth="8%"
+                  strokeDasharray={2 * Math.PI * 42} 
+                  strokeDashoffset={0}
                   pathLength={100}
-                  className={`transition-all duration-1000 ease-out ${
-                    percentage > 100 ? "text-destructive" : "text-primary"
-                  }`}
+                  className="transition-all duration-1000 ease-out"
                   strokeLinecap="round"
                   style={{
                     strokeDasharray: 100,
-                    strokeDashoffset: 100 - Math.min(percentage, 100)
+                    strokeDashoffset: 100 - Math.min(percentage, 100),
+                    filter: "drop-shadow(0 0 8px rgba(255,255,255,0.5))"
                   }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl sm:text-4xl font-bold tracking-tighter">
-                  {percentage.toFixed(0)}%
+                <span className="text-5xl sm:text-6xl font-bold tracking-tighter text-white drop-shadow-sm">
+                  {percentage.toFixed(0)}<span className="text-2xl sm:text-3xl opacity-60">%</span>
                 </span>
-                <span className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">
-                  of Budget Used
+                <span className="text-sm sm:text-base text-white/70 font-medium mt-1 uppercase tracking-wider">
+                  Used
                 </span>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 sm:gap-8 w-full mt-6 sm:mt-8">
-              <div className="text-center p-3 sm:p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-border/50">
-                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Spent</p>
-                <p className="text-xl sm:text-2xl font-bold text-foreground">₹{totalSpent.toLocaleString()}</p>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full mt-8">
+              <div className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/15 transition-colors">
+                <p className="text-xs sm:text-sm text-white/60 mb-1 uppercase tracking-wide font-medium">Spent</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">₹{totalSpent.toLocaleString()}</p>
               </div>
-              <div className="text-center p-3 sm:p-4 rounded-2xl bg-background/50 backdrop-blur-sm border border-border/50">
-                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Budget</p>
-                <p className="text-xl sm:text-2xl font-bold text-primary">₹{totalBudget.toLocaleString()}</p>
+              <div className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/15 transition-colors">
+                <p className="text-xs sm:text-sm text-white/60 mb-1 uppercase tracking-wide font-medium">Limit</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">₹{totalBudget.toLocaleString()}</p>
               </div>
             </div>
           </div>
