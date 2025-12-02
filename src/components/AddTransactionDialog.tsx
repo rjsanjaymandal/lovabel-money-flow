@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScanReceiptButton } from "@/components/ScanReceiptButton";
 import { ScannedReceiptData } from "@/utils/receiptParser";
+import { checkAchievement } from "@/utils/gamification";
 
 interface AddTransactionDialogProps {
   children: React.ReactNode;
@@ -142,20 +143,6 @@ export const AddTransactionDialog = ({
       });
 
       if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Transaction added successfully.",
-      });
-
-      setOpen(false);
-      setFormData({
-        type: "expense",
-        amount: "",
-        category: "",
-        description: "",
-        date: new Date(),
-      });
       
       if (onSuccess) onSuccess();
     } catch (error: any) {

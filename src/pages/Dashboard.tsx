@@ -11,6 +11,7 @@ import { LendBorrowView } from "@/components/LendBorrowView";
 import { UserProfile } from "@/components/UserProfile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { StreakCounter } from "@/components/StreakCounter";
 
 interface Person {
   name: string;
@@ -184,6 +185,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <StreakCounter userId={user?.id} />
                 <Button 
                   variant="ghost" 
                   size="icon" 

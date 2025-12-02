@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { BadgesSection } from "@/components/BadgesSection";
 
 interface UserProfileProps {
   trigger?: React.ReactNode;
+  userId?: string;
 }
 
-export function UserProfile({ trigger }: UserProfileProps) {
+export function UserProfile({ trigger, userId }: UserProfileProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -50,6 +52,8 @@ export function UserProfile({ trigger }: UserProfileProps) {
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-3">
+          {userId && <BadgesSection userId={userId} />}
+          <div className="h-px bg-border my-2" />
           <Button
             variant="outline"
             className="w-full justify-start gap-4 h-14 text-base font-medium rounded-2xl border-muted hover:bg-primary/5 hover:border-primary/20 hover:text-primary transition-all"

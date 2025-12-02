@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { checkAchievement } from "@/utils/gamification";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +69,10 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
         title: "Budget Saved",
         description: `Budget for ${category} set to ₹${amount}`,
       });
+
+      // Check Achievement
+      checkAchievement(user.id, "BUDGET_BOSS");
+
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
