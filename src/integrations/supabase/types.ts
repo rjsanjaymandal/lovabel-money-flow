@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      budgets: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          spent: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          id?: string
+          spent?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          spent?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lend_borrow: {
         Row: {
           amount: number
