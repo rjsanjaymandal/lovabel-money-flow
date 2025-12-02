@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Settings, LogOut } from "lucide-react";
@@ -105,6 +106,9 @@ export function BottomNav() {
               <SheetTitle className="text-center text-xl font-bold">
                 Profile & Settings
               </SheetTitle>
+              <SheetDescription className="text-center text-muted-foreground">
+                Manage your account settings and preferences
+              </SheetDescription>
             </SheetHeader>
             <div className="space-y-3">
               <Button

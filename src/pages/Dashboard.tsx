@@ -71,7 +71,9 @@ const Dashboard = () => {
   // Sync activeTab with URL changes
   useEffect(() => {
     const tab = searchParams.get("tab");
-    setActiveTab(tab === "lend" ? "lend" : "spend");
+    if (tab === "lend") setActiveTab("lend");
+    else if (tab === "budget") setActiveTab("budget");
+    else setActiveTab("spend");
   }, [searchParams]);
 
   // Focus input when search opens
@@ -310,7 +312,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-24 sm:pb-8 max-w-7xl mx-auto w-full">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs key={activeTab} value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsContent value="spend" className="mt-0 animate-slide-in">
             <TransactionView 
               userId={user?.id}

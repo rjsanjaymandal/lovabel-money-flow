@@ -44,7 +44,7 @@ export function CategoryBudgetCard({ category, spent, budget, onEdit }: Category
           <span className="text-muted-foreground">
             ₹{spent.toLocaleString()} of ₹{budget.toLocaleString()}
           </span>
-          <span className={`font-medium ${percentage >= 100 ? "text-destructive" : ""}`}>
+          <span className={`font-medium ${percentage >= 100 ? "text-destructive" : "text-primary"}`}>
             {percentage.toFixed(0)}%
           </span>
         </div>
@@ -53,6 +53,11 @@ export function CategoryBudgetCard({ category, spent, budget, onEdit }: Category
           className="h-2.5" 
           indicatorClassName={progressColor}
         />
+        <div className="flex justify-between items-center text-xs mt-1">
+          <span className={isOverBudget ? "text-destructive font-medium" : "text-muted-foreground"}>
+            {isOverBudget ? `Over by ₹${(spent - budget).toLocaleString()}` : `₹${(budget - spent).toLocaleString()} remaining`}
+          </span>
+        </div>
       </div>
     </div>
   );

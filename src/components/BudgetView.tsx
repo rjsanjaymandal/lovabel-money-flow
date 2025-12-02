@@ -64,6 +64,25 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
 
   useEffect(() => {
     fetchBudgets();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel('budget-updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'budgets', filter: `user_id=eq.${userId}` },
+        () => fetchBudgets()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` },
+        () => fetchBudgets()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userId]);
 
   const handleEdit = (budget: Budget) => {
@@ -159,10 +178,17 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
         </div>
         
         {budgets.length === 0 ? (
-          <div className="col-span-full text-center py-12 bg-muted/30 rounded-3xl border border-dashed border-muted-foreground/25">
-            <p className="text-muted-foreground">No budgets set yet</p>
-            <Button variant="link" onClick={() => setIsSetBudgetOpen(true)} className="mt-2">
-              Set your first budget
+          <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 bg-muted/30 rounded-3xl border border-dashed border-muted-foreground/25 animate-fade-in">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Target className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Start Budgeting</h3>
+            <p className="text-muted-foreground text-center max-w-sm mb-6">
+              Take control of your finances by setting monthly limits for different categories.
+            </p>
+            <Button onClick={() => setIsSetBudgetOpen(true)} className="rounded-xl shadow-lg shadow-primary/20">
+              <Plus className="w-4 h-4 mr-2" />
+              Set Your First Budget
             </Button>
           </div>
         ) : (
