@@ -4,6 +4,7 @@ export interface ScannedReceiptData {
   amount?: number;
   date?: Date;
   merchant?: string;
+  category?: string;
   text: string;
 }
 
@@ -25,6 +26,7 @@ export const parseReceiptImage = async (imageFile: File): Promise<ScannedReceipt
       amount: extractAmount(text),
       date: extractDate(text),
       merchant: extractMerchant(text),
+      category: extractCategory(text),
     };
   } catch (error) {
     console.error("OCR Error:", error);
@@ -74,5 +76,28 @@ const extractMerchant = (text: string): string | undefined => {
   if (lines.length > 0) {
     return lines[0];
   }
+  return undefined;
+};
+
+const extractCategory = (text: string): string | undefined => {
+  const lowerText = text.toLowerCase();
+  
+  const keywords: Record<string, string[]> = {
+    "Food & Dining": ["restaurant", "cafe", "coffee", "burger", "pizza", "food", "dining", "lunch", "dinner", "breakfast", "starbucks", "mcdonalds", "kfc", "subway", "zomato", "swiggy"],
+    "Transportation": ["uber", "ola", "lyft", "taxi", "cab", "fuel", "petrol", "diesel", "gas", "parking", "toll", "metro", "bus", "train", "flight", "airline"],
+    "Shopping": ["mart", "supermarket", "grocery", "store", "shop", "mall", "amazon", "flipkart", "myntra", "zara", "h&m", "nike", "adidas", "ikea"],
+    "Entertainment": ["movie", "cinema", "theatre", "netflix", "prime", "hotstar", "spotify", "apple music", "game", "concert", "event", "ticket"],
+    "Bills & Utilities": ["electricity", "water", "gas", "bill", "recharge", "mobile", "internet", "broadband", "wifi", "subscription", "insurance", "premium"],
+    "Healthcare": ["hospital", "clinic", "doctor", "pharmacy", "medicine", "medical", "health", "lab", "test", "scan"],
+    "Education": ["school", "college", "university", "tuition", "course", "book", "stationery", "fee", "exam"],
+    "Personal": ["salon", "spa", "gym", "fitness", "hair", "beauty", "cosmetics", "barber"],
+  };
+
+  for (const [category, words] of Object.entries(keywords)) {
+    if (words.some(word => lowerText.includes(word))) {
+      return category;
+    }
+  }
+
   return undefined;
 };

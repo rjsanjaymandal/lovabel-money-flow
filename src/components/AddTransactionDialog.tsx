@@ -111,6 +111,7 @@ export const AddTransactionDialog = ({
       amount: data.amount ? data.amount.toString() : prev.amount,
       date: data.date || prev.date,
       description: data.merchant || prev.description,
+      category: data.category || prev.category,
       type: "expense", // Receipts are usually expenses
     }));
   };
@@ -176,7 +177,7 @@ export const AddTransactionDialog = ({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] border-none bg-card/95 backdrop-blur-xl shadow-2xl p-0 overflow-hidden gap-0">
         <DialogHeader className="p-6 pb-2 relative">
-          <div className="absolute right-4 top-4 z-10">
+          <div className="absolute left-4 top-4 z-10">
             <ScanReceiptButton onScanComplete={handleScanComplete} />
           </div>
           <DialogTitle className="text-2xl font-bold text-center">
