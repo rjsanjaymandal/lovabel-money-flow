@@ -32,6 +32,7 @@ export function TransactionView({ userId, categories, onTransactionAdded, search
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [voiceData, setVoiceData] = useState<{ amount: string; description: string; type: "expense" | "income" } | undefined>(undefined);
+  const [monthlyBudget, setMonthlyBudget] = useState(0);
 
   const handleVoiceResult = (data: { amount: string; description: string; type: "expense" | "income" }) => {
     setVoiceData(data);
@@ -62,6 +63,17 @@ export function TransactionView({ userId, categories, onTransactionAdded, search
         .filter((t) => t.type === "expense")
         .reduce((sum, t) => sum + t.amount, 0);
       setStats({ income, expenses, balance: income - expenses });
+    }
+
+    // Fetch total budget from new budgets table
+    const { data: budgetData } = await supabase
+      .from("budgets")
+      .select("amount")
+      .eq("user_id", userId);
+
+    if (budgetData) {
+      const totalBudget = budgetData.reduce((sum, item) => sum + item.amount, 0);
+      setMonthlyBudget(totalBudget);
     }
   }, [userId, dateRange]);
 
@@ -142,6 +154,7 @@ export function TransactionView({ userId, categories, onTransactionAdded, search
           userId={userId}
           selectedMonth={selectedMonth}
           totalExpenses={stats.expenses}
+          budget={monthlyBudget}
         />
         <div className="space-y-3">
           <MonthlyLendBorrowSummary userId={userId} selectedMonth={selectedMonth} />

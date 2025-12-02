@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X } from "lucide-react";
+import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
+import { BudgetView } from "@/components/BudgetView";
 import { LendBorrowView } from "@/components/LendBorrowView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -226,6 +227,19 @@ const Dashboard = () => {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => handleTabChange("budget")}
+              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
+                activeTab === "budget" 
+                  ? "bg-background shadow-sm text-foreground scale-105" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              }`}
+            >
+              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Budget
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleTabChange("lend")}
               className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
                 activeTab === "lend" 
@@ -308,6 +322,10 @@ const Dashboard = () => {
                 setIsSearchOpen(false);
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="budget" className="mt-0 animate-slide-in">
+            <BudgetView userId={user?.id} categories={categories} />
           </TabsContent>
           
           <TabsContent value="lend" className="mt-0 animate-slide-in">

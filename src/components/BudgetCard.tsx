@@ -1,70 +1,18 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Target, Edit2, Check, X, TrendingUp, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { Target, ArrowRight, AlertCircle, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface BudgetCardProps {
   userId: string;
   selectedMonth: Date;
   totalExpenses: number;
+  budget?: number;
 }
 
-export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardProps) => {
-  const [budget, setBudget] = useState<number>(0);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState("");
-  const { toast } = useToast();
-
-  const monthKey = format(selectedMonth, "yyyy-MM-01");
-
-  useEffect(() => {
-    fetchBudget();
-  }, [userId, monthKey]);
-
-  const fetchBudget = async () => {
-    const { data } = await supabase
-      .from("monthly_budgets")
-      .select("total_budget")
-      .eq("user_id", userId)
-      .eq("month", monthKey)
-      .maybeSingle() as { data: { total_budget: number } | null };
-
-    if (data) {
-      setBudget(data.total_budget);
-    } else {
-      setBudget(0);
-    }
-  };
-
-  const saveBudget = async () => {
-    const newBudget = parseFloat(editValue);
-    if (isNaN(newBudget) || newBudget < 0) {
-      toast({ title: "Invalid budget amount", variant: "destructive" });
-      return;
-    }
-
-    const { error } = await supabase
-      .from("monthly_budgets")
-      .upsert({
-        user_id: userId,
-        month: monthKey,
-        total_budget: newBudget,
-      } as any);
-
-    if (error) {
-      toast({ title: "Failed to save budget", variant: "destructive" });
-    } else {
-      setBudget(newBudget);
-      setIsEditing(false);
-      toast({ title: "Budget saved successfully" });
-    }
-  };
-
+export const BudgetCard = ({ userId, selectedMonth, totalExpenses, budget = 0 }: BudgetCardProps) => {
+  const navigate = useNavigate();
   const percentage = budget > 0 ? (totalExpenses / budget) * 100 : 0;
   const isOverBudget = percentage > 100;
   const isNearLimit = percentage > 80 && percentage <= 100;
@@ -72,57 +20,33 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
   return (
     <Card className="border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 animate-scale-in">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <Target className="w-5 h-5 text-primary" />
-          Monthly Budget
+        <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+          <div className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" />
+            Monthly Budget
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 text-xs text-muted-foreground hover:text-primary"
+            onClick={() => navigate("/dashboard?tab=budget")}
+          >
+            Manage
+            <ArrowRight className="w-3 h-3 ml-1" />
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!isEditing ? (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                ₹{budget.toFixed(0)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Target spending</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setEditValue(budget.toString());
-                setIsEditing(true);
-              }}
-              className="hover:bg-muted rounded-full"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground">
+              ₹{budget.toFixed(0)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">Target spending</p>
           </div>
-        ) : (
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              placeholder="Enter budget"
-              className="flex-1"
-              autoFocus
-            />
-            <Button size="icon" variant="default" onClick={saveBudget} className="rounded-full">
-              <Check className="w-4 h-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsEditing(false)}
-              className="rounded-full"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+        </div>
 
-        {budget > 0 && (
+        {budget > 0 ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Spent</span>
@@ -133,6 +57,7 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
             <Progress 
               value={Math.min(percentage, 100)} 
               className="h-2"
+              indicatorClassName={isOverBudget ? "bg-destructive" : isNearLimit ? "bg-yellow-500" : "bg-primary"}
             />
             
             {isOverBudget && (
@@ -142,11 +67,18 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses }: BudgetCardP
               </div>
             )}
             {isNearLimit && !isOverBudget && (
-              <div className="flex items-center gap-2 text-xs text-accent bg-accent/10 p-2 rounded-lg">
+              <div className="flex items-center gap-2 text-xs text-yellow-600 bg-yellow-500/10 p-2 rounded-lg">
                 <TrendingUp className="w-4 h-4 flex-shrink-0" />
                 <span>Approaching budget limit</span>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="text-center py-2">
+            <p className="text-sm text-muted-foreground mb-2">No budget set for this month</p>
+            <Button variant="outline" size="sm" onClick={() => navigate("/dashboard?tab=budget")}>
+              Set Budget
+            </Button>
           </div>
         )}
       </CardContent>

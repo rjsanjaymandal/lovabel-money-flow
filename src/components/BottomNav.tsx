@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Receipt, HandCoins, LayoutGrid, User } from "lucide-react";
+import { Receipt, HandCoins, LayoutGrid, User, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
@@ -22,6 +22,7 @@ export function BottomNav() {
   const currentTab = searchParams.get('tab') || 'spend';
 
   const isSpend = location.pathname === "/dashboard" && currentTab === "spend";
+  const isBudget = location.pathname === "/dashboard" && currentTab === "budget";
   const isLend = location.pathname === "/dashboard" && currentTab === "lend";
   const isTransactionsPage = location.pathname === "/transactions";
   const isLendBorrowPage = location.pathname === "/lend-borrow";
@@ -39,6 +40,12 @@ export function BottomNav() {
       label: "Spends",
       isActive: isSpend,
       onClick: () => navigate("/dashboard?tab=spend"),
+    },
+    {
+      icon: Target,
+      label: "Budget",
+      isActive: isBudget,
+      onClick: () => navigate("/dashboard?tab=budget"),
     },
     {
       icon: HandCoins,
