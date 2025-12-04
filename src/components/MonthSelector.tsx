@@ -30,7 +30,7 @@ export const MonthSelector = ({ selectedMonth, onMonthChange }: MonthSelectorPro
       </Button>
       
       <div className="flex flex-col items-center flex-1">
-        <h2 className="text-base sm:text-xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+        <h2 className="text-base sm:text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-accent bg-clip-text text-transparent">
           {format(selectedMonth, "MMMM yyyy")}
         </h2>
         {isCurrentMonth && (

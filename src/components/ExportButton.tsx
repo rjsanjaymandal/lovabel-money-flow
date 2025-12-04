@@ -25,9 +25,11 @@ interface ExportButtonProps {
   selectedMonth: Date;
   income: number;
   expenses: number;
+  className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
-export const ExportButton = ({ transactions, selectedMonth, income, expenses }: ExportButtonProps) => {
+export const ExportButton = ({ transactions, selectedMonth, income, expenses, className, variant = "outline" }: ExportButtonProps) => {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
@@ -116,10 +118,10 @@ export const ExportButton = ({ transactions, selectedMonth, income, expenses }: 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant={variant}
           size="sm"
           disabled={isExporting || transactions.length === 0}
-          className="gap-2 hover:bg-muted transition-all hover:scale-105"
+          className={`gap-2 hover:bg-muted transition-all hover:scale-105 ${className}`}
         >
           <Download className="w-4 h-4" />
           <span className="hidden sm:inline">Export</span>

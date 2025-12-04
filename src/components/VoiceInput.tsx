@@ -6,9 +6,11 @@ import { parseVoiceInput, VoiceData } from "@/utils/voiceParser";
 
 interface VoiceInputProps {
   onResult: (data: VoiceData) => void;
+  className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
-export function VoiceInput({ onResult }: VoiceInputProps) {
+export function VoiceInput({ onResult, className, variant = "outline" }: VoiceInputProps) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -83,12 +85,12 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
   return (
     <Button
       type="button"
-      variant={isListening ? "destructive" : "outline"}
+      variant={isListening ? "destructive" : variant}
       size="icon"
       onClick={toggleListening}
       className={`rounded-full transition-all duration-300 ${
         isListening ? "animate-pulse scale-110 shadow-lg shadow-red-500/20" : "hover:bg-primary/10 hover:text-primary"
-      }`}
+      } ${className}`}
       title="Tap to Speak"
     >
       {isProcessing ? (

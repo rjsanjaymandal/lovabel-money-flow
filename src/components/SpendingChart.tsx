@@ -60,49 +60,51 @@ export const SpendingChart = ({ userId, selectedMonth }: { userId: string; selec
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+        <defs>
+          <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="#10b981" stopOpacity={0.2}/>
+          </linearGradient>
+          <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.2}/>
+          </linearGradient>
+        </defs>
         <XAxis 
           dataKey="category" 
           angle={-45} 
           textAnchor="end" 
           height={80} 
           fontSize={10} 
-          tick={{ fill: 'hsl(var(--muted-foreground))' }}
+          tick={{ fill: '#64748b' }}
           axisLine={false}
           tickLine={false}
-        />
-        <YAxis 
-          fontSize={10} 
-          tick={{ fill: 'hsl(var(--muted-foreground))' }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={(value) => `₹${value}`}
         />
         <Tooltip
-          cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
+          cursor={{ fill: 'transparent' }}
           contentStyle={{
-            backgroundColor: "hsl(var(--card)/0.9)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid hsl(var(--border)/0.5)",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            backgroundColor: "rgba(0,0,0,0.8)",
+            backdropFilter: "blur(12px)",
+            border: "none",
+            borderRadius: "16px",
+            color: "#fff",
+            padding: "12px"
           }}
           itemStyle={{ fontSize: '12px', fontWeight: 500 }}
         />
-        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
         <Bar 
           dataKey="income" 
-          fill="#10b981" 
+          fill="url(#incomeGradient)" 
           name="Income" 
-          radius={[4, 4, 0, 0]} 
-          maxBarSize={40}
+          radius={[8, 8, 8, 8]} 
+          maxBarSize={32}
         />
         <Bar 
           dataKey="expense" 
-          fill="#f43f5e" 
+          fill="url(#expenseGradient)" 
           name="Expenses" 
-          radius={[4, 4, 0, 0]} 
-          maxBarSize={40}
+          radius={[8, 8, 8, 8]} 
+          maxBarSize={32}
         />
       </BarChart>
     </ResponsiveContainer>

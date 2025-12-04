@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+// Force rebuild
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -341,6 +342,7 @@ const Dashboard = () => {
           <TabsContent value="spend" className="mt-0 animate-slide-in">
             <TransactionView 
               userId={user?.id}
+              user={user} // Pass user object
               categories={categories}
               onTransactionAdded={() => {}}
               searchQuery={searchQuery}

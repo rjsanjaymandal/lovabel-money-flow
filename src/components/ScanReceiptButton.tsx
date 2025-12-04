@@ -7,9 +7,10 @@ import { useToast } from "@/hooks/use-toast";
 interface ScanReceiptButtonProps {
   onScanComplete: (data: ScannedReceiptData) => void;
   className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
-export function ScanReceiptButton({ onScanComplete, className }: ScanReceiptButtonProps) {
+export function ScanReceiptButton({ onScanComplete, className, variant = "outline" }: ScanReceiptButtonProps) {
   const [isScanning, setIsScanning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -53,7 +54,7 @@ export function ScanReceiptButton({ onScanComplete, className }: ScanReceiptButt
       />
       <Button
         type="button"
-        variant="outline"
+        variant={variant}
         size="icon"
         className={`rounded-full ${className}`}
         onClick={() => fileInputRef.current?.click()}

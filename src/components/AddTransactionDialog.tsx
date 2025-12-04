@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -155,6 +155,13 @@ export const AddTransactionDialog = ({
 
       if (error) throw error;
       
+      toast({
+        title: "Saved!",
+        description: `${formData.type === "expense" ? "Expense" : "Income"} of ₹${formData.amount} added.`,
+        className: "bg-emerald-500 text-white border-none",
+      });
+
+      setOpen(false);
       if (onSuccess) onSuccess();
     } catch (error: any) {
       const message = error.message.includes("Amount") 
@@ -182,6 +189,9 @@ export const AddTransactionDialog = ({
           <DialogTitle className="text-2xl font-bold text-center">
             {formData.type === "expense" ? "New Expense" : "New Income"}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Enter the details of your new {formData.type}.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-0">
