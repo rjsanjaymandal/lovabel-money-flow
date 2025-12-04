@@ -272,6 +272,7 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
             income={stats.income}
             expenses={stats.expenses}
             transactions={transactions}
+            budget={monthlyBudget}
           />
         </div>
       </div>

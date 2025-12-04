@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sparkles, Send, Bot, User, Trash2, RefreshCw } from "lucide-react";
-import { format } from "date-fns";
+import { format, subDays, isSameDay, isAfter, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 
 interface AIInsightsProps {
   userId: string;
@@ -13,6 +13,7 @@ interface AIInsightsProps {
   income: number;
   expenses: number;
   transactions: any[];
+  budget?: number; // New prop
   userName?: string;
 }
 
@@ -23,13 +24,29 @@ interface Message {
 }
 
 const SUGGESTED_PROMPTS = [
+  "How much budget left?",
+  "Spending yesterday?",
   "Where did my money go?",
-  "How much did I save?",
-  "Spending on Food?",
-  "Highest expense?",
+  "Any savings?",
 ];
 
-// Helper to find category with fuzzy matching
+// --- 1. Expanded Dictionary (The "Brain") ---
+const CATEGORY_ALIASES: Record<string, string[]> = {
+  "food": ["groceries", "dining", "restaurants", "eating out", "swiggy", "zomato", "snacks", "lunch", "dinner", "breakfast", "coffee", "cafe", "drinks", "bar", "pizza", "burger"],
+  "transport": ["transportation", "uber", "ola", "rapido", "taxi", "cab", "fuel", "gas", "petrol", "diesel", "bus", "train", "metro", "flight", "ticket", "travel"],
+  "shopping": ["clothing", "clothes", "apparel", "myntra", "ajio", "amazon", "flipkart", "electronics", "gadgets", "shoes", "accessories", "mall"],
+  "bills": ["utilities", "rent", "internet", "wifi", "broadband", "phone", "recharge", "mobile", "electricity", "water", "gas bill", "maintenance"],
+  "entertainment": ["movies", "cinema", "bookmyshow", "netflix", "prime", "hotstar", "spotify", "games", "steam", "playstation", "xbox", "fun", "outing"],
+  "health": ["medical", "doctor", "medicine", "pharmacy", "gym", "fitness", "yoga", "hospital", "checkup"],
+  "education": ["fees", "tuition", "books", "course", "learning", "school", "college", "udemy", "coursera"],
+};
+
+// --- 2. Helper Functions ---
+
+const getRandomResponse = (responses: string[]) => {
+  return responses[Math.floor(Math.random() * responses.length)];
+};
+
 const findCategory = (query: string, categories: string[]) => {
   const lowerQuery = query.toLowerCase();
   
@@ -37,32 +54,58 @@ const findCategory = (query: string, categories: string[]) => {
   const direct = categories.find(c => lowerQuery.includes(c.toLowerCase()));
   if (direct) return direct;
 
-  // Common aliases
-  const aliases: Record<string, string[]> = {
-    "food": ["groceries", "dining", "restaurants", "food", "eating out"],
-    "transport": ["transportation", "uber", "taxi", "fuel", "gas", "bus", "train"],
-    "shopping": ["clothing", "clothes", "electronics", "gadgets", "amazon"],
-    "bills": ["utilities", "rent", "internet", "phone", "electricity", "water"],
-    "entertainment": ["movies", "games", "netflix", "subscriptions", "fun"],
-  };
-
-  for (const [key, values] of Object.entries(aliases)) {
-    if (lowerQuery.includes(key)) {
-      // Find the first matching category in the user's actual categories
-      const match = categories.find(c => values.some(v => c.toLowerCase().includes(v)));
+  // Fuzzy match using aliases
+  for (const [key, values] of Object.entries(CATEGORY_ALIASES)) {
+    if (lowerQuery.includes(key) || values.some(v => lowerQuery.includes(v))) {
+      // Find the first matching category in the user's actual categories that matches the key or alias
+      // This is a bit tricky: we map "swiggy" -> "food", but user might have "Dining" or "Groceries".
+      // We try to find a category that contains the key (e.g. "Food") or is commonly associated.
+      
+      // Simple heuristic: check if any user category contains the key
+      const match = categories.find(c => c.toLowerCase().includes(key));
       if (match) return match;
+      
+      // Fallback: check if any user category matches any alias (less likely but possible)
+      const aliasMatch = categories.find(c => values.some(v => c.toLowerCase().includes(v)));
+      if (aliasMatch) return aliasMatch;
     }
   }
   
   return null;
 };
 
-export const AIInsights = ({ userId, selectedMonth, income, expenses, transactions, userName = "Friend" }: AIInsightsProps) => {
+const filterTransactionsByTime = (transactions: any[], query: string) => {
+  const lowerQuery = query.toLowerCase();
+  const today = new Date();
+
+  if (lowerQuery.includes("yesterday")) {
+    const yesterday = subDays(today, 1);
+    return transactions.filter(t => isSameDay(new Date(t.date), yesterday));
+  }
+  
+  if (lowerQuery.includes("today")) {
+    return transactions.filter(t => isSameDay(new Date(t.date), today));
+  }
+
+  if (lowerQuery.includes("last week")) {
+    const lastWeekStart = startOfWeek(subWeeks(today, 1));
+    const lastWeekEnd = endOfWeek(subWeeks(today, 1));
+    return transactions.filter(t => {
+      const d = new Date(t.date);
+      return isAfter(d, lastWeekStart) && d < lastWeekEnd; // Rough check
+    });
+  }
+
+  // Default: Return all (current month context)
+  return transactions;
+};
+
+export const AIInsights = ({ userId, selectedMonth, income, expenses, transactions, budget = 0, userName = "Friend" }: AIInsightsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
-      content: `Hi ${userName}! I'm your AI Financial Advisor. 🤖\n\nI can analyze your spending for ${format(selectedMonth, 'MMMM yyyy')}. Ask me anything!`,
+      content: `Hi ${userName}! I'm your upgraded AI Financial Advisor. 🧠\n\nI can analyze your budget, track specific days (like "yesterday"), and understand more categories. Try me!`,
       timestamp: new Date(),
     },
   ]);
@@ -79,22 +122,54 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
   const clearChat = () => {
     setMessages([{
       role: "ai",
-      content: `Chat cleared! Ready for new questions. 🧹`,
+      content: `Memory wiped! 🧹 Ready for a fresh start.`,
       timestamp: new Date(),
     }]);
   };
 
   const analyzeRequest = (query: string) => {
     const lowerQuery = query.toLowerCase();
-    let response = "I'm not sure about that yet. 🤔 Try asking about your spending breakdown, savings, or specific categories.";
+    
+    // 1. Time Filtering
+    const relevantTransactions = filterTransactionsByTime(transactions, query);
+    const isTimeSpecific = relevantTransactions.length !== transactions.length;
+    const timeContext = lowerQuery.includes("yesterday") ? "yesterday" : lowerQuery.includes("last week") ? "last week" : "this month";
 
     try {
       const categories = [...new Set(transactions.map(t => t.category || ""))].filter(Boolean);
 
-      // 1. Spending Breakdown (Top 3)
+      // --- Intent: Budget Check ---
+      if (lowerQuery.includes("budget") || (lowerQuery.includes("safe") && lowerQuery.includes("spend"))) {
+        if (budget === 0) {
+          return "You haven't set a budget yet! Go to the Budget tab to set one up. 🎯";
+        }
+        const remaining = budget - expenses;
+        const percentUsed = (expenses / budget) * 100;
+        
+        if (remaining > 0) {
+          if (percentUsed > 80) {
+            return getRandomResponse([
+              `⚠️ Careful! You have **₹${remaining.toLocaleString()}** left. You've used ${percentUsed.toFixed(0)}% of your budget.`,
+              `Tight squeeze! Only **₹${remaining.toLocaleString()}** remaining. Watch your spending!`,
+            ]);
+          } else {
+            return getRandomResponse([
+              `You're safe! ✅ You have **₹${remaining.toLocaleString()}** left to spend.`,
+              `Green light! 🟢 **₹${remaining.toLocaleString()}** remaining in your budget.`,
+            ]);
+          }
+        } else {
+          return getRandomResponse([
+            `🚨 Alert! You're over budget by **₹${Math.abs(remaining).toLocaleString()}**.`,
+            `Stop spending! 🛑 You've exceeded your budget by **₹${Math.abs(remaining).toLocaleString()}**.`,
+          ]);
+        }
+      }
+
+      // --- Intent: Spending Breakdown ---
       if (lowerQuery.includes("breakdown") || lowerQuery.includes("where") || lowerQuery.includes("go")) {
         const categoryTotals: Record<string, number> = {};
-        transactions.filter(t => t.type === "expense").forEach(t => {
+        relevantTransactions.filter(t => t.type === "expense").forEach(t => {
           categoryTotals[t.category] = (categoryTotals[t.category] || 0) + Number(t.amount);
         });
 
@@ -104,86 +179,81 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
 
         if (sorted.length > 0) {
           const list = sorted.map(([cat, amount]) => `• **${cat}**: ₹${amount.toLocaleString()}`).join("\n");
-          response = `Here's where most of your money went:\n\n${list}`;
+          return `Here's your top spending for ${timeContext}:\n\n${list}`;
         } else {
-          response = "You haven't spent anything yet! 🎉";
+          return `No spending recorded for ${timeContext}. Good job? 🤷‍♂️`;
         }
       }
 
-      // 2. Savings Analysis
-      else if (lowerQuery.includes("save") || lowerQuery.includes("savings")) {
+      // --- Intent: Savings Analysis ---
+      if (lowerQuery.includes("save") || lowerQuery.includes("savings")) {
         const savings = income - expenses;
         const savingsRate = income > 0 ? (savings / income) * 100 : 0;
         
         if (savings > 0) {
-          response = `You've saved **₹${savings.toLocaleString()}** this month! 💰\nThat's a **${savingsRate.toFixed(1)}%** savings rate. Keep it up!`;
-        } else if (savings < 0) {
-          response = `You've overspent by **₹${Math.abs(savings).toLocaleString()}** this month. 📉\nTry to cut back on discretionary spending.`;
+          return getRandomResponse([
+            `You're a saver! 💰 **₹${savings.toLocaleString()}** saved (${savingsRate.toFixed(1)}%). High five! ✋`,
+            `Nest egg growing! 🥚 You've saved **₹${savings.toLocaleString()}** this month.`,
+          ]);
         } else {
-          response = "You've broken even this month. No savings yet, but no debt either! ⚖️";
+          return `No savings right now. You're down by **₹${Math.abs(savings).toLocaleString()}**. Time to tighten the belt! 📉`;
         }
       }
 
-      // 3. Category Spending (Fuzzy Match)
-      else if (lowerQuery.includes("spend") || lowerQuery.includes("much") || lowerQuery.includes("cost")) {
+      // --- Intent: Category Spending (Fuzzy) ---
+      if (lowerQuery.includes("spend") || lowerQuery.includes("much") || lowerQuery.includes("cost") || lowerQuery.includes("on")) {
         const foundCategory = findCategory(query, categories);
 
         if (foundCategory) {
-          const total = transactions
+          const total = relevantTransactions
             .filter(t => t.category === foundCategory && t.type === "expense")
             .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
           
-          const count = transactions.filter(t => t.category === foundCategory && t.type === "expense").length;
-          const avg = count > 0 ? total / count : 0;
+          const count = relevantTransactions.filter(t => t.category === foundCategory && t.type === "expense").length;
 
-          response = `You spent **₹${total.toLocaleString()}** on **${foundCategory}** across ${count} transactions.\nAverage per transaction: ₹${avg.toFixed(0)}.`;
-        } else {
-          response = "I couldn't find that specific category. Try asking for a 'breakdown' to see your top categories.";
+          if (total === 0) {
+            return `You haven't spent anything on **${foundCategory}** ${timeContext}. Nice! 👏`;
+          }
+          return `You spent **₹${total.toLocaleString()}** on **${foundCategory}** ${timeContext} (${count} transactions).`;
         }
       }
 
-      // 4. Highest Expense
-      else if (lowerQuery.includes("highest") || lowerQuery.includes("biggest") || lowerQuery.includes("most expensive")) {
-        const expenseTxns = transactions.filter(t => t.type === "expense");
+      // --- Intent: Highest Expense ---
+      if (lowerQuery.includes("highest") || lowerQuery.includes("biggest")) {
+        const expenseTxns = relevantTransactions.filter(t => t.type === "expense");
         if (expenseTxns.length > 0) {
           const highest = expenseTxns.reduce((prev, current) => ((Number(prev.amount) || 0) > (Number(current.amount) || 0)) ? prev : current);
-          response = `Your biggest purchase was **₹${highest.amount.toLocaleString()}** for "${highest.description || highest.category}" on ${format(new Date(highest.date), 'MMM d')}. 💸`;
+          return `Biggest hit: **₹${highest.amount.toLocaleString()}** for "${highest.description || highest.category}" on ${format(new Date(highest.date), 'MMM d')}. 💸`;
         } else {
-          response = "No expenses recorded yet.";
+          return "No big expenses found.";
         }
       }
 
-      // 5. Transaction Counts
-      else if (lowerQuery.includes("how many") || lowerQuery.includes("times")) {
+      // --- Intent: Transaction Counts ---
+      if (lowerQuery.includes("how many") || lowerQuery.includes("times")) {
         const foundCategory = findCategory(query, categories);
         if (foundCategory) {
-           const count = transactions.filter(t => t.category === foundCategory).length;
-           response = `You had **${count}** transactions in **${foundCategory}** this month.`;
-        } else {
-           response = `You've had a total of **${transactions.length}** transactions this month.`;
+           const count = relevantTransactions.filter(t => t.category === foundCategory).length;
+           return `You visited **${foundCategory}** **${count}** times ${timeContext}.`;
         }
       }
 
-      // 6. Total Income/Expense
-      else if (lowerQuery.includes("income") || lowerQuery.includes("earned")) {
-        response = `Total Income: **₹${income.toLocaleString()}** 📈`;
-      }
-      else if (lowerQuery.includes("expense") || lowerQuery.includes("spent") || lowerQuery.includes("total")) {
-        response = `Total Expenses: **₹${expenses.toLocaleString()}** 📉`;
+      // --- Intent: General Balance ---
+      if (lowerQuery.includes("balance") || lowerQuery.includes("left")) {
+        const balance = income - expenses;
+        return `Balance: **₹${balance.toLocaleString()}**. ${balance > 0 ? "Keep it green! 💚" : "In the red! 🔴"}`;
       }
 
-      // 7. Balance
-      else if (lowerQuery.includes("balance") || lowerQuery.includes("left")) {
-        const balance = income - expenses;
-        response = `Current Balance: **₹${balance.toLocaleString()}** 🏦\n${balance > 0 ? "Looking good! 🌟" : "Careful, you're in the red. ⚠️"}`;
-      }
+      // Fallback
+      return getRandomResponse([
+        "I'm smart, but I didn't catch that. Try asking about 'budget', 'savings', or specific categories like 'swiggy'.",
+        "Hmm, not sure. Ask me 'Where did my money go?' or 'How much budget left?'",
+      ]);
 
     } catch (err) {
       console.error("Error in analyzeRequest:", err);
-      response = "My brain short-circuited! ⚡ Please try asking something simpler.";
+      return "My circuits are fried! ⚡ Try a simpler question.";
     }
-
-    return response;
   };
 
   const handleSendMessage = async (text: string) => {
@@ -194,13 +264,14 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI thinking delay
+    // Simulate AI thinking delay (randomized)
+    const delay = Math.floor(Math.random() * 500) + 800; // 800-1300ms
     setTimeout(() => {
       const aiResponse = analyzeRequest(text);
       const aiMsg: Message = { role: "ai", content: aiResponse, timestamp: new Date() };
       setMessages(prev => [...prev, aiMsg]);
       setIsTyping(false);
-    }, 800);
+    }, delay);
   };
 
   return (
