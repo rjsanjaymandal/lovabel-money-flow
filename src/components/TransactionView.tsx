@@ -16,6 +16,7 @@ import { VoiceInput } from "@/components/VoiceInput";
 import { ScanReceiptButton } from "@/components/ScanReceiptButton";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { ModeToggle } from "@/components/mode-toggle";
+import { ZenBackground } from "@/components/ZenBackground";
 
 import { SearchResults } from "@/components/SearchResults";
 
@@ -117,8 +118,11 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
     );
   }
 
+
+
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in pb-24 sm:pb-24 px-4 sm:px-0 h-auto flex flex-col sm:block">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in pb-24 sm:pb-24 px-4 sm:px-0 h-auto flex flex-col sm:block relative z-10">
+      <ZenBackground />
       {/* Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2 px-0 sm:px-0 shrink-0">
         <div className="space-y-1">
@@ -228,6 +232,8 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
               expenses={stats.expenses}
             />
           </div>
+
+
 
           {/* Spending Graph - Zen Style (Now visible on mobile, Order 1) */}
           <div className="order-1 sm:order-none mb-6 sm:mb-0 rounded-3xl bg-card/40 border border-white/10 p-6 backdrop-blur-xl shadow-xl">
