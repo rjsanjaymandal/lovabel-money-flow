@@ -40,8 +40,12 @@ function FloatingShape({ position, color, speed, rotationIntensity, floatIntensi
 
 export function ZenBackground() {
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
-      <Canvas camera={{ position: [0, 0, 10], fov: 50 }} dpr={[1, 2]}>
+    <div className="fixed inset-0 -z-10 pointer-events-none">
+      <Canvas 
+        camera={{ position: [0, 0, 10], fov: 50 }} 
+        dpr={[1, 2]}
+        style={{ pointerEvents: 'none' }}
+      >
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0.5} />
         
