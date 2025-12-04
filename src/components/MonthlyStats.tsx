@@ -1,12 +1,14 @@
 import { TrendingUp, TrendingDown, Wallet, ArrowUpDown } from "lucide-react";
+import { ThreeDCard } from "@/components/ThreeDCard";
 
 interface MonthlyStatsProps {
   income: number;
   expenses: number;
   balance: number;
+  userName?: string;
 }
 
-export const MonthlyStats = ({ income, expenses, balance }: MonthlyStatsProps) => {
+export const MonthlyStats = ({ income, expenses, balance, userName = "Friend" }: MonthlyStatsProps) => {
   const stats = [
     {
       label: "Income",
@@ -39,49 +41,33 @@ export const MonthlyStats = ({ income, expenses, balance }: MonthlyStatsProps) =
 
   return (
     <>
-      {/* Mobile View: Single Wallet Card */}
-      <div className="sm:hidden">
-        <div className="relative overflow-hidden rounded-[2rem] p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background text-foreground shadow-2xl shadow-primary/5 border border-border/50 backdrop-blur-xl">
-          {/* Background Effects */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/10 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none" />
-          
-          <div className="relative z-10 space-y-6">
-            <div className="flex items-center justify-between opacity-80">
-              <span className="text-sm font-medium tracking-wide">Total Balance</span>
-              <Wallet className="w-5 h-5 text-primary" />
-            </div>
-            
-            <div className="space-y-1">
-              <h2 className="text-4xl font-bold tracking-tight text-primary">
-                ₹{balance.toLocaleString()}
-              </h2>
-              <p className="text-sm font-medium text-muted-foreground">
-                {balance >= 0 ? "You're doing great!" : "Watch your spending."}
-              </p>
-            </div>
+      {/* Mobile View: 3D Card & Stats */}
+      <div className="sm:hidden space-y-6">
+        {/* 3D Credit Card */}
+        <div className="rounded-[2rem] overflow-hidden bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-white/10 shadow-2xl">
+          <ThreeDCard balance={balance} name={userName} />
+        </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="space-y-1 p-3 rounded-2xl bg-card/50 backdrop-blur-md border border-border/50 shadow-sm">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <div className="p-1 rounded-full bg-emerald-500/10">
-                    <TrendingUp className="w-3 h-3" />
-                  </div>
-                  <span className="text-xs font-medium uppercase tracking-wider opacity-80">Income</span>
-                </div>
-                <p className="text-lg font-semibold">₹{income.toLocaleString()}</p>
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1 p-4 rounded-2xl bg-card/50 backdrop-blur-md border border-border/50 shadow-sm">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <div className="p-1.5 rounded-full bg-emerald-500/10">
+                <TrendingUp className="w-3.5 h-3.5" />
               </div>
-              
-              <div className="space-y-1 p-3 rounded-2xl bg-card/50 backdrop-blur-md border border-border/50 shadow-sm">
-                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                  <div className="p-1 rounded-full bg-rose-500/10">
-                    <TrendingDown className="w-3 h-3" />
-                  </div>
-                  <span className="text-xs font-medium uppercase tracking-wider opacity-80">Expense</span>
-                </div>
-                <p className="text-lg font-semibold">₹{expenses.toLocaleString()}</p>
-              </div>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-80">Income</span>
             </div>
+            <p className="text-lg font-bold mt-1">₹{income.toLocaleString()}</p>
+          </div>
+          
+          <div className="space-y-1 p-4 rounded-2xl bg-card/50 backdrop-blur-md border border-border/50 shadow-sm">
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+              <div className="p-1.5 rounded-full bg-rose-500/10">
+                <TrendingDown className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-80">Expense</span>
+            </div>
+            <p className="text-lg font-bold mt-1">₹{expenses.toLocaleString()}</p>
           </div>
         </div>
       </div>

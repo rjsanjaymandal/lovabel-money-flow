@@ -147,6 +147,7 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
         income={stats.income}
         expenses={stats.expenses}
         balance={stats.balance}
+        userName={userName}
       />
 
       {/* Mobile Actions (Inline - Like Desktop) */}
