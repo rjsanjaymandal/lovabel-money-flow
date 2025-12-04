@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CategoryBudgetCard } from "./CategoryBudgetCard";
 import { SetBudgetDialog } from "./SetBudgetDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { ThreeDEnergyCore } from "@/components/ThreeDEnergyCore";
 
 interface BudgetViewProps {
   userId: string;
@@ -114,45 +115,8 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
         </CardHeader>
         <CardContent className="p-4 sm:p-6 relative z-10">
           <div className="flex flex-col items-center justify-center py-2 sm:py-4">
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center">
-              {/* Circular Progress Background */}
-              <svg className="w-full h-full transform -rotate-90 drop-shadow-2xl">
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="42%"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="8%"
-                  className="text-white/10"
-                />
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="42%"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="8%"
-                  strokeDasharray={2 * Math.PI * 42} 
-                  strokeDashoffset={0}
-                  pathLength={100}
-                  className="transition-all duration-1000 ease-out"
-                  strokeLinecap="round"
-                  style={{
-                    strokeDasharray: 100,
-                    strokeDashoffset: 100 - Math.min(percentage, 100),
-                    filter: "drop-shadow(0 0 8px rgba(255,255,255,0.5))"
-                  }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl sm:text-6xl font-bold tracking-tighter text-white drop-shadow-sm">
-                  {percentage.toFixed(0)}<span className="text-2xl sm:text-3xl opacity-60">%</span>
-                </span>
-                <span className="text-sm sm:text-base text-white/70 font-medium mt-1 uppercase tracking-wider">
-                  Used
-                </span>
-              </div>
+            <div className="relative w-full h-80 flex items-center justify-center -my-8">
+              <ThreeDEnergyCore budget={totalBudget} spent={totalSpent} />
             </div>
             
             <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full mt-8">

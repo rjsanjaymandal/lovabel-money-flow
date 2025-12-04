@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, format } from "date-fns";
 
 export function StreakCounter({ userId }: { userId: string }) {
   const [streak, setStreak] = useState(0);
@@ -37,14 +37,16 @@ export function StreakCounter({ userId }: { userId: string }) {
           newStreak = 1;
           shouldUpdate = true;
         } else {
-          const daysDiff = differenceInCalendarDays(today, lastActivity);
+          // Compare local dates strings to avoid timezone issues
+          const isSameDay = today.toDateString() === lastActivity.toDateString();
+          const isYesterday = differenceInCalendarDays(today, lastActivity) === 1;
 
-          if (daysDiff === 0) {
+          if (isSameDay) {
             // Already active today, do nothing
             setStreak(newStreak);
             setLoading(false);
             return;
-          } else if (daysDiff === 1) {
+          } else if (isYesterday) {
             // Consecutive day
             newStreak += 1;
             shouldUpdate = true;
@@ -71,7 +73,8 @@ export function StreakCounter({ userId }: { userId: string }) {
             .upsert({
               user_id: userId,
               current_streak: newStreak,
-              last_activity_date: today.toISOString(),
+              // Store as YYYY-MM-DD to avoid time/timezone ambiguity
+              last_activity_date: format(today, 'yyyy-MM-dd'),
               longest_streak: Math.max(newStreak, stats?.longest_streak || 0),
               updated_at: new Date().toISOString(),
             });

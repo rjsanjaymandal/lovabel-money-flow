@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { SplitBillDialog } from "@/components/SplitBillDialog";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
+import { ThreeDCoins } from "@/components/ThreeDCoins";
 
 const amountSchema = z.number()
   .positive({ message: "Amount must be greater than zero" })
@@ -116,30 +117,40 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
         <Card className="border-none shadow-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardContent className="p-4 sm:p-5 relative">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 rounded-full bg-emerald-500/20 text-emerald-500">
-                <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-xs sm:text-sm font-medium text-muted-foreground">You're Owed</span>
+            <div className="absolute inset-x-0 -top-4 opacity-80">
+              <ThreeDCoins type="lent" />
             </div>
-            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-500">
-              ₹{stats.totalOwedToYou.toLocaleString()}
-            </p>
+            <div className="relative pt-16">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-full bg-emerald-500/20 text-emerald-500">
+                  <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">You're Owed</span>
+              </div>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-500">
+                ₹{stats.totalOwedToYou.toLocaleString()}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
         <Card className="border-none shadow-lg bg-gradient-to-br from-rose-500/10 to-rose-500/5 backdrop-blur-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardContent className="p-4 sm:p-5 relative">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 rounded-full bg-rose-500/20 text-rose-500">
-                <ArrowDownLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-xs sm:text-sm font-medium text-muted-foreground">You Owe</span>
+            <div className="absolute inset-x-0 -top-4 opacity-80">
+              <ThreeDCoins type="borrowed" />
             </div>
-            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-rose-500">
-              ₹{stats.totalYouOwe.toLocaleString()}
-            </p>
+            <div className="relative pt-16">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-full bg-rose-500/20 text-rose-500">
+                  <ArrowDownLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">You Owe</span>
+              </div>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-rose-500">
+                ₹{stats.totalYouOwe.toLocaleString()}
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Target, ArrowRight, AlertCircle, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ThreeDBudgetRing } from "@/components/ThreeDBudgetRing";
 
 interface BudgetCardProps {
   userId: string;
@@ -47,21 +47,29 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses, budget = 0 }:
         </div>
 
         {budget > 0 ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Spent</span>
-              <span className={`font-semibold ${isOverBudget ? "text-destructive" : "text-foreground"}`}>
-                ₹{totalExpenses.toFixed(0)} ({percentage.toFixed(0)}%)
-              </span>
+          <div className="space-y-4">
+            {/* 3D Ring Visualization */}
+            <div className="-my-4">
+              <ThreeDBudgetRing budget={budget} spent={totalExpenses} />
             </div>
-            <Progress 
-              value={Math.min(percentage, 100)} 
-              className="h-2"
-              indicatorClassName={isOverBudget ? "bg-destructive" : isNearLimit ? "bg-yellow-500" : "bg-primary"}
-            />
+            
+            <div className="flex items-center justify-between text-sm px-2">
+              <div className="space-y-1">
+                <span className="text-muted-foreground text-xs">Spent</span>
+                <p className={`font-bold ${isOverBudget ? "text-destructive" : "text-foreground"}`}>
+                  ₹{totalExpenses.toFixed(0)}
+                </p>
+              </div>
+              <div className="space-y-1 text-right">
+                <span className="text-muted-foreground text-xs">Remaining</span>
+                <p className="font-bold text-foreground">
+                  ₹{Math.max(0, budget - totalExpenses).toFixed(0)}
+                </p>
+              </div>
+            </div>
             
             {isOverBudget && (
-              <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded-lg">
+              <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded-lg animate-pulse">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>Over budget by ₹{(totalExpenses - budget).toFixed(0)}</span>
               </div>
