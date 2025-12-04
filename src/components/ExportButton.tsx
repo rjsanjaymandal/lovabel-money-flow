@@ -121,10 +121,10 @@ export const ExportButton = ({ transactions, selectedMonth, income, expenses, cl
           variant={variant}
           size="sm"
           disabled={isExporting || transactions.length === 0}
-          className={`gap-2 hover:bg-muted transition-all hover:scale-105 ${className}`}
+          className={`gap-2 h-12 px-4 rounded-2xl border-border/50 text-foreground hover:text-primary hover:bg-primary/5 transition-all hover:scale-105 ${className}`}
         >
           <Download className="w-4 h-4" />
-          <span className="hidden sm:inline">Export</span>
+          <span className="hidden sm:inline font-medium">Export</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

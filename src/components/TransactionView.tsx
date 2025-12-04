@@ -214,7 +214,11 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
                   Add Transaction
                 </Button>
               </AddTransactionDialog>
-              <VoiceInput onResult={handleVoiceResult} />
+              <VoiceInput 
+                onResult={handleVoiceResult} 
+                variant="outline"
+                className="h-12 w-12 rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm"
+              />
             </div>
             <ExportButton
               transactions={transactions}

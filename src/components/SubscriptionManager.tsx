@@ -78,13 +78,13 @@ export const SubscriptionManager = ({ userId, onTransactionAdded }: { userId: st
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2 h-auto py-3 px-4 rounded-xl border-dashed border-2 hover:border-primary/50 hover:bg-primary/5">
-          <div className="p-2 rounded-full bg-primary/10 text-primary">
+        <Button variant="outline" className="w-full justify-start gap-3 h-auto py-4 px-5 rounded-2xl border-dashed border-2 border-border/60 hover:border-primary/50 hover:bg-primary/5 text-foreground hover:text-foreground group transition-all">
+          <div className="p-2.5 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
             <CreditCard className="w-5 h-5" />
           </div>
           <div className="text-left">
-            <p className="font-semibold">Manage Subscriptions</p>
-            <p className="text-xs text-muted-foreground">{subscriptions.length} active</p>
+            <p className="font-semibold text-base">Manage Subscriptions</p>
+            <p className="text-xs text-muted-foreground font-medium">{subscriptions.length} active</p>
           </div>
         </Button>
       </DialogTrigger>
