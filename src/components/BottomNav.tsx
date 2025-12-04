@@ -41,7 +41,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-6 left-4 right-4 z-50 sm:hidden">
-      <div className="glass-panel rounded-2xl p-2 flex items-center justify-between shadow-2xl shadow-primary/10 border border-white/20 backdrop-blur-2xl bg-white/80">
+      <div className="glass-panel rounded-2xl p-2 flex items-center justify-between shadow-2xl shadow-primary/10">
         {navItems.map((item, index) => (
           <button
             key={index}
@@ -49,7 +49,7 @@ export function BottomNav() {
             className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl group ${
               item.isActive
                 ? "text-primary"
-                : "text-muted-foreground hover:bg-black/5"
+                : "text-muted-foreground hover:bg-muted"
             }`}
           >
             {item.isActive && (
