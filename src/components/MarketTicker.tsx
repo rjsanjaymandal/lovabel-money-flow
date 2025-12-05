@@ -114,43 +114,53 @@ export function MarketTicker() {
   const fetchIndianStocks = async () => {
     try {
       const promises = INDICES.map(async (index) => {
-        const url = `https://api.allorigins.win/get?url=` + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${index.key}?interval=5m&range=1d`);
+        // CodeTabs proxy is often more permissive for Yahoo Finance
+        const url = `https://api.codetabs.com/v1/proxy?quest=` + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${index.key}?interval=5m&range=1d`);
         
-        const res = await fetch(url);
-        const json = await res.json();
-        const data = JSON.parse(json.contents);
-        
-        if (!data.chart || !data.chart.result) throw new Error("Invalid Data");
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Network response was not ok");
+          const data = await res.json();
+          
+          if (!data.chart || !data.chart.result) throw new Error("Invalid Data");
 
-        const result = data.chart.result[0];
-        const meta = result.meta;
-        const quotes = result.indicators.quote[0];
-        // Filter nulls from history
-        const history = quotes.close.filter((p: number | null) => p !== null) as number[];
+          const result = data.chart.result[0];
+          const meta = result.meta;
+          const quotes = result.indicators.quote[0];
+          const history = quotes.close.filter((p: number | null) => p !== null) as number[];
 
-        const price = meta.regularMarketPrice;
-        const prevClose = meta.chartPreviousClose;
-        const change = price - prevClose;
-        const changePercent = (change / prevClose) * 100;
+          const price = meta.regularMarketPrice;
+          const prevClose = meta.chartPreviousClose;
+          const change = price - prevClose;
+          const changePercent = (change / prevClose) * 100;
 
-        return {
-          symbol: index.key,
-          name: index.name,
-          price: price.toLocaleString("en-IN", { maximumFractionDigits: 2 }),
-          change: change.toFixed(2),
-          changePercent: Math.abs(changePercent).toFixed(2) + "%",
-          isUp: change >= 0,
-          marketState: meta.tradingPeriod,
-          source: "LIVE",
-          history
-        } as StockItem;
+          return {
+            symbol: index.key,
+            name: index.name,
+            price: price.toLocaleString("en-IN", { maximumFractionDigits: 2 }),
+            change: change.toFixed(2),
+            changePercent: Math.abs(changePercent).toFixed(2) + "%",
+            isUp: change >= 0,
+            marketState: meta.tradingPeriod,
+            source: "LIVE",
+            history
+          } as StockItem;
+        } catch (err) {
+          // Silently fail individual items to trigger fallback later
+          return null;
+        }
       });
 
       const results = await Promise.all(promises);
-      setStocks(results);
-      setUsingFallback(false);
+      const validResults = results.filter(r => r !== null) as StockItem[];
+
+      if (validResults.length > 0) {
+        setStocks(validResults);
+        setUsingFallback(false);
+      } else {
+        throw new Error("No valid data");
+      }
     } catch (e) {
-      // Only switch to fallback if we don't have ANY data yet
       if (stocks.length === 0) {
         setStocks(getFallbackData());
         setUsingFallback(true);
@@ -162,22 +172,21 @@ export function MarketTicker() {
 
   useEffect(() => {
     // Initial Load
-    setStocks(getFallbackData());
-    setLoading(false);
-    
     fetchIndianStocks();
     
+    // Status Logic
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const time = hours * 60 + minutes;
+    // NSE Market Hours: 9:15 AM (555) to 3:30 PM (930) IST
     if (time >= 555 && time <= 930 && now.getDay() !== 0 && now.getDay() !== 6) {
       setMarketStatus("Market Open");
     } else {
       setMarketStatus("Closed");
     }
 
-    const interval = setInterval(fetchIndianStocks, 30000); // 30s refresh for chart data
+    const interval = setInterval(fetchIndianStocks, 60000); // 1 min refresh is safer for free proxies
     return () => clearInterval(interval);
   }, []);
 
@@ -198,18 +207,18 @@ export function MarketTicker() {
         
         <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${
           usingFallback 
-            ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500"
+            ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
             : marketStatus === "Market Open" 
               ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
               : "bg-orange-500/10 border-orange-500/20 text-orange-500"
         }`}>
           {usingFallback ? (
-             <WifiOff className="w-2 h-2" />
+             <Signal className="w-2 h-2" />
           ) : (
              <div className={`w-1.5 h-1.5 rounded-full ${marketStatus === "Market Open" ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
           )}
           <span className="text-[9px] font-bold tracking-wide whitespace-nowrap">
-            {usingFallback ? "OFFLINE" : marketStatus.toUpperCase()}
+            {usingFallback ? "DEMO MODE" : marketStatus.toUpperCase()}
           </span>
         </div>
       </div>

@@ -351,8 +351,8 @@ export function NewsView() {
       </div>
 
       {/* Feed Grid */}
-      <div className="container max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-4 py-4 sm:py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-6">
           {filteredNews.map((item) => (
             <NewsCard 
               key={item.guid} 

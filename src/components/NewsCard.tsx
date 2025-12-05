@@ -50,58 +50,57 @@ export const NewsCard = memo(({ news, layoutId, onClick }: NewsCardProps) => {
   return (
     <motion.div layoutId={layoutId} onClick={onClick} className="h-full">
       <Card 
-        className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-colors duration-300 hover:shadow-xl cursor-pointer flex flex-col h-full"
+        className="group overflow-hidden border border-border/50 bg-card rounded-2xl sm:rounded-xl shadow-sm hover:shadow-xl hover:bg-card/80 transition-all duration-300 cursor-pointer flex flex-col h-full relative"
       >
         {/* Image Container */}
-        <div className="relative w-full pt-[56.25%] overflow-hidden bg-muted">
+        <div className="relative w-full aspect-[16/9] sm:pt-[56.25%] overflow-hidden bg-muted">
           <motion.div 
             layoutId={`image-${layoutId}`}
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 will-change-transform"
             style={{ backgroundImage: `url(${imageUrl})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 sm:opacity-60 transition-opacity" />
           
-          {/* Badges Container */}
-          <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+          {/* Badges Container - Clean & Minimal */}
+          <div className="absolute bottom-3 left-4 right-4 flex flex-wrap items-center gap-2 z-10">
             {/* Source Badge */}
-            <div className="bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
+            <div className="bg-white/90 backdrop-blur-xl text-black px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
               <Newspaper className="w-3 h-3" />
               {news.source || "News"}
             </div>
 
-            {/* Sentiment Badge */}
+            {/* Sentiment Badge (Clean Dot style) */}
             {news.sentiment && news.sentiment !== "neutral" && (
-              <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border backdrop-blur-md ${
+              <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-xl shadow-sm ${
                 news.sentiment === "bullish" 
-                  ? "bg-emerald-500/20 text-emerald-100 border-emerald-500/30" 
-                  : "bg-rose-500/20 text-rose-100 border-rose-500/30"
+                  ? "bg-emerald-500/90 text-white" 
+                  : "bg-rose-500/90 text-white"
               }`}>
                 {news.sentiment === "bullish" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {news.sentiment}
+                <span className="hidden xs:inline">{news.sentiment}</span>
               </div>
             )}
-
-            {/* Sector Badge */}
-            {news.sector && (
-              <div className="bg-blue-500/20 backdrop-blur-md text-blue-100 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-blue-500/30">
-                <Tag className="w-3 h-3" />
-                {news.sector}
-              </div>
-            )}
+            
+            {/* Time Badge (Mobile Overlay) */}
+            <div className="ml-auto text-[10px] font-medium text-white/90 flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/10 sm:hidden">
+               <Clock className="w-3 h-3" />
+               {timeAgo}
+            </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 flex flex-col flex-1 gap-3">
-          <motion.h3 layoutId={`title-${layoutId}`} className="font-bold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+        <div className="p-4 sm:p-4 flex flex-col flex-1 gap-2 sm:gap-3 bg-card relative z-20">
+          <motion.h3 layoutId={`title-${layoutId}`} className="font-bold text-[17px] sm:text-lg leading-[1.4] group-hover:text-primary transition-colors line-clamp-2">
             {news.title}
           </motion.h3>
 
-          <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed flex-1">
+          <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed flex-1 hidden sm:block">
             {news.contentSnippet}
           </p>
 
-          <div className="flex items-center justify-between pt-3 mt-auto border-t border-border/50">
+          {/* Desktop Footer Only */}
+          <div className="hidden sm:flex items-center justify-between pt-3 mt-auto border-t border-border/50">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
               <Clock className="w-3 h-3" />
               {timeAgo}
