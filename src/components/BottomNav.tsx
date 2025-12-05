@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Receipt, HandCoins, Target } from "lucide-react";
+import { Receipt, HandCoins, Target, Newspaper } from "lucide-react";
 
 export function BottomNav() {
   const navigate = useNavigate();
@@ -32,6 +32,12 @@ export function BottomNav() {
       isActive: isLend,
       onClick: () => navigate("/dashboard?tab=lend"),
     },
+    {
+      icon: Newspaper,
+      label: "News",
+      isActive: location.pathname === "/news",
+      onClick: () => navigate("/news"),
+    },
   ];
 
   // Only hide on auth and index pages
@@ -40,7 +46,7 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-6 left-4 right-4 z-50 sm:hidden">
+    <nav className="fixed bottom-6 left-4 right-4 z-50 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px]">
       <div className="glass-panel rounded-2xl p-2 flex items-center justify-between shadow-2xl shadow-primary/10">
         {navItems.map((item, index) => (
           <button

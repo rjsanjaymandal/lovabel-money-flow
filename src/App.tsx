@@ -10,6 +10,7 @@ import AllTransactions from "./pages/AllTransactions";
 import AllLendBorrow from "./pages/AllLendBorrow";
 import PersonHistory from "./pages/PersonHistory";
 import NotFound from "./pages/NotFound";
+import { NewsView } from "./components/NewsView";
 import { BottomNav } from "./components/BottomNav";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/transactions" element={<AllTransactions />} />
           <Route path="/lend-borrow" element={<AllLendBorrow />} />
           <Route path="/person/:personName" element={<PersonHistory />} />
+          <Route path="/news" element={<NewsView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

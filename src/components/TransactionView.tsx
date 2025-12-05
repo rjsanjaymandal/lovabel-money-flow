@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3 } from "lucide-react";
+import { Plus, BarChart3, Newspaper } from "lucide-react";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
 import { MonthSelector } from "@/components/MonthSelector";
 import { MonthlyStats } from "@/components/MonthlyStats";
@@ -133,10 +133,14 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
             Here's your financial overview.
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2">
-          <ModeToggle />
+        
+        {/* Desktop Floating Pill Header */}
+        <div className="hidden sm:flex pointer-events-auto w-full max-w-md bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 items-center justify-between transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
           <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
+          <div className="h-6 w-px bg-border/50 mx-2" />
+          <ModeToggle />
         </div>
+
         {/* Mobile Month Selector */}
         <div className="sm:hidden w-full bg-background/80 rounded-2xl p-1.5 backdrop-blur-md border border-white/5 flex gap-2">
            <div className="flex-1">
