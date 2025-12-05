@@ -407,7 +407,7 @@ export function NewsView() {
                 <X className="w-5 h-5" />
               </Button>
 
-              <ScrollArea className="flex-1 h-full">
+              <div className="flex-1 h-full overflow-y-auto pb-safe overscroll-y-contain">
                 {/* Hero Image */}
                 <div className="relative w-full h-[35vh] sm:h-[350px]">
                   <motion.div 
@@ -449,7 +449,7 @@ export function NewsView() {
                         {formatDistanceToNow(new Date(selectedNews.pubDate), { addSuffix: true })}
                       </div>
                     </div>
-                    <motion.h2 layoutId={`title-${selectedId}`} className="text-2xl sm:text-3xl font-bold leading-tight">
+                    <motion.h2 layoutId={`title-${selectedId}`} className="text-xl sm:text-3xl font-bold leading-tight">
                       {selectedNews.title}
                     </motion.h2>
                   </div>
@@ -643,7 +643,7 @@ export function NewsView() {
                     </Button>
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
               
               {/* Hidden Share Template */}
               <div 
