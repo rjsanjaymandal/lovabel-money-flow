@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { CategoryBudgetCard } from "./CategoryBudgetCard";
 import { SetBudgetDialog } from "./SetBudgetDialog";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { ThreeDEnergyCore } from "@/components/ThreeDEnergyCore";
 
 interface BudgetViewProps {
   userId: string;
@@ -115,8 +114,32 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
         </CardHeader>
         <CardContent className="p-4 sm:p-6 relative z-10">
           <div className="flex flex-col items-center justify-center py-2 sm:py-4">
-            <div className="relative w-full h-80 flex items-center justify-center -my-8">
-              <ThreeDEnergyCore budget={totalBudget} spent={totalSpent} />
+            <div className="relative w-64 h-64 flex items-center justify-center">
+              {/* CSS Energy Core */}
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-tr ${percentage > 100 ? "from-red-500/20 to-orange-500/20" : "from-emerald-300/20 to-blue-500/20"} blur-3xl animate-pulse`}></div>
+              <div className="relative z-10 text-center">
+                <span className="text-6xl font-black text-white tracking-tighter drop-shadow-lg">
+                  {percentage.toFixed(0)}%
+                </span>
+                <p className="text-white/80 text-sm font-medium mt-2 uppercase tracking-widest">Used</p>
+              </div>
+              
+              {/* Ring */}
+              <svg className="absolute inset-0 w-full h-full -rotate-90 text-white/10" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" />
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="8" 
+                  strokeDasharray="283"
+                  strokeDashoffset={283 - (283 * Math.min(percentage, 100) / 100)}
+                  className="transition-all duration-1000 ease-out text-white"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
             
             <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full mt-8">

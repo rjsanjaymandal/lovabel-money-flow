@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { SplitBillDialog } from "@/components/SplitBillDialog";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
-import { ThreeDCoins } from "@/components/ThreeDCoins";
 
 const amountSchema = z.number()
   .positive({ message: "Amount must be greater than zero" })
@@ -117,8 +116,8 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
         <Card className="border-none shadow-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardContent className="p-4 sm:p-5 relative">
-            <div className="absolute inset-x-0 -top-4 opacity-80">
-              <ThreeDCoins type="lent" />
+            <div className="absolute top-2 right-2 opacity-10 rotate-12">
+               <ArrowUpRight className="w-24 h-24 text-emerald-500" />
             </div>
             <div className="relative pt-16">
               <div className="flex items-center gap-2 mb-2">
@@ -137,8 +136,8 @@ export function LendBorrowView({ people, userId, onPersonAdded }: LendBorrowView
         <Card className="border-none shadow-lg bg-gradient-to-br from-rose-500/10 to-rose-500/5 backdrop-blur-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardContent className="p-4 sm:p-5 relative">
-            <div className="absolute inset-x-0 -top-4 opacity-80">
-              <ThreeDCoins type="borrowed" />
+             <div className="absolute top-2 right-2 opacity-10 -rotate-12">
+               <ArrowDownLeft className="w-24 h-24 text-rose-500" />
             </div>
             <div className="relative pt-16">
               <div className="flex items-center gap-2 mb-2">

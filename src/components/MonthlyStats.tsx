@@ -42,10 +42,33 @@ export const MonthlyStats = ({ income, expenses, balance, userName = "Friend" }:
   return (
     <>
       {/* Mobile View: 3D Card & Stats */}
+      {/* Mobile View: CSS Card & Stats */}
       <div className="sm:hidden space-y-6">
-        {/* 3D Credit Card */}
-        <div className="rounded-[2rem] overflow-hidden bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-white/10 shadow-2xl">
-          <ThreeDCard balance={balance} name={userName} />
+        {/* Glass Credit Card (CSS Only) */}
+        <div className="relative h-48 rounded-[2rem] overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 shadow-2xl p-6 flex flex-col justify-between text-white animate-fade-in transition-all hover:scale-[1.02]">
+           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
+           <div className="relative z-10 flex justify-between items-start">
+             <div className="space-y-1">
+               <p className="text-indigo-100/80 text-sm font-medium tracking-wide">Current Balance</p>
+               <h3 className="text-3xl font-bold tracking-tight drop-shadow-md">₹{balance.toLocaleString()}</h3>
+             </div>
+             <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md border border-white/20 shadow-inner">
+                <Wallet className="w-6 h-6 text-white" />
+             </div>
+           </div>
+           
+           <div className="relative z-10">
+             <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-indigo-100/60 mb-1 font-semibold">Card Holder</p>
+                  <p className="font-medium tracking-wide text-lg text-white/90">{userName}</p>
+                </div>
+                <div className="flex gap-2">
+                   <div className="w-10 h-6 bg-white/20 rounded-md backdrop-blur-sm border border-white/10"></div>
+                   <div className="w-10 h-6 bg-white/20 rounded-md backdrop-blur-sm border border-white/10"></div>
+                </div>
+             </div>
+           </div>
         </div>
 
         {/* Quick Stats Grid */}

@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Target, ArrowRight, AlertCircle, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { ThreeDBudgetRing } from "@/components/ThreeDBudgetRing";
 
 interface BudgetCardProps {
   userId: string;
@@ -48,9 +47,14 @@ export const BudgetCard = ({ userId, selectedMonth, totalExpenses, budget = 0 }:
 
         {budget > 0 ? (
           <div className="space-y-4">
-            {/* 3D Ring Visualization */}
-            <div className="-my-4">
-              <ThreeDBudgetRing budget={budget} spent={totalExpenses} />
+            {/* Progress Bar Visualization */}
+            <div className="py-2">
+              <div className="h-4 w-full bg-secondary/50 rounded-full overflow-hidden border border-white/5">
+                <div 
+                  className={`h-full transition-all duration-1000 ease-out rounded-full shadow-lg ${isOverBudget ? "bg-destructive" : isNearLimit ? "bg-yellow-500" : "bg-gradient-to-r from-emerald-500 to-teal-500"}`} 
+                  style={{ width: `${Math.min(percentage, 100)}%` }}
+                />
+              </div>
             </div>
             
             <div className="flex items-center justify-between text-sm px-2">
