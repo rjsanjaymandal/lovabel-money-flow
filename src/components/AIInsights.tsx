@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Sparkles, Send, Bot, User, Trash2, RefreshCw } from "lucide-react";
+import { Sparkles, Send, Bot, User, Trash2, PieChart as PieChartIcon, ArrowUpRight, ArrowDownRight, CreditCard, ChevronRight } from "lucide-react";
 import { format, subDays, isSameDay, isAfter, startOfWeek, endOfWeek, subWeeks } from "date-fns";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface AIInsightsProps {
   userId: string;
@@ -13,24 +14,30 @@ interface AIInsightsProps {
   income: number;
   expenses: number;
   transactions: any[];
-  budget?: number; // New prop
+  budget?: number;
   userName?: string;
 }
+
+type MessageType = "text" | "chart" | "list" | "insight";
 
 interface Message {
   role: "ai" | "user";
   content: string;
+  type?: MessageType;
+  data?: any;
   timestamp: Date;
 }
 
 const SUGGESTED_PROMPTS = [
-  "How much budget left?",
-  "Spending yesterday?",
+  "Spending breakdown",
+  "Top expenses this month",
+  "Budget checker",
   "Where did my money go?",
-  "Any savings?",
 ];
 
-// --- 1. Expanded Dictionary (The "Brain") ---
+const COLORS = ['#8b5cf6', '#ec4899', '#f43f5e', '#10b981', '#f59e0b', '#3b82f6'];
+
+// --- 1. Expanded Dictionary ---
 const CATEGORY_ALIASES: Record<string, string[]> = {
   "food": ["groceries", "dining", "restaurants", "eating out", "swiggy", "zomato", "snacks", "lunch", "dinner", "breakfast", "coffee", "cafe", "drinks", "bar", "pizza", "burger"],
   "transport": ["transportation", "uber", "ola", "rapido", "taxi", "cab", "fuel", "gas", "petrol", "diesel", "bus", "train", "metro", "flight", "ticket", "travel"],
@@ -42,61 +49,33 @@ const CATEGORY_ALIASES: Record<string, string[]> = {
 };
 
 // --- 2. Helper Functions ---
-
-const getRandomResponse = (responses: string[]) => {
-  return responses[Math.floor(Math.random() * responses.length)];
-};
+const getRandomResponse = (responses: string[]) => responses[Math.floor(Math.random() * responses.length)];
 
 const findCategory = (query: string, categories: string[]) => {
   const lowerQuery = query.toLowerCase();
-  
-  // Direct match
   const direct = categories.find(c => lowerQuery.includes(c.toLowerCase()));
   if (direct) return direct;
-
-  // Fuzzy match using aliases
   for (const [key, values] of Object.entries(CATEGORY_ALIASES)) {
     if (lowerQuery.includes(key) || values.some(v => lowerQuery.includes(v))) {
-      // Find the first matching category in the user's actual categories that matches the key or alias
-      // This is a bit tricky: we map "swiggy" -> "food", but user might have "Dining" or "Groceries".
-      // We try to find a category that contains the key (e.g. "Food") or is commonly associated.
-      
-      // Simple heuristic: check if any user category contains the key
       const match = categories.find(c => c.toLowerCase().includes(key));
       if (match) return match;
-      
-      // Fallback: check if any user category matches any alias (less likely but possible)
       const aliasMatch = categories.find(c => values.some(v => c.toLowerCase().includes(v)));
       if (aliasMatch) return aliasMatch;
     }
   }
-  
   return null;
 };
 
 const filterTransactionsByTime = (transactions: any[], query: string) => {
   const lowerQuery = query.toLowerCase();
   const today = new Date();
-
-  if (lowerQuery.includes("yesterday")) {
-    const yesterday = subDays(today, 1);
-    return transactions.filter(t => isSameDay(new Date(t.date), yesterday));
-  }
-  
-  if (lowerQuery.includes("today")) {
-    return transactions.filter(t => isSameDay(new Date(t.date), today));
-  }
-
+  if (lowerQuery.includes("yesterday")) return transactions.filter(t => isSameDay(new Date(t.date), subDays(today, 1)));
+  if (lowerQuery.includes("today")) return transactions.filter(t => isSameDay(new Date(t.date), today));
   if (lowerQuery.includes("last week")) {
-    const lastWeekStart = startOfWeek(subWeeks(today, 1));
-    const lastWeekEnd = endOfWeek(subWeeks(today, 1));
-    return transactions.filter(t => {
-      const d = new Date(t.date);
-      return isAfter(d, lastWeekStart) && d < lastWeekEnd; // Rough check
-    });
+    const start = startOfWeek(subWeeks(today, 1));
+    const end = endOfWeek(subWeeks(today, 1));
+    return transactions.filter(t => { const d = new Date(t.date); return isAfter(d, start) && d < end; });
   }
-
-  // Default: Return all (current month context)
   return transactions;
 };
 
@@ -105,7 +84,8 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "ai",
-      content: `Hi ${userName}! I'm your upgraded AI Financial Advisor. 🧠\n\nI can analyze your budget, track specific days (like "yesterday"), and understand more categories. Try me!`,
+      content: `Hi ${userName}! I'm your advanced financial assistant. 🧠\n\nI can show you charts, list transactions, and analyze your budget. Try asking for a "Spending breakdown"!`,
+      type: "text",
       timestamp: new Date(),
     },
   ]);
@@ -114,164 +94,185 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    if (scrollRef.current) scrollRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const clearChat = () => {
-    setMessages([{
-      role: "ai",
-      content: `Memory wiped! 🧹 Ready for a fresh start.`,
-      timestamp: new Date(),
-    }]);
-  };
+  const clearChat = () => setMessages([{
+    role: "ai",
+    content: `Memory wiped! 🧹 Ready for a fresh start.`,
+    timestamp: new Date(),
+  }]);
 
-  const analyzeRequest = (query: string) => {
+  const analyzeRequest = (query: string): Partial<Message> => {
     const lowerQuery = query.toLowerCase();
-    
-    // 1. Time Filtering
     const relevantTransactions = filterTransactionsByTime(transactions, query);
-    const isTimeSpecific = relevantTransactions.length !== transactions.length;
     const timeContext = lowerQuery.includes("yesterday") ? "yesterday" : lowerQuery.includes("last week") ? "last week" : "this month";
+    const categories = [...new Set(transactions.map(t => t.category || ""))].filter(Boolean);
 
     try {
-      const categories = [...new Set(transactions.map(t => t.category || ""))].filter(Boolean);
-
-      // --- Intent: Budget Check ---
-      if (lowerQuery.includes("budget") || (lowerQuery.includes("safe") && lowerQuery.includes("spend"))) {
-        if (budget === 0) {
-          return "You haven't set a budget yet! Go to the Budget tab to set one up. 🎯";
-        }
-        const remaining = budget - expenses;
-        const percentUsed = (expenses / budget) * 100;
-        
-        if (remaining > 0) {
-          if (percentUsed > 80) {
-            return getRandomResponse([
-              `⚠️ Careful! You have **₹${remaining.toLocaleString()}** left. You've used ${percentUsed.toFixed(0)}% of your budget.`,
-              `Tight squeeze! Only **₹${remaining.toLocaleString()}** remaining. Watch your spending!`,
-            ]);
-          } else {
-            return getRandomResponse([
-              `You're safe! ✅ You have **₹${remaining.toLocaleString()}** left to spend.`,
-              `Green light! 🟢 **₹${remaining.toLocaleString()}** remaining in your budget.`,
-            ]);
-          }
-        } else {
-          return getRandomResponse([
-            `🚨 Alert! You're over budget by **₹${Math.abs(remaining).toLocaleString()}**.`,
-            `Stop spending! 🛑 You've exceeded your budget by **₹${Math.abs(remaining).toLocaleString()}**.`,
-          ]);
-        }
-      }
-
-      // --- Intent: Spending Breakdown ---
-      if (lowerQuery.includes("breakdown") || lowerQuery.includes("where") || lowerQuery.includes("go")) {
+      // --- Intent: Spending Breakdown (Chart) ---
+      if (lowerQuery.includes("breakdown") || lowerQuery.includes("chart") || lowerQuery.includes("graph") || lowerQuery.includes("where") && lowerQuery.includes("go")) {
         const categoryTotals: Record<string, number> = {};
         relevantTransactions.filter(t => t.type === "expense").forEach(t => {
           categoryTotals[t.category] = (categoryTotals[t.category] || 0) + Number(t.amount);
         });
 
-        const sorted = Object.entries(categoryTotals)
-          .sort(([, a], [, b]) => b - a)
+        const chartData = Object.entries(categoryTotals)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 5); // Top 5
+
+        if (chartData.length > 0) {
+          return {
+            content: `Here is your spending breakdown for ${timeContext}. The top category is **${chartData[0].name}**.`,
+            type: "chart",
+            data: chartData
+          };
+        } else {
+          return { content: `No spending data found for ${timeContext} to generate a chart.` };
+        }
+      }
+
+      // --- Intent: High Expenses (List) ---
+      if (lowerQuery.includes("highest") || lowerQuery.includes("biggest") || lowerQuery.includes("top expense")) {
+        const topExpenses = relevantTransactions
+          .filter(t => t.type === "expense")
+          .sort((a, b) => Number(b.amount) - Number(a.amount))
           .slice(0, 3);
 
-        if (sorted.length > 0) {
-          const list = sorted.map(([cat, amount]) => `• **${cat}**: ₹${amount.toLocaleString()}`).join("\n");
-          return `Here's your top spending for ${timeContext}:\n\n${list}`;
+        if (topExpenses.length > 0) {
+          return {
+            content: `Here are your biggest expenses for ${timeContext}:`,
+            type: "list",
+            data: topExpenses
+          };
         } else {
-          return `No spending recorded for ${timeContext}. Good job? 🤷‍♂️`;
+          return { content: "No major expenses found." };
         }
       }
 
-      // --- Intent: Savings Analysis ---
-      if (lowerQuery.includes("save") || lowerQuery.includes("savings")) {
-        const savings = income - expenses;
-        const savingsRate = income > 0 ? (savings / income) * 100 : 0;
-        
-        if (savings > 0) {
-          return getRandomResponse([
-            `You're a saver! 💰 **₹${savings.toLocaleString()}** saved (${savingsRate.toFixed(1)}%). High five! ✋`,
-            `Nest egg growing! 🥚 You've saved **₹${savings.toLocaleString()}** this month.`,
-          ]);
-        } else {
-          return `No savings right now. You're down by **₹${Math.abs(savings).toLocaleString()}**. Time to tighten the belt! 📉`;
-        }
-      }
-
-      // --- Intent: Category Spending (Fuzzy) ---
-      if (lowerQuery.includes("spend") || lowerQuery.includes("much") || lowerQuery.includes("cost") || lowerQuery.includes("on")) {
-        const foundCategory = findCategory(query, categories);
-
-        if (foundCategory) {
-          const total = relevantTransactions
-            .filter(t => t.category === foundCategory && t.type === "expense")
-            .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-          
-          const count = relevantTransactions.filter(t => t.category === foundCategory && t.type === "expense").length;
-
-          if (total === 0) {
-            return `You haven't spent anything on **${foundCategory}** ${timeContext}. Nice! 👏`;
-          }
-          return `You spent **₹${total.toLocaleString()}** on **${foundCategory}** ${timeContext} (${count} transactions).`;
-        }
-      }
-
-      // --- Intent: Highest Expense ---
-      if (lowerQuery.includes("highest") || lowerQuery.includes("biggest")) {
-        const expenseTxns = relevantTransactions.filter(t => t.type === "expense");
-        if (expenseTxns.length > 0) {
-          const highest = expenseTxns.reduce((prev, current) => ((Number(prev.amount) || 0) > (Number(current.amount) || 0)) ? prev : current);
-          return `Biggest hit: **₹${highest.amount.toLocaleString()}** for "${highest.description || highest.category}" on ${format(new Date(highest.date), 'MMM d')}. 💸`;
-        } else {
-          return "No big expenses found.";
-        }
-      }
-
-      // --- Intent: Transaction Counts ---
-      if (lowerQuery.includes("how many") || lowerQuery.includes("times")) {
+      // --- Intent: Specific Category List ---
+      if (lowerQuery.includes("show") || lowerQuery.includes("list") || lowerQuery.includes("find")) {
         const foundCategory = findCategory(query, categories);
         if (foundCategory) {
-           const count = relevantTransactions.filter(t => t.category === foundCategory).length;
-           return `You visited **${foundCategory}** **${count}** times ${timeContext}.`;
+           const categoryTxns = relevantTransactions
+            .filter(t => t.category === foundCategory)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5);
+            
+           if (categoryTxns.length > 0) {
+             return {
+               content: `Found ${categoryTxns.length} recent transactions for **${foundCategory}**:`,
+               type: "list",
+               data: categoryTxns
+             };
+           }
         }
       }
 
-      // --- Intent: General Balance ---
-      if (lowerQuery.includes("balance") || lowerQuery.includes("left")) {
-        const balance = income - expenses;
-        return `Balance: **₹${balance.toLocaleString()}**. ${balance > 0 ? "Keep it green! 💚" : "In the red! 🔴"}`;
+      // --- Intent: Budget Check ---
+      if (lowerQuery.includes("budget")) {
+        if (budget === 0) return { content: "You haven't set a budget yet! Go to the Budget tab to set one up. 🎯" };
+        const remaining = budget - expenses;
+        const percent = (expenses / budget) * 100;
+        return {
+           content: remaining > 0 
+             ? `✅ You have **₹${remaining.toLocaleString()}** left (${(100-percent).toFixed(1)}%).` 
+             : `🚨 Over budget by **₹${Math.abs(remaining).toLocaleString()}**!`,
+           type: "insight",
+           data: { remaining, budget, expenses, percent }
+        };
       }
 
       // Fallback
-      return getRandomResponse([
-        "I'm smart, but I didn't catch that. Try asking about 'budget', 'savings', or specific categories like 'swiggy'.",
-        "Hmm, not sure. Ask me 'Where did my money go?' or 'How much budget left?'",
-      ]);
+      return { content: getRandomResponse(["I can show you a 'breakdown', list 'top expenses', or check your 'budget'.", "Try asking: 'Show me food spending' or 'Spending breakdown'."]) };
 
     } catch (err) {
-      console.error("Error in analyzeRequest:", err);
-      return "My circuits are fried! ⚡ Try a simpler question.";
+      console.error(err);
+      return { content: "My circuits jammed! Try a simpler question." };
     }
   };
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
-
-    const userMsg: Message = { role: "user", content: text, timestamp: new Date() };
+    const userMsg: Message = { role: "user", content: text, type: "text", timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI thinking delay (randomized)
-    const delay = Math.floor(Math.random() * 500) + 800; // 800-1300ms
+    const delay = Math.floor(Math.random() * 500) + 600;
     setTimeout(() => {
-      const aiResponse = analyzeRequest(text);
-      const aiMsg: Message = { role: "ai", content: aiResponse, timestamp: new Date() };
+      const response = analyzeRequest(text);
+      const aiMsg: Message = { 
+        role: "ai", 
+        content: response.content || "Error", 
+        type: response.type || "text",
+        data: response.data,
+        timestamp: new Date() 
+      };
       setMessages(prev => [...prev, aiMsg]);
       setIsTyping(false);
     }, delay);
+  };
+
+  const renderMessageContent = (msg: Message) => {
+    return (
+      <div className="space-y-3 w-full">
+        <p className="whitespace-pre-wrap leading-relaxed" 
+           dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>') }} 
+        />
+        
+        {/* Chart Render */}
+        {msg.type === "chart" && msg.data && (
+          <div className="h-48 w-full bg-background/50 rounded-xl border border-white/5 p-2 mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={msg.data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={55}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {msg.data.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '12px', fontSize: '12px' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* List Render */}
+        {msg.type === "list" && msg.data && (
+          <div className="space-y-2 mt-2">
+            {msg.data.map((txn: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-2.5 bg-background/50 border border-white/5 rounded-xl text-xs">
+                 <div className="flex items-center gap-2">
+                   <div className={`p-1.5 rounded-full ${txn.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                      {txn.type === 'income' ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                   </div>
+                   <div>
+                      <p className="font-medium truncate max-w-[100px]">{txn.description || txn.category}</p>
+                      <p className="text-[10px] text-muted-foreground">{format(new Date(txn.date), 'MMM d')}</p>
+                   </div>
+                 </div>
+                 <span className={`font-semibold ${txn.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {txn.type === 'income' ? '+' : '-'}₹{Number(txn.amount).toLocaleString()}
+                 </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -285,7 +286,7 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Get instant answers about your spending, budget, and financial health.
+            Analysis, Charts & Smart Insights.
           </p>
           <Button 
             onClick={() => setIsOpen(true)} 
@@ -306,31 +307,23 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
               </div>
               Financial Advisor
             </SheetTitle>
-            <Button variant="ghost" size="icon" onClick={clearChat} className="h-8 w-8 text-muted-foreground hover:text-destructive">
-              <Trash2 className="w-4 h-4" />
-            </Button>
           </SheetHeader>
 
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4 pb-4">
               {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                >
+                <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-indigo-500/10 text-indigo-500"
                   }`}>
                     {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                   </div>
-                  <div className={`rounded-2xl p-3 max-w-[80%] text-sm ${
+                  <div className={`rounded-2xl p-3 max-w-[85%] text-sm shadow-sm ${
                     msg.role === "user" 
-                      ? "bg-primary text-primary-foreground rounded-tr-none" 
+                      ? "bg-primary text-primary-foreground rounded-tr-none px-4 py-2" 
                       : "bg-muted/50 text-foreground rounded-tl-none border border-border/50"
                   }`}>
-                    <p className="whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{ 
-                      __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>') 
-                    }} />
+                    {renderMessageContent(msg)}
                     <p className="text-[10px] opacity-50 mt-1 text-right">
                       {format(msg.timestamp, 'h:mm a')}
                     </p>
@@ -353,7 +346,6 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
             </div>
           </ScrollArea>
 
-          {/* Suggested Prompts */}
           {messages.length === 1 && (
             <div className="px-4 pb-2">
               <p className="text-xs text-muted-foreground mb-2 font-medium">Suggested Questions</p>
@@ -373,26 +365,30 @@ export const AIInsights = ({ userId, selectedMonth, income, expenses, transactio
             </div>
           )}
 
-          <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm">
+          <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm flex gap-2 items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={clearChat} 
+              className="h-10 w-10 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full"
+              title="Clear Chat"
+            >
+              <Trash2 className="w-5 h-5" />
+            </Button>
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSendMessage(inputValue);
               }}
-              className="flex gap-2"
+              className="flex gap-2 flex-1"
             >
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask about your spending..."
-                className="rounded-full bg-muted/50 border-border/50 focus-visible:ring-indigo-500/50"
+                className="rounded-full bg-muted/50 border-border/50 focus-visible:ring-indigo-500/50 flex-1"
               />
-              <Button 
-                type="submit" 
-                size="icon" 
-                className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20"
-                disabled={!inputValue.trim() || isTyping}
-              >
+              <Button type="submit" size="icon" className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 shrink-0" disabled={!inputValue.trim() || isTyping}>
                 <Send className="w-4 h-4" />
               </Button>
             </form>
