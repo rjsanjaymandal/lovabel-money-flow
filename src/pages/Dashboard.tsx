@@ -196,10 +196,16 @@ const Dashboard = () => {
                   <Search className="w-5 h-5" />
                 </Button>
                 <UserProfile 
+                  userId={user?.id}
+                  onManageCategories={() => setCategoryManagerOpen(true)}
                   trigger={
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary/20 to-purple-500/20 flex items-center justify-center border border-primary/10">
-                        <User className="w-3.5 h-3.5 text-primary" />
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5 transition-colors p-0 overflow-hidden">
+                      <div className="h-full w-full rounded-full border border-primary/10 overflow-hidden">
+                         <img 
+                           src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`} 
+                           alt="Profile"
+                           className="h-full w-full object-cover"
+                         />
                       </div>
                     </Button>
                   }
@@ -211,26 +217,28 @@ const Dashboard = () => {
 
       {/* Floating Island Navbar (Desktop Only) */}
       <div className="fixed top-4 left-0 right-0 z-50 hidden sm:flex justify-center px-4 pointer-events-none">
-        <header className="pointer-events-auto w-full max-w-5xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
+        <header className="pointer-events-auto w-full max-w-5xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 flex items-center transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
           
-          {/* Logo Section - Hide when search is open on desktop to save space if needed, or just keep it */}
-          <div 
-            className={`flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`} 
-            onClick={() => handleTabChange("spend")}
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-              <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-base font-bold tracking-tight group-hover:text-primary transition-colors leading-none">
-                EasyExpense
-              </h1>
-              <p className="text-[10px] text-muted-foreground font-medium group-hover:text-primary/70 transition-colors">Financial Freedom</p>
+          {/* 1. Left Section (Logo) - Flex 1 to push center */}
+          <div className="flex-1 flex justify-start min-w-0">
+            <div 
+              className={`flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`} 
+              onClick={() => handleTabChange("spend")}
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 flex-shrink-0">
+                <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div className="hidden sm:block truncate">
+                <h1 className="text-base font-bold tracking-tight group-hover:text-primary transition-colors leading-none truncate">
+                  EasyExpense
+                </h1>
+                <p className="text-[10px] text-muted-foreground font-medium group-hover:text-primary/70 transition-colors truncate">Financial Freedom</p>
+              </div>
             </div>
           </div>
 
-          {/* Center Navigation Pills - Hide when search is open */}
-          <nav className={`flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden p-0 border-0' : 'w-auto opacity-100'}`}>
+          {/* 2. Center Section (Nav) - Flex None to stay centered */}
+          <nav className={`flex-none flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden p-0 border-0' : 'w-auto opacity-100'}`}>
             <Button
               variant="ghost"
               size="sm"
@@ -272,18 +280,18 @@ const Dashboard = () => {
             </Button>
           </nav>
 
-          {/* Right Actions & Search */}
-          <div className={`flex items-center gap-2 pr-1 transition-all duration-300 ${isSearchOpen ? 'flex-1 pl-2' : ''}`}>
-            
+          {/* 3. Right Section (Actions) - Flex 1 and Justify End to balance Left */}
+          <div className={`flex-1 flex justify-end items-center gap-2 pr-1 min-w-0 transition-all duration-300 ${isSearchOpen ? 'flex-grow pl-2' : ''}`}>
+             
             {/* Streak Counter (Desktop) */}
             {!isSearchOpen && (
-              <div className="hidden md:block mr-2">
+              <div className="hidden md:block mr-2 flex-shrink-0">
                 <StreakCounter userId={user?.id} />
               </div>
             )}
 
             {/* Desktop Search */}
-            <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-full' : 'w-9'}`}>
+            <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-full' : 'w-9 flex-shrink-0'}`}>
               <div 
                 className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 ${isSearchOpen ? 'left-3' : 'left-1/2 -translate-x-1/2'}`}
                 onClick={() => !isSearchOpen && setIsSearchOpen(true)}
@@ -314,24 +322,27 @@ const Dashboard = () => {
               )}
             </div>
 
-            <div className={`w-px h-4 bg-border/50 mx-1 ${isSearchOpen ? 'hidden' : 'block'}`} />
+            <div className={`w-px h-4 bg-border/50 mx-1 flex-shrink-0 ${isSearchOpen ? 'hidden' : 'block'}`} />
             
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setCategoryManagerOpen(true)}
-              className={`rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all ${isSearchOpen ? 'hidden' : 'flex'}`}
-            >
-              <Settings className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-muted-foreground" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleSignOut} 
-              className={`rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-destructive/10 hover:text-destructive hover:scale-105 transition-all ${isSearchOpen ? 'hidden' : 'flex'}`}
-            >
-              <LogOut className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-            </Button>
+            <div className={`flex-shrink-0 ${isSearchOpen ? 'hidden' : 'flex'}`}>
+              <UserProfile 
+                 userId={user?.id}
+                 onManageCategories={() => setCategoryManagerOpen(true)}
+                 trigger={
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all p-0 overflow-hidden border border-transparent hover:border-white/10"
+                    >
+                      <img 
+                        src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`} 
+                        alt="Profile"
+                        className="h-full w-full object-cover"
+                      />
+                    </Button>
+                 }
+              />
+            </div>
           </div>
         </header>
       </div>

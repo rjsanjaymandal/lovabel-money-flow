@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Receipt, HandCoins, Settings, LogOut, User, Pencil, Sparkles } from "lucide-react";
+import { Receipt, HandCoins, Settings, LogOut, User, Pencil, Sparkles, Shapes } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
@@ -16,9 +16,10 @@ import { EditProfileDialog } from "./EditProfileDialog";
 interface UserProfileProps {
   trigger?: React.ReactNode;
   userId?: string;
+  onManageCategories?: () => void;
 }
 
-export function UserProfile({ trigger, userId }: UserProfileProps) {
+export function UserProfile({ trigger, userId, onManageCategories }: UserProfileProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -45,6 +46,11 @@ export function UserProfile({ trigger, userId }: UserProfileProps) {
   const handleNavigation = (path: string) => {
     setOpen(false);
     navigate(path);
+  };
+
+  const handleCategoryClick = () => {
+    setOpen(false);
+    onManageCategories?.();
   };
 
   const meta = userData?.user_metadata || {};
@@ -122,6 +128,22 @@ export function UserProfile({ trigger, userId }: UserProfileProps) {
                   <div className="text-xs text-muted-foreground font-normal">Manage debts</div>
                 </div>
               </Button>
+
+              {onManageCategories && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-4 h-16 text-base font-medium rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 transition-all border-0"
+                  onClick={handleCategoryClick}
+                >
+                  <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                    <Shapes className="h-5 w-5 text-orange-500" />
+                  </div>
+                   <div className="text-left">
+                    <div className="leading-none mb-1">Categories</div>
+                    <div className="text-xs text-muted-foreground font-normal">Manage budgets</div>
+                  </div>
+                </Button>
+              )}
             </div>
 
             <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2" />
