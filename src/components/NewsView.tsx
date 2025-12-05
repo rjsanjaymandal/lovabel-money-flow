@@ -392,16 +392,16 @@ export function NewsView() {
       {/* Expanded View Overlay */}
       <AnimatePresence>
         {selectedId && selectedNews && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-8 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-8 bg-black/60 backdrop-blur-sm">
             <motion.div 
               layoutId={selectedId} 
-              className="w-full h-full sm:max-w-2xl sm:h-[85vh] bg-background sm:rounded-3xl overflow-hidden shadow-2xl relative flex flex-col"
+              className="w-full h-[100dvh] sm:max-w-3xl sm:h-[85vh] bg-background sm:rounded-3xl overflow-hidden shadow-2xl relative flex flex-col border border-white/10"
             >
               {/* Close Button */}
               <Button 
                 size="icon" 
                 variant="secondary" 
-                className="absolute top-4 right-4 z-50 rounded-full h-10 w-10 bg-black/20 backdrop-blur-md hover:bg-black/40 text-white border border-white/10"
+                className="absolute top-4 right-4 z-50 rounded-full h-10 w-10 bg-black/20 backdrop-blur-md hover:bg-black/40 text-white border border-white/10 transition-transform active:scale-95"
                 onClick={() => setSelectedId(null)}
               >
                 <X className="w-5 h-5" />
@@ -409,7 +409,7 @@ export function NewsView() {
 
               <ScrollArea className="flex-1 h-full">
                 {/* Hero Image */}
-                <div className="relative w-full h-[40vh] sm:h-[300px]">
+                <div className="relative w-full h-[35vh] sm:h-[350px]">
                   <motion.div 
                     layoutId={`image-${selectedId}`}
                     className="absolute inset-0 bg-cover bg-center"
@@ -456,7 +456,7 @@ export function NewsView() {
                 </div>
 
                 {/* Content Body */}
-                <div className="p-6 pt-0 space-y-6">
+                <div className="p-6 pt-0 space-y-6 pb-32">
                   
                   {/* Action Bar */}
                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">

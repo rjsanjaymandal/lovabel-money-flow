@@ -100,7 +100,7 @@ export function MarketStories() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full h-full sm:max-w-sm sm:h-[85vh] bg-gradient-to-br from-gray-900 to-black rounded-none sm:rounded-[32px] relative overflow-hidden flex flex-col shadow-2xl border sm:border-white/10"
+              className="w-full h-[100dvh] sm:max-w-sm sm:h-[85vh] bg-gradient-to-br from-gray-900 to-black rounded-none sm:rounded-[32px] relative overflow-hidden flex flex-col shadow-2xl border sm:border-white/10"
             >
               {/* Progress Bar (Simulated) */}
               <div className="flex gap-1 p-2 absolute top-0 left-0 right-0 z-20">
@@ -124,15 +124,15 @@ export function MarketStories() {
               </Button>
 
               {/* Content */}
-              <div className={`flex-1 flex flex-col p-8 bg-gradient-to-br ${selectedStory.gradient}`}>
-                 <div className="mt-12 mb-8">
+              <div className={`flex-1 flex flex-col p-6 sm:p-8 bg-gradient-to-br ${selectedStory.gradient} overflow-y-auto`}>
+                 <div className="mt-12 mb-8 shrink-0">
                     <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 border border-white/30">
                        <selectedStory.icon className="w-8 h-8 text-white" />
                     </div>
                     <h2 className="text-3xl font-black text-white leading-tight">{selectedStory.content.headline}</h2>
                  </div>
 
-                 <div className="space-y-4 bg-black/20 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
+                 <div className="space-y-4 bg-black/20 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shrink-0">
                     {selectedStory.content.stats.map((stat, idx) => (
                       <div key={idx} className="flex items-center justify-between border-b border-white/10 pb-2 last:border-0 last:pb-0">
                          <span className="text-white/80 font-medium">{stat.label}</span>
@@ -144,11 +144,11 @@ export function MarketStories() {
                     ))}
                  </div>
 
-                 <p className="mt-8 text-white/90 text-lg leading-relaxed font-medium">
+                 <p className="mt-8 text-white/90 text-lg leading-relaxed font-medium pb-8">
                    {selectedStory.content.summary}
                  </p>
                  
-                 <div className="mt-auto text-center">
+                 <div className="mt-auto text-center shrink-0 pb-4">
                     <p className="text-white/50 text-xs uppercase tracking-widest">Tap to close</p>
                  </div>
               </div>
