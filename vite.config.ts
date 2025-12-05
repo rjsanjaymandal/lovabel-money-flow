@@ -52,4 +52,19 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Advanced optimizations
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunking for better caching
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-popover", "@radix-ui/react-tooltip", "framer-motion", "lucide-react"],
+          charts: ["recharts"],
+          utils: ["date-fns", "clsx", "tailwind-merge"]
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  }
 }));
