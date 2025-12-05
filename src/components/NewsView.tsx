@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
+import { MarketStories } from "./MarketStories";
+import { Send } from "lucide-react";
 
 const RSS_FEEDS = [
   { url: "https://finance.yahoo.com/news/rssindex", source: "Yahoo Finance" },
@@ -39,6 +41,10 @@ export function NewsView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   
+  // Chat State
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   // Bookmarks State
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem("news_bookmarks");
@@ -158,6 +164,7 @@ export function NewsView() {
     if (!selectedId) {
       setHighlights([]);
       setIsGenerating(false);
+      setChatHistory([]); // Reset Chat
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
@@ -291,6 +298,7 @@ export function NewsView() {
       {/* Header */}
       <div className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border/50">
         <MarketTicker />
+        
         <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button 
@@ -333,25 +341,36 @@ export function NewsView() {
           </Button>
         </div>
 
-        {/* Category Filters */}
-        <div className="container max-w-7xl mx-auto px-4 pb-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
-            {CATEGORIES.map(cat => (
-              <Badge 
-                key={cat}
-                variant={selectedCategory === cat ? "default" : "outline"}
-                className={`cursor-pointer px-4 py-1.5 rounded-full transition-all ${selectedCategory === cat ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </Badge>
-            ))}
-          </div>
+        {/* Stories & Filters Container */}
+        <div className="container max-w-7xl mx-auto px-0 sm:px-4 pb-0 bg-background/50 border-b border-border/50">
+           {/* Category Filters (Keep Sticky) */}
+           <div className="px-4 sm:px-0 pb-3 pt-2 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2">
+                {CATEGORIES.map(cat => (
+                  <Badge 
+                    key={cat}
+                    variant={selectedCategory === cat ? "default" : "outline"}
+                    className={`cursor-pointer px-4 py-1.5 rounded-full transition-all ${selectedCategory === cat ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {cat}
+                  </Badge>
+                ))}
+              </div>
+           </div>
         </div>
       </div>
 
+      {/* Market Stories (Scrollable) */}
+      <div className="container max-w-7xl mx-auto px-0 sm:px-4 pt-4 sm:pt-6">
+         <div className="border-b border-border/50 sm:border-0 pb-4 sm:pb-2">
+            <h2 className="px-4 sm:px-0 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Market Pulse</h2>
+            <MarketStories />
+         </div>
+      </div>
+
       {/* Feed Grid */}
-      <div className="container max-w-7xl mx-auto px-4 sm:px-4 py-4 sm:py-8">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-4 py-4 sm:py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-6">
           {filteredNews.map((item) => (
             <NewsCard 
@@ -505,6 +524,87 @@ export function NewsView() {
                       __html: selectedNews.description || selectedNews.contentSnippet 
                     }} 
                   />
+
+                  {/* AI Analyst Chat Section */}
+                  <div className="mt-8 rounded-2xl bg-muted/30 border border-border/50 overflow-hidden">
+                    <div className="p-4 border-b border-border/50 bg-black/20 backdrop-blur-sm flex items-center gap-3">
+                       <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                          <BrainCircuit className="w-5 h-5" />
+                       </div>
+                       <div>
+                          <h3 className="font-bold text-sm">FinBot Analyst</h3>
+                          <p className="text-[10px] text-muted-foreground">Ask about impacts, sectors, or trends</p>
+                       </div>
+                    </div>
+                    
+                    <div className="p-4 space-y-4 max-h-[300px] overflow-y-auto">
+                       {/* Initial Greeting */}
+                       <div className="flex gap-3">
+                          <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
+                             <Sparkles className="w-4 h-4 text-indigo-400" />
+                          </div>
+                          <div className="bg-card border border-border/50 p-3 rounded-2xl rounded-tl-none text-sm leading-relaxed shadow-sm">
+                             <p>I've analyzed this article. Ask me anything! e.g., "Is this good for Banking stocks?"</p>
+                          </div>
+                       </div>
+
+                       {/* Chat History */}
+                       {chatHistory.map((msg, i) => (
+                         <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-primary/10' : 'bg-indigo-500/10'}`}>
+                               {msg.role === 'user' ? <div className="w-4 h-4 bg-primary rounded-full" /> : <Sparkles className="w-4 h-4 text-indigo-400" />}
+                            </div>
+                            <div className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[80%] ${
+                              msg.role === 'user' 
+                                ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                                : 'bg-card border border-border/50 rounded-tl-none'
+                            }`}>
+                               <p>{msg.content}</p>
+                            </div>
+                         </div>
+                       ))}
+                       
+                       {isAnalyzing && (
+                         <div className="flex gap-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
+                               <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+                            </div>
+                            <div className="bg-card border border-border/50 p-3 rounded-2xl rounded-tl-none text-sm text-muted-foreground shadow-sm">
+                               <span className="animate-pulse">Thinking...</span>
+                            </div>
+                         </div>
+                       )}
+                    </div>
+
+                    <div className="p-4 bg-background/50 backdrop-blur-sm border-t border-border/50 flex gap-2">
+                       <Input 
+                         placeholder="Type your question..." 
+                         className="bg-background border-border"
+                         disabled={isAnalyzing}
+                         onKeyDown={async (e) => {
+                           if (e.key === "Enter" && !isAnalyzing) {
+                              const input = e.currentTarget;
+                              const question = input.value;
+                              if (!question.trim()) return;
+                              
+                              setChatHistory(prev => [...prev, { role: 'user', content: question }]);
+                              input.value = "";
+                              setIsAnalyzing(true);
+                              
+                              // Mock AI Delay & Response
+                              setTimeout(() => {
+                                setIsAnalyzing(false);
+                                const response = `Based on current market sentiment (${selectedNews.sentiment}), this indicates a potential ${selectedNews.sentiment === 'bullish' ? 'uptrend' : 'correction'} for ${selectedNews.sector || 'the market'}. ${question.toLowerCase().includes('time') ? "It might be a good time to watch." : "Keep an eye on volume."}`;
+                                setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
+                              }, 1500);
+                           }
+                         }}
+                       />
+                       <Button size="icon" className="shrink-0" disabled={isAnalyzing}>
+                          <Send className="w-4 h-4" />
+                       </Button>
+                    </div>
+                  </div>
                   
                   {/* Related Stories */}
                   {relatedNews.length > 0 && (
