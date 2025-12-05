@@ -1,82 +1,35 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment } from "@react-three/drei";
-import { useRef } from "react";
-import * as THREE from "three";
+import { memo } from "react";
 
-function FloatingShape({ position, color, speed, rotationIntensity, floatIntensity, scale }: any) {
-  const mesh = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (!mesh.current) return;
-    const t = state.clock.getElapsedTime();
-    // Subtle rotation
-    mesh.current.rotation.x = t * speed * 0.2;
-    mesh.current.rotation.y = t * speed * 0.1;
-  });
-
+// CSS-based lightweight background
+export const ZenBackground = memo(() => {
   return (
-    <Float 
-      speed={speed} 
-      rotationIntensity={rotationIntensity} 
-      floatIntensity={floatIntensity} 
-      position={position}
-    >
-      <mesh ref={mesh} scale={scale}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshPhysicalMaterial 
-          color={color}
-          roughness={0.1}
-          metalness={0.1}
-          transmission={0.5} // Glass-like
-          thickness={1}
-          clearcoat={1}
-          opacity={0.6}
-          transparent
-        />
-      </mesh>
-    </Float>
-  );
-}
+    <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-background">
+      {/* 
+        Optimization Note: 
+        Replaced Heavy 3D Canvas with CSS Gradients.
+        This saves ~500kb bundle size and heavily reduces GPU usage.
+      */}
+      
+      {/* Orb 1: Indigo */}
+      <div 
+        className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-500/20 blur-[100px] animate-float-slow opacity-60 mix-blend-screen"
+        style={{ animationDelay: '0s' }}
+      />
+      
+      {/* Orb 2: Purple */}
+      <div 
+        className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-purple-500/20 blur-[120px] animate-float-delayed opacity-50 mix-blend-screen"
+        style={{ animationDelay: '-2s' }}
+      />
+      
+      {/* Orb 3: Sky */}
+      <div 
+        className="absolute top-[30%] left-[30%] w-[40vw] h-[40vw] rounded-full bg-sky-500/10 blur-[80px] animate-float-slow opacity-40 mix-blend-screen"
+        style={{ animationDelay: '-5s' }}
+      />
 
-export function ZenBackground() {
-  return (
-    <div className="fixed inset-0 -z-10 pointer-events-none">
-      <Canvas 
-        camera={{ position: [0, 0, 10], fov: 50 }} 
-        dpr={[1, 2]}
-        style={{ pointerEvents: 'none' }}
-      >
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0.5} />
-        
-        {/* Floating Orbs */}
-        <FloatingShape 
-          position={[-4, 2, -5]} 
-          color="#818cf8" // Indigo
-          speed={1.5} 
-          rotationIntensity={1} 
-          floatIntensity={2} 
-          scale={1.5}
-        />
-        <FloatingShape 
-          position={[4, -3, -5]} 
-          color="#c084fc" // Purple
-          speed={1.2} 
-          rotationIntensity={1.5} 
-          floatIntensity={1.5} 
-          scale={2}
-        />
-        <FloatingShape 
-          position={[0, 4, -8]} 
-          color="#38bdf8" // Sky
-          speed={1} 
-          rotationIntensity={0.5} 
-          floatIntensity={1} 
-          scale={1.2}
-        />
-
-        <Environment preset="city" />
-      </Canvas>
+      {/* Grid overlay for texture */}
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
     </div>
   );
-}
+});

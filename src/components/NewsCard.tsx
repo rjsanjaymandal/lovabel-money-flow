@@ -1,6 +1,7 @@
+import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, ExternalLink, Clock, Newspaper } from "lucide-react";
+import { Share2, ExternalLink, Clock, Newspaper, TrendingUp, TrendingDown, Tag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 
@@ -15,6 +16,8 @@ export interface NewsItem {
   image?: string;
   source?: string;
   description?: string; // Raw HTML description
+  sentiment?: "bullish" | "bearish" | "neutral";
+  sector?: string;
 }
 
 interface NewsCardProps {
@@ -23,9 +26,9 @@ interface NewsCardProps {
   onClick: () => void;
 }
 
-export const NewsCard = ({ news, layoutId, onClick }: NewsCardProps) => {
+export const NewsCard = memo(({ news, layoutId, onClick }: NewsCardProps) => {
   // Extract image from content if not explicitly provided
-  const getImage = () => {
+  const imageUrl = useMemo(() => {
     if (news.image) return news.image;
     
     const imgMatch = news.content.match(/<img[^>]+src="([^">]+)"/);
@@ -40,9 +43,8 @@ export const NewsCard = ({ news, layoutId, onClick }: NewsCardProps) => {
       return "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80";
       
     return "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=80"; 
-  };
+  }, [news.image, news.content, news.title]);
 
-  const imageUrl = getImage();
   const timeAgo = formatDistanceToNow(new Date(news.pubDate), { addSuffix: true });
 
   return (
@@ -54,17 +56,38 @@ export const NewsCard = ({ news, layoutId, onClick }: NewsCardProps) => {
         <div className="relative w-full pt-[56.25%] overflow-hidden bg-muted">
           <motion.div 
             layoutId={`image-${layoutId}`}
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 will-change-transform"
             style={{ backgroundImage: `url(${imageUrl})` }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
           
-          {/* Source Badge */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-2">
+          {/* Badges Container */}
+          <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+            {/* Source Badge */}
             <div className="bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
               <Newspaper className="w-3 h-3" />
               {news.source || "News"}
             </div>
+
+            {/* Sentiment Badge */}
+            {news.sentiment && news.sentiment !== "neutral" && (
+              <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border backdrop-blur-md ${
+                news.sentiment === "bullish" 
+                  ? "bg-emerald-500/20 text-emerald-100 border-emerald-500/30" 
+                  : "bg-rose-500/20 text-rose-100 border-rose-500/30"
+              }`}>
+                {news.sentiment === "bullish" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {news.sentiment}
+              </div>
+            )}
+
+            {/* Sector Badge */}
+            {news.sector && (
+              <div className="bg-blue-500/20 backdrop-blur-md text-blue-100 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-blue-500/30">
+                <Tag className="w-3 h-3" />
+                {news.sector}
+              </div>
+            )}
           </div>
         </div>
 
@@ -96,4 +119,4 @@ export const NewsCard = ({ news, layoutId, onClick }: NewsCardProps) => {
       </Card>
     </motion.div>
   );
-};
+});
