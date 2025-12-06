@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Users, Play, Settings, Gamepad2, ArrowLeft, Bot, RotateCcw } from "lucide-react";
+import { Users, Play, Settings, Gamepad2, ArrowLeft, Bot, RotateCcw, Lock, Globe } from "lucide-react";
 import { ZenBackground } from "@/components/ZenBackground";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,10 +17,11 @@ interface RoomData {
     players: any[];
     code: string; // Joined from uno_rooms
     status: string;
+    settings?: any;
 }
 
 interface UnoLobbyProps {
-  onCreateRoom: (startingCards: number) => void;
+  onCreateRoom: (startingCards: number, isPublic: boolean) => void;
   onJoinRoom: (code: string) => void;
   isLoading: boolean;
 }
@@ -29,6 +30,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
   const [mode, setMode] = useState<"menu" | "create" | "join" | "browse">("menu");
   const [joinCode, setJoinCode] = useState("");
   const [startingCards, setStartingCards] = useState([7]);
+  const [isPublic, setIsPublic] = useState(true);
   const [activeRooms, setActiveRooms] = useState<RoomData[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const navigate = useNavigate();
@@ -44,7 +46,8 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
             *,
             uno_rooms!inner (
                 code,
-                status
+                status,
+                settings
             )
         `)
         .order('updated_at', { ascending: false })
@@ -56,8 +59,13 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
               room_id: s.room_id,
               players: s.players,
               code: s.uno_rooms.code,
-              status: s.uno_rooms.status
-          }));
+              status: s.uno_rooms.status,
+              settings: s.uno_rooms.settings
+          }))
+          // Filter: only showing 'waiting' rooms that are public
+          // We assume missing settings or missing is_public means Public by default
+          .filter((s:any) => s.status === 'waiting' && s.settings?.is_public !== false);
+          
           setActiveRooms(mapped);
       }
       setIsFetching(false);
@@ -162,11 +170,33 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                       />
                       <p className="text-xs text-white/40">Standard Uno is 7 cards. Drag to adjust.</p>
                   </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                      <Label className="text-white/80">Room Visibility</Label>
+                      <div className="flex gap-2">
+                          <Button 
+                            size="sm"
+                            variant={isPublic ? "default" : "secondary"}
+                            className={cn("text-xs", isPublic ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20")}
+                            onClick={() => setIsPublic(true)}
+                          >
+                             <Globe className="w-3 h-3 mr-1" /> Public
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant={!isPublic ? "default" : "secondary"}
+                            className={cn("text-xs", !isPublic ? "bg-red-600 hover:bg-red-700" : "bg-white/10 hover:bg-white/20")}
+                            onClick={() => setIsPublic(false)}
+                          >
+                             <Lock className="w-3 h-3 mr-1" /> Private
+                          </Button>
+                      </div>
+                  </div>
                 </div>
 
                 <Button 
                     className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90"
-                    onClick={() => onCreateRoom(startingCards[0])}
+                    onClick={() => onCreateRoom(startingCards[0], isPublic)}
                     disabled={isLoading}
                 >
                     {isLoading ? <span className="animate-pulse">Creating Room...</span> : "Start Game"}
