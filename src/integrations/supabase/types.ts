@@ -191,6 +191,80 @@ export type Database = {
         }
         Relationships: []
       }
+      uno_game_states: {
+        Row: {
+          current_player_index: number | null
+          deck: Json[] | null
+          direction: number | null
+          discard_pile: Json[] | null
+          id: string
+          players: Json[] | null
+          room_id: string | null
+          updated_at: string
+          version: number | null
+          winner_id: string | null
+        }
+        Insert: {
+          current_player_index?: number | null
+          deck?: Json[] | null
+          direction?: number | null
+          discard_pile?: Json[] | null
+          id?: string
+          players?: Json[] | null
+          room_id?: string | null
+          updated_at?: string
+          version?: number | null
+          winner_id?: string | null
+        }
+        Update: {
+          current_player_index?: number | null
+          deck?: Json[] | null
+          direction?: number | null
+          discard_pile?: Json[] | null
+          id?: string
+          players?: Json[] | null
+          room_id?: string | null
+          updated_at?: string
+          version?: number | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uno_game_states_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "uno_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uno_rooms: {
+        Row: {
+          code: string
+          created_at: string
+          host_id: string | null
+          id: string
+          settings: Json | null
+          status: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          host_id?: string | null
+          id?: string
+          settings?: Json | null
+          status?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          host_id?: string | null
+          id?: string
+          settings?: Json | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
