@@ -45,8 +45,8 @@ export const shuffleDeck = (deck: UnoCard[]): UnoCard[] => {
 };
 
 export const isValidMove = (card: UnoCard, topCard: UnoCard): boolean => {
-  // Wilds are always valid
-  if (card.color === 'black') return true;
+  // Wilds are always valid to play, regardless of what color matches
+  if (card.color === 'black' || card.type === 'wild' || card.type === 'wild_draw4') return true;
   
   // Color match
   if (card.color === topCard.color) return true;
@@ -55,8 +55,6 @@ export const isValidMove = (card: UnoCard, topCard: UnoCard): boolean => {
   if (card.type === topCard.type && card.type !== 'number') return true;
   if (card.type === 'number' && card.value === topCard.value) return true;
 
-  // If top card is wild, we check against the *declared* color (which we store in color for simplicity on the board)
-  // Logic note: When a black card is played, the game state should update its color to the chosen color.
   return false;
 };
 

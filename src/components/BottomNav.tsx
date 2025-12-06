@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Receipt, HandCoins, Target, Newspaper } from "lucide-react";
+import { Receipt, HandCoins, Target, Newspaper, Gamepad2 } from "lucide-react";
 
 export function BottomNav() {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export function BottomNav() {
   const isSpend = location.pathname === "/dashboard" && currentTab === "spend";
   const isBudget = location.pathname === "/dashboard" && currentTab === "budget";
   const isLend = location.pathname === "/dashboard" && currentTab === "lend";
+  const isGames = location.pathname === "/uno" || location.pathname === "/uno/bot"; // Bot page needs nav? Maybe not. Let's say only Lobby.
 
   const navItems = [
     {
@@ -33,15 +34,26 @@ export function BottomNav() {
       onClick: () => navigate("/dashboard?tab=lend"),
     },
     {
-      icon: Newspaper,
-      label: "News",
-      isActive: location.pathname === "/news",
-      onClick: () => navigate("/news"),
+      icon: Gamepad2,
+      label: "Games",
+      isActive: location.pathname.startsWith("/uno"),
+      onClick: () => navigate("/uno"),
     },
   ];
 
-  // Only hide on auth, index, and uno pages
-  if (location.pathname === "/auth" || location.pathname === "/" || location.pathname.startsWith("/uno")) {
+  // Logic: Show on Dashboard, News, and Uno Lobby (/uno).
+  // Hide on Auth, Root, and Uno Game Rooms (e.g. /uno/ABCD or /uno/bot).
+  // Actually usually /uno/bot is a game, so hide there too.
+  // So Show if: /dashboard, /news, /uno (exact).
+  
+  const isGameRoom = location.pathname.match(/^\/uno\/.+$/); 
+  // matches /uno/anything.
+  
+  if (
+      location.pathname === "/auth" || 
+      location.pathname === "/" || 
+      (location.pathname.startsWith("/uno") && location.pathname !== "/uno")
+  ) {
     return null;
   }
 

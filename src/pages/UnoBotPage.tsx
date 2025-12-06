@@ -91,7 +91,17 @@ export default function UnoBotPage() {
 
      if (validCardIndex !== -1) {
          // Play Card
-         const card = bot.hand[validCardIndex];
+         let card = bot.hand[validCardIndex];
+         
+         // Bot Logic for Wilds: Pick most frequent color
+         if (card.type === 'wild' || card.type === 'wild_draw4') {
+             const colors = ['red', 'blue', 'green', 'yellow'] as const;
+             // Simple random for now, or could count hand
+             const randomColor = colors[Math.floor(Math.random() * colors.length)];
+             card = { ...card, color: randomColor };
+             toast({ title: `Bot chose ${randomColor.toUpperCase()}` });
+         }
+
          handlePlayCard(card, 'bot');
          // Call Uno?
          if (bot.hand.length === 2) { // Will be 1 after play
