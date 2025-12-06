@@ -15,6 +15,7 @@ interface UnoTableProps {
   onPlayCard: (card: UnoCardType) => void;
   onDrawCard: () => void;
   onCallUno: () => void;
+  onPassTurn?: () => void; // Optional for compatibility, made required by usage if provided
   onExit?: () => void;
   hideRoomCode?: boolean;
 }
@@ -22,7 +23,7 @@ interface UnoTableProps {
 import { Copy, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, onCallUno, onExit, hideRoomCode }: UnoTableProps) => {
+export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, onCallUno, onPassTurn, onExit, hideRoomCode }: UnoTableProps) => {
   const me = gameState.players.find(p => p.id === currentPlayerId);
   const otherPlayers = gameState.players.filter(p => p.id !== currentPlayerId);
   const { toast } = useToast();
@@ -222,11 +223,11 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
              {/* Deck */}
              <motion.div 
                whileHover={isMyTurn ? { scale: 1.05 } : {}}
-               whileTap={isMyTurn && !isDrawing ? { scale: 0.95 } : {}}
-               onClick={isMyTurn && !isDrawing ? handleDrawClick : undefined}
+               whileTap={isMyTurn && !isDrawing && !gameState.hasDrawnThisTurn ? { scale: 0.95 } : {}}
+               onClick={isMyTurn && !isDrawing && !gameState.hasDrawnThisTurn ? handleDrawClick : undefined}
                className={cn(
                    "relative w-28 h-40 sm:w-36 sm:h-52 bg-slate-900 rounded-xl border-2 border-white/10 shadow-2xl flex items-center justify-center cursor-pointer transition-all",
-                   (!isMyTurn || isDrawing) && "opacity-50 grayscale cursor-not-allowed"
+                   (!isMyTurn || isDrawing || gameState.hasDrawnThisTurn) && "opacity-50 grayscale cursor-not-allowed"
                )}
              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.05)_10px,rgba(255,255,255,0.05)_20px)]" />
@@ -292,8 +293,23 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
                 </Button>
              )}
              
-             {/* Draw Button (Visible if active) */}
-             {/* Draw Button Removed (Integrated into Deck) */}
+             {/* Pass Button (After Draw) */}
+             {isMyTurn && gameState.hasDrawnThisTurn && onPassTurn && (
+                 <motion.div 
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="ml-4"
+                 >
+                     <Button 
+                        size="lg" 
+                        variant="secondary"
+                        onClick={onPassTurn}
+                        className="rounded-full font-bold shadow-xl bg-orange-500 hover:bg-orange-600 text-white animate-pulse"
+                     >
+                         PASS TURN ⏭️
+                     </Button>
+                 </motion.div>
+             )}
          </div>
 
          {/* Player Hand Scroll Container */}

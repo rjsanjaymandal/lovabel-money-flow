@@ -60,7 +60,8 @@ export default function UnoBotPage() {
         status: 'playing',
         version: 1,
         lastAction: "Game Started",
-        turnStartTime: Date.now()
+        turnStartTime: Date.now(),
+        hasDrawnThisTurn: false
     });
   };
 
@@ -153,43 +154,52 @@ export default function UnoBotPage() {
     // Apply Effects
     let direction = nextState.direction;
     let nextIndex = nextState.currentPlayerIndex;
+    let skipTurn = false; // logic flag
 
     if (card.type === 'reverse') direction *= -1;
     if (card.type === 'skip') {
-        nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
+        skipTurn = true;
         toast({ title: playerId === 'bot' ? "Bot Skipped You!" : "You Skipped Bot!" });
     }
     if (card.type === 'draw2') {
+         // Standard Uno: Victim draws 2 AND loses turn
          const victimIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
          const victim = nextState.players[victimIndex];
          const drawn = nextState.deck.splice(0, 2);
          victim.hand.push(...drawn);
          toast({ title: `${victim.name} drew 2 cards!` });
-         if(nextState.players.length === 2) {
-             nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
-         }
+         
+         // Victim loses turn
+         skipTurn = true; 
     }
     
     // Wild Draw 4
     if (card.type === 'wild_draw4') {
+        // Standard Uno: Victim draws 4 AND loses turn
         const victimIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
         const victim = nextState.players[victimIndex];
         const drawn = nextState.deck.splice(0, 4);
         victim.hand.push(...drawn);
         toast({ title: `${victim.name} drew 4 cards!` });
-        if(nextState.players.length === 2) {
-             nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
-        }
+        
+        // Victim loses turn
+        skipTurn = true;
     }
 
     // Advance Turn
-    if (card.type !== 'skip') {
+    // 1. Move to next player (always)
+    nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
+    
+    // 2. If skip/draw2/draw4 was played, skip that next player
+    if (skipTurn) {
         nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
     }
 
     nextState.currentPlayerIndex = nextIndex;
     nextState.direction = direction as 1 | -1;
     nextState.version += 1;
+    // Reset draw flag
+    nextState.hasDrawnThisTurn = false;
     // Update Turn Start Time
     nextState.turnStartTime = Date.now();
 
@@ -205,6 +215,12 @@ export default function UnoBotPage() {
   const handleDrawCard = (playerId?: string) => {
     if (!gameState) return;
     const activeId = playerId || 'human'; // default to human if called from UI
+    
+    // If Human already drew, prevent double draw (handled in UI, but safe here)
+    if (activeId === 'human' && gameState.hasDrawnThisTurn) {
+        toast({ title: "Already drew!", description: "Play a card or Pass." });
+        return;
+    }
 
     const nextState = { ...gameState };
     const playerIndex = nextState.players.findIndex(p => p.id === activeId);
@@ -226,14 +242,51 @@ export default function UnoBotPage() {
     if (newCard) {
         player.hand.push(newCard);
         
-        // Pass Turn
-        nextState.currentPlayerIndex = getNextPlayerIndex(nextState.currentPlayerIndex, nextState.players.length, nextState.direction);
-        nextState.version += 1;
-        // Update Turn Start Time
-        nextState.turnStartTime = Date.now();
+        // LOGIC CHANGE: 
+        // If Bot, it just continues turn logic (re-evaluates or passes).
+        // If Human, we DO NOT advance turn immediately. We set hasDrawnThisTurn = true.
         
+        if (activeId === 'bot') {
+            // Check if playable immediately? simpler: just pass for now or re-eval
+            // For this simpler bot, let's just end turn to keep it speedy, 
+            // OR we could check if newCard is valid.
+            const topCard = nextState.discardPile[nextState.discardPile.length - 1];
+            if (isValidMove(newCard, topCard)) {
+                 // Bot plays immediately if valid (simple heuristic)
+                 // Recursive call isn't easy here due to state update batching. 
+                 // We'll let the bot turn end for now.
+                 // Actually, let's just pass turn for Bot always to be safe/simple.
+                 nextState.currentPlayerIndex = getNextPlayerIndex(nextState.currentPlayerIndex, nextState.players.length, nextState.direction);
+                 nextState.hasDrawnThisTurn = false;
+                 nextState.turnStartTime = Date.now();
+            } else {
+                 nextState.currentPlayerIndex = getNextPlayerIndex(nextState.currentPlayerIndex, nextState.players.length, nextState.direction);
+                 nextState.hasDrawnThisTurn = false;
+                 nextState.turnStartTime = Date.now();
+            }
+        } else {
+            // Human: Mark as drawn, waiting for Play or Pass
+            nextState.hasDrawnThisTurn = true;
+            nextState.lastAction = "You drew a card.";
+            // Don't change currentPlayerIndex!
+        }
+        
+        nextState.version += 1;
         setGameState(nextState);
     }
+  };
+
+  const handlePassTurn = () => {
+      if (!gameState) return;
+      const nextState = { ...gameState };
+      
+      nextState.currentPlayerIndex = getNextPlayerIndex(nextState.currentPlayerIndex, nextState.players.length, nextState.direction);
+      nextState.hasDrawnThisTurn = false; // Reset flags
+      nextState.turnStartTime = Date.now();
+      nextState.version += 1;
+      nextState.lastAction = "You passed.";
+      
+      setGameState(nextState);
   };
 
   if (!gameState) return null;
@@ -258,6 +311,7 @@ export default function UnoBotPage() {
         onPlayCard={(card) => handlePlayCard(card, 'human')}
         onDrawCard={() => handleDrawCard('human')}
         onCallUno={() => toast({ title: "You called UNO!" })}
+        onPassTurn={handlePassTurn}
         onExit={() => navigate("/uno")}
         hideRoomCode={true}
     />

@@ -30,6 +30,7 @@ export interface GameState {
   lastAction?: string; // "Player X played Red 5"
   version: number;
   turnStartTime: number;
+  hasDrawnThisTurn?: boolean; // Track if current player has already drawn
 }
 
 export interface GameSettings {
