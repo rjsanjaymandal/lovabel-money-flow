@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Users, Play, Settings, Gamepad2, ArrowLeft, Bot } from "lucide-react";
+import { Users, Play, Settings, Gamepad2, ArrowLeft, Bot, RotateCcw } from "lucide-react";
 import { ZenBackground } from "@/components/ZenBackground";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { UnoRoomCard } from "./UnoRoomCard";
+import { cn } from "@/lib/utils";
+
+interface RoomData {
+    id: string;
+    room_id: string;
+    players: any[];
+    code: string; // Joined from uno_rooms
+    status: string;
+}
 
 interface UnoLobbyProps {
   onCreateRoom: (startingCards: number) => void;
@@ -15,16 +26,58 @@ interface UnoLobbyProps {
 }
 
 export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps) => {
-  const [mode, setMode] = useState<"menu" | "create" | "join">("menu");
+  const [mode, setMode] = useState<"menu" | "create" | "join" | "browse">("menu");
   const [joinCode, setJoinCode] = useState("");
   const [startingCards, setStartingCards] = useState([7]);
+  const [activeRooms, setActiveRooms] = useState<RoomData[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch rooms when entering browse mode
+  const fetchRooms = async () => {
+      setIsFetching(true);
+      
+      // Fetch latest game states
+      const { data: states, error } = await supabase
+        .from('uno_game_states')
+        .select(`
+            *,
+            uno_rooms!inner (
+                code,
+                status
+            )
+        `)
+        .order('updated_at', { ascending: false })
+        .limit(20);
+
+      if (states) {
+          const mapped = states.map((s: any) => ({
+              id: s.id,
+              room_id: s.room_id,
+              players: s.players,
+              code: s.uno_rooms.code,
+              status: s.uno_rooms.status
+          }));
+          setActiveRooms(mapped);
+      }
+      setIsFetching(false);
+  };
+
+  useEffect(() => {
+      if (mode === 'browse') {
+          fetchRooms();
+          // Optional: real-time subscription could go here
+      }
+  }, [mode]);
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
       <ZenBackground />
       
-      <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+      <div className={cn(
+          "relative z-10 w-full animate-in fade-in zoom-in-95 duration-500",
+          mode === 'browse' ? "max-w-5xl" : "max-w-md"
+      )}>
         <Button 
             variant="ghost" 
             className="absolute -top-12 left-0 text-white/50 hover:text-white hover:bg-white/10"
@@ -59,6 +112,15 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                 >
                   <Play className="mr-2 w-5 h-5 fill-current" /> Create Room
                 </Button>
+                
+                <Button 
+                  size="lg" 
+                  className="w-full h-14 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 border-0"
+                  onClick={() => setMode("browse")}
+                >
+                  <Users className="mr-2 w-5 h-5" /> Browse Public Rooms
+                </Button>
+
                 <Button 
                   size="lg" 
                   className="w-full h-14 text-lg font-bold bg-cyan-600 hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-500/20 border-0"
@@ -66,6 +128,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                 >
                   <Bot className="mr-2 w-5 h-5" /> Play vs Computer
                 </Button>
+                
                 <Button 
                   size="lg" 
                   variant="outline"
@@ -133,6 +196,39 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                   </Button>
               </div>
             )}
+
+            {mode === "browse" && (
+                <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold text-white">Active Rooms</h2>
+                        <Button size="sm" variant="ghost" className="text-white/50 hover:text-white" onClick={fetchRooms}>
+                            <RotateCcw className={cn("w-4 h-4 mr-2", isFetching && "animate-spin")} /> Refresh
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                        {activeRooms.length === 0 && !isFetching && (
+                            <div className="col-span-full text-center py-12 text-white/30 border-2 border-dashed border-white/10 rounded-xl">
+                                <p>No active rooms found.</p>
+                                <Button variant="link" className="text-primary mt-2" onClick={() => setMode('create')}>Create one?</Button>
+                            </div>
+                        )}
+                        
+                        {activeRooms.map((room) => (
+                            <UnoRoomCard 
+                                key={room.id}
+                                roomId={room.room_id}
+                                code={room.code}
+                                playerCount={room.players.length}
+                                maxPlayers={4}
+                                hostName={room.players[0]?.name || "Unknown"}
+                                onJoin={onJoinRoom}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
 
           </CardContent>
         </Card>
