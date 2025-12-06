@@ -86,6 +86,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
           "relative z-10 w-full animate-in fade-in zoom-in-95 duration-500",
           mode === 'browse' ? "max-w-5xl" : "max-w-md"
       )}>
+        {mode !== "create" && (
         <Button 
             variant="ghost" 
             className="absolute -top-12 left-0 text-white/50 hover:text-white hover:bg-white/10"
@@ -93,6 +94,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
         >
             <ArrowLeft className="w-4 h-4 mr-2" /> {mode === "menu" ? "Dashboard" : "Back"}
         </Button>
+        )}
 
         <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl overflow-hidden relative">
           {/* Decorative Gradient Blob */}
@@ -194,13 +196,22 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                   </div>
                 </div>
 
-                <Button 
-                    className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90"
-                    onClick={() => onCreateRoom(startingCards[0], isPublic)}
-                    disabled={isLoading}
-                >
-                    {isLoading ? <span className="animate-pulse">Creating Room...</span> : "Start Game"}
-                </Button>
+                <div className="flex gap-3">
+                    <Button 
+                        variant="outline"
+                        className="flex-1 h-12 text-lg font-bold border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                        onClick={() => setMode("menu")}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        className="flex-[2] h-12 text-lg font-bold bg-primary hover:bg-primary/90"
+                        onClick={() => onCreateRoom(startingCards[0], isPublic)}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? <span className="animate-pulse">Creating...</span> : "Start Game"}
+                    </Button>
+                </div>
               </div>
             )}
 

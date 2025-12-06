@@ -58,7 +58,7 @@ export function BottomNav() {
   if (
       location.pathname === "/auth" || 
       location.pathname === "/" || 
-      (location.pathname.startsWith("/uno") && location.pathname !== "/uno")
+      location.pathname.startsWith("/uno")
   ) {
     return null;
   }
