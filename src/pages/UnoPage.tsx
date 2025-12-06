@@ -26,14 +26,15 @@ export default function UnoPage() {
   // Note: JSONB columns (players, deck, discard_pile) store data AS IS.
   // We assume we store them as camelCase inside the JSON.
   // We only map Top Level columns.
-  const mapDbToGame = (row: any): GameState => ({
+  // Mapper: DB (snake_case) -> Frontend (camelCase)
+  const mapDbToGame = (row: { [key: string]: any }): GameState => ({
     roomId: row.room_id,
     players: row.players || [],
     deck: row.deck || [],
     discardPile: row.discard_pile || [],
     currentPlayerIndex: row.current_player_index || 0,
     direction: row.direction || 1,
-    status: 'playing', // Derived from room, but we assume playing if we have state
+    status: 'playing', // Derived
     version: row.version || 0,
     lastAction: "Synced"
   });
@@ -54,7 +55,8 @@ export default function UnoPage() {
             .single();
 
         if (roomError || !room) {
-            toast({ title: "Room not found", variant: "destructive" });
+            console.error("Room Error:", roomError);
+            toast({ title: "Room not found", description: "This room code doesn't exist or the database tables are missing.", variant: "destructive" });
             setLoading(false);
             return;
         }
@@ -107,7 +109,9 @@ export default function UnoPage() {
                 table: 'uno_game_states', 
                 filter: `room_id=eq.${room.id}` 
             }, (payload) => {
-                setGameState(mapDbToGame(payload.new));
+                if (payload.new) {
+                    setGameState(mapDbToGame(payload.new as any));
+                }
             })
             .subscribe();
     };
@@ -267,6 +271,7 @@ export default function UnoPage() {
         onPlayCard={handlePlayCard} 
         onDrawCard={handleDrawCard}
         onCallUno={() => toast({ title: "UNO Called!" })}
+        onExit={() => navigate("/uno")}
     />
   );
 }

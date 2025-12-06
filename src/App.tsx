@@ -18,6 +18,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Lazy Load Heavy Components
 const NewsView = lazy(() => import("./components/NewsView").then(module => ({ default: module.NewsView })));
 const UnoPage = lazy(() => import("./pages/UnoPage"));
+const UnoBotPage = lazy(() => import("./pages/UnoBotPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        {/* Routes for the application */}
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -49,6 +51,7 @@ const App = () => (
             <Route path="/person/:personName" element={<PersonHistory />} />
             <Route path="/news" element={<NewsView />} />
             <Route path="/uno" element={<UnoPage />} />
+            <Route path="/uno/bot" element={<UnoBotPage />} />
             <Route path="/uno/:roomCode" element={<UnoPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

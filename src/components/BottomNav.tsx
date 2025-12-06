@@ -40,8 +40,8 @@ export function BottomNav() {
     },
   ];
 
-  // Only hide on auth and index pages
-  if (location.pathname === "/auth" || location.pathname === "/") {
+  // Only hide on auth, index, and uno pages
+  if (location.pathname === "/auth" || location.pathname === "/" || location.pathname.startsWith("/uno")) {
     return null;
   }
 

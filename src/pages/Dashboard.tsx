@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, User } from "lucide-react";
+import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, User, Gamepad2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
@@ -186,6 +186,14 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => navigate("/uno")}
+                  className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Gamepad2 className="w-5 h-5" />
+                </Button>
                 <StreakCounter userId={user?.id} />
                 <Button 
                   variant="ghost" 
@@ -277,6 +285,15 @@ const Dashboard = () => {
             >
               <HandCoins className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Lend
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/uno")}
+              className="rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 text-muted-foreground hover:text-foreground hover:bg-background/50"
+            >
+              <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Games
             </Button>
           </nav>
 

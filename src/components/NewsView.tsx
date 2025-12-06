@@ -133,7 +133,7 @@ export function NewsView() {
       });
 
       const uniqueNews = sortedNews.filter((item, index, self) =>
-        index === self.findIndex((t) => t.title === item.title)
+        index === self.findIndex((t) => t.title === item.title || t.guid === item.guid)
       );
 
       setNews(uniqueNews);
