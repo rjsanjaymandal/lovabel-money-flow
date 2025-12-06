@@ -17,6 +17,7 @@ const PersonHistory = lazy(() => import("./pages/PersonHistory"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 // Lazy Load Heavy Components
 const NewsView = lazy(() => import("./components/NewsView").then(module => ({ default: module.NewsView })));
+const UnoPage = lazy(() => import("./pages/UnoPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +48,8 @@ const App = () => (
             <Route path="/lend-borrow" element={<AllLendBorrow />} />
             <Route path="/person/:personName" element={<PersonHistory />} />
             <Route path="/news" element={<NewsView />} />
+            <Route path="/uno" element={<UnoPage />} />
+            <Route path="/uno/:roomCode" element={<UnoPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

@@ -1,0 +1,68 @@
+import { UnoCard, CardColor, CardType } from "./types";
+
+// Standard Uno Deck Composition (108 cards adjusted)
+// We need to support 163 cards as requested, or flexible size.
+
+export const createDeck = (includeExtensions: boolean = false): UnoCard[] => {
+  const cards: UnoCard[] = [];
+  const colors: CardColor[] = ['red', 'blue', 'green', 'yellow'];
+
+  colors.forEach(color => {
+    // 1 zero
+    cards.push({ id: crypto.randomUUID(), color, type: 'number', value: 0 });
+
+    // 2 of each 1-9
+    for (let i = 1; i <= 9; i++) {
+      cards.push({ id: crypto.randomUUID(), color, type: 'number', value: i });
+      cards.push({ id: crypto.randomUUID(), color, type: 'number', value: i });
+    }
+
+    // 2 Skips, 2 Reverses, 2 Draw Two
+    ['skip', 'reverse', 'draw2'].forEach(type => {
+      cards.push({ id: crypto.randomUUID(), color, type: type as CardType });
+      cards.push({ id: crypto.randomUUID(), color, type: type as CardType });
+    });
+  });
+
+  // Wild Cards
+  for (let i = 0; i < 4; i++) {
+    cards.push({ id: crypto.randomUUID(), color: 'black', type: 'wild' });
+    cards.push({ id: crypto.randomUUID(), color: 'black', type: 'wild_draw4' });
+  }
+
+  // If extensions requested (for 163 cards), add more decks or special cards
+  if (includeExtensions) {
+    // Adding another half deck to bulk it up
+    const extraCards = createDeck(false).slice(0, 55);
+    extraCards.forEach(c => cards.push({ ...c, id: crypto.randomUUID() }));
+  }
+
+  return shuffleDeck(cards);
+};
+
+export const shuffleDeck = (deck: UnoCard[]): UnoCard[] => {
+  return [...deck].sort(() => Math.random() - 0.5);
+};
+
+export const isValidMove = (card: UnoCard, topCard: UnoCard): boolean => {
+  // Wilds are always valid
+  if (card.color === 'black') return true;
+  
+  // Color match
+  if (card.color === topCard.color) return true;
+
+  // Value/Type match (e.g. Red 5 on Blue 5, or Red Skip on Blue Skip)
+  if (card.type === topCard.type && card.type !== 'number') return true;
+  if (card.type === 'number' && card.value === topCard.value) return true;
+
+  // If top card is wild, we check against the *declared* color (which we store in color for simplicity on the board)
+  // Logic note: When a black card is played, the game state should update its color to the chosen color.
+  return false;
+};
+
+export const getNextPlayerIndex = (current: number, total: number, direction: 1 | -1): number => {
+  let next = current + direction;
+  if (next >= total) next = 0;
+  if (next < 0) next = total - 1;
+  return next;
+};
