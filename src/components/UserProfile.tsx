@@ -5,6 +5,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,8 @@ export function UserProfile({ trigger, userId, onManageCategories }: UserProfile
             </Button>
           )}
         </SheetTrigger>
-        <SheetContent side="bottom" className="pb-safe rounded-t-[2rem] border-t-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] bg-background/95 backdrop-blur-xl h-[85vh]">
+        <SheetContent side="bottom" className="pb-safe rounded-t-none sm:rounded-t-[2rem] border-t-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] bg-background/95 backdrop-blur-xl h-[100dvh] sm:h-[85vh] flex flex-col">
+          <SheetTitle className="sr-only">Profile</SheetTitle>
           {/* Header Profile Section */}
           <div className="pt-2 pb-6 flex flex-col items-center justify-center relative">
             <div className="w-12 h-1.5 bg-muted/50 rounded-full mb-6" />
@@ -97,7 +99,7 @@ export function UserProfile({ trigger, userId, onManageCategories }: UserProfile
             <p className="text-sm text-muted-foreground">{userData?.email}</p>
           </div>
 
-          <div className="space-y-4 px-1 overflow-y-auto max-h-[calc(100vh-320px)]">
+          <div className="space-y-4 px-1 flex-1 overflow-y-auto custom-scrollbar">
             {userId && <BadgesSection userId={userId} />}
             
             <div className="grid gap-3">
@@ -146,6 +148,9 @@ export function UserProfile({ trigger, userId, onManageCategories }: UserProfile
               )}
             </div>
 
+          </div>
+
+          <div className="pt-2 pb-6 px-1 mt-auto">
             <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2" />
             
             <div className="grid gap-2">
