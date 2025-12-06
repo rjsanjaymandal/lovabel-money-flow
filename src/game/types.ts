@@ -15,6 +15,7 @@ export interface Player {
   hand: UnoCard[];
   isReady: boolean;
   avatarUrl?: string;
+  isUno?: boolean;
 }
 
 export interface GameState {
@@ -28,6 +29,7 @@ export interface GameState {
   winner?: Player | null;
   lastAction?: string; // "Player X played Red 5"
   version: number;
+  turnStartTime: number;
 }
 
 export interface GameSettings {

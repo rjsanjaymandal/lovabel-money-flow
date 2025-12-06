@@ -59,7 +59,8 @@ export default function UnoBotPage() {
         direction: 1,
         status: 'playing',
         version: 1,
-        lastAction: "Game Started"
+        lastAction: "Game Started",
+        turnStartTime: Date.now()
     });
   };
 
@@ -79,7 +80,26 @@ export default function UnoBotPage() {
     }
   }, [gameState?.currentPlayerIndex, gameState?.version]);
 
-  const playBotTurn = () => {
+    // Timer Logic
+    useEffect(() => {
+        if (!gameState || gameState.status !== 'playing') return;
+        
+        // Only enforce for Human
+        const isHumanTurn = gameState.players[gameState.currentPlayerIndex].id === 'human';
+        if (!isHumanTurn) return;
+
+        const interval = setInterval(() => {
+            const elapsed = Date.now() - gameState.turnStartTime;
+            if (elapsed > 120000) { // 2 minutes
+                 toast({ title: "Time's up!", description: "Auto-drawing card...", variant: "destructive" });
+                 handleDrawCard('human');
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [gameState]);
+
+    const playBotTurn = () => {
      if (!gameState) return;
      
      const botIndex = gameState.players.findIndex(p => p.id === 'bot');
@@ -105,7 +125,7 @@ export default function UnoBotPage() {
          handlePlayCard(card, 'bot');
          // Call Uno?
          if (bot.hand.length === 2) { // Will be 1 after play
-             toast({ title: "Bot says: UNO!", icon: <Bot className="w-4 h-4"/> });
+             toast({ title: "Bot says: UNO!", description: "🤖 The bot is about to win!" });
          }
      } else {
          // Draw Card
@@ -145,11 +165,7 @@ export default function UnoBotPage() {
          const drawn = nextState.deck.splice(0, 2);
          victim.hand.push(...drawn);
          toast({ title: `${victim.name} drew 2 cards!` });
-         // In simple rules, draw 2 also skips turn usually, or we can keep it simple. 
-         // Standard Uno: Next player loses turn.
          if(nextState.players.length === 2) {
-             // In 2 player, skip is effectively implied if we don't advance index twice? 
-             // Actually Standard Rules: Draw 2 -> Next player draws and forfeits turn.
              nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
          }
     }
@@ -167,33 +183,15 @@ export default function UnoBotPage() {
     }
 
     // Advance Turn
-    if (card.type !== 'skip') { // Skip already advanced once
+    if (card.type !== 'skip') {
         nextIndex = getNextPlayerIndex(nextIndex, nextState.players.length, direction);
-    } else if (nextState.players.length === 2) {
-        // In 2 player, Skip means play again.
-        // Logic: current is 0. Next was 1. Skip makes next 1+1=0? 
-        // Engine's getNext just does +1.
-        // Let's stick to simple: If skip, we already advanced. If 2 player, skip means *I* play again. 
-        // Current index is still me? No, engine logic needs care.
-        // Let's rely on standard loop:
-        // 1. Play card.
-        // 2. Calc next index.
-        // If Skip: next = next + 1. 
     }
-    
-    // Simple 2-Player Skip Fix
-    if (card.type === 'reverse' && nextState.players.length === 2) {
-         // Reverse in 2p acts like skip
-         nextIndex = playerIndex; // It's my turn again
-         toast({ title: "Reverse! Play Again!" });
-    } else if (card.type === 'skip' && nextState.players.length === 2) {
-         nextIndex = playerIndex; // Play again
-    }
-
 
     nextState.currentPlayerIndex = nextIndex;
     nextState.direction = direction as 1 | -1;
     nextState.version += 1;
+    // Update Turn Start Time
+    nextState.turnStartTime = Date.now();
 
     // Check Win
     if (player.hand.length === 0) {
@@ -231,6 +229,9 @@ export default function UnoBotPage() {
         // Pass Turn
         nextState.currentPlayerIndex = getNextPlayerIndex(nextState.currentPlayerIndex, nextState.players.length, nextState.direction);
         nextState.version += 1;
+        // Update Turn Start Time
+        nextState.turnStartTime = Date.now();
+        
         setGameState(nextState);
     }
   };
@@ -258,6 +259,7 @@ export default function UnoBotPage() {
         onDrawCard={() => handleDrawCard('human')}
         onCallUno={() => toast({ title: "You called UNO!" })}
         onExit={() => navigate("/uno")}
+        hideRoomCode={true}
     />
   );
 }

@@ -45,15 +45,15 @@ export const shuffleDeck = (deck: UnoCard[]): UnoCard[] => {
 };
 
 export const isValidMove = (card: UnoCard, topCard: UnoCard): boolean => {
-  // Wilds are always valid to play, regardless of what color matches
-  if (card.color === 'black' || card.type === 'wild' || card.type === 'wild_draw4') return true;
-  
-  // Color match
+  if (card.type === 'wild' || card.type === 'wild_draw4') return true;
   if (card.color === topCard.color) return true;
-
-  // Value/Type match (e.g. Red 5 on Blue 5, or Red Skip on Blue Skip)
+  if (card.value !== undefined && card.value === topCard.value) return true;
   if (card.type === topCard.type && card.type !== 'number') return true;
-  if (card.type === 'number' && card.value === topCard.value) return true;
+  
+  // Special Case: Wild that has been played (has color)
+  if ((topCard.type === 'wild' || topCard.type === 'wild_draw4') && topCard.color) {
+      if (card.color === topCard.color) return true;
+  }
 
   return false;
 };

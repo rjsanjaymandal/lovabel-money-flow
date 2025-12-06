@@ -40,6 +40,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        {/* Force Rebuild for UnoBotPage */}
         {/* Routes for the application */}
         <Suspense fallback={<PageLoader />}>
           <Routes>

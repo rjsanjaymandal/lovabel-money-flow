@@ -36,7 +36,8 @@ export default function UnoPage() {
     direction: row.direction || 1,
     status: 'playing', // Derived
     version: row.version || 0,
-    lastAction: "Synced"
+    lastAction: "Synced",
+    turnStartTime: row.updated_at ? new Date(row.updated_at).getTime() : Date.now()
   });
 
   // Fetch or Subscribe
@@ -122,6 +123,24 @@ export default function UnoPage() {
         if (channel) supabase.removeChannel(channel);
     };
   }, [roomCode, user?.id]);
+
+
+  // Timer Logic
+  useEffect(() => {
+    if (!gameState || !user) return;
+    const isMyTurn = gameState.players[gameState.currentPlayerIndex].id === user.id;
+    if (!isMyTurn) return;
+
+    const interval = setInterval(() => {
+        const elapsed = Date.now() - gameState.turnStartTime;
+        if (elapsed > 120000) { // 2 minutes
+             toast({ title: "Time's up!", description: "You took too long. Drawing a card...", variant: "destructive" });
+             handleDrawCard();
+        }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameState, user]);
 
 
   const handleCreateRoom = async (startingCards: number) => {
