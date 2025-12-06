@@ -153,22 +153,33 @@ export function UserProfile({ trigger, userId, onManageCategories }: UserProfile
           <div className="pt-2 pb-6 px-1 mt-auto">
             <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2" />
             
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               <Button
-                variant="ghost"
-                className="w-full justify-start gap-4 h-12 rounded-xl hover:bg-white/5"
+                variant="outline"
+                className="w-full justify-start gap-4 h-16 text-base font-medium rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 transition-all border-0"
                 onClick={() => setEditOpen(true)}
               >
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                Settings
+                <div className="w-10 h-10 rounded-full bg-zinc-500/10 flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-zinc-400" />
+                </div>
+                <div className="text-left">
+                  <div className="leading-none mb-1">Settings</div>
+                  <div className="text-xs text-muted-foreground font-normal">App preferences</div>
+                </div>
               </Button>
+              
               <Button
-                variant="ghost"
-                className="w-full justify-start gap-4 h-12 rounded-xl text-rose-400 hover:text-rose-500 hover:bg-rose-500/10"
+                variant="outline"
+                className="w-full justify-start gap-4 h-16 text-base font-medium rounded-2xl border-white/5 bg-rose-500/5 hover:bg-rose-500/10 transition-all border-0 group"
                 onClick={handleSignOut}
               >
-                <LogOut className="h-4 w-4" />
-                Sign Out
+                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
+                  <LogOut className="h-5 w-5 text-rose-500" />
+                </div>
+                <div className="text-left">
+                  <div className="leading-none mb-1 text-rose-400 group-hover:text-rose-300 transition-colors">Sign Out</div>
+                  <div className="text-xs text-rose-500/50 font-normal">Log out of account</div>
+                </div>
               </Button>
             </div>
           </div>

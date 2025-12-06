@@ -150,7 +150,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
 
             {mode === "create" && (
               <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-                <div className="space-y-4 bg-black/20 p-5 rounded-2xl border border-white/5">
+                <div className="space-y-4 bg-black/20 p-4 sm:p-5 rounded-2xl border border-white/5">
                   <div className="flex items-center gap-2 text-lg font-bold text-white">
                       <Settings className="w-5 h-5 text-primary" />
                       Game Settings
@@ -171,13 +171,13 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                       <p className="text-xs text-white/40">Standard Uno is 7 cards. Drag to adjust.</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-white/5 gap-3">
                       <Label className="text-white/80">Room Visibility</Label>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 w-full sm:w-auto">
                           <Button 
                             size="sm"
                             variant={isPublic ? "default" : "secondary"}
-                            className={cn("text-xs", isPublic ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20")}
+                            className={cn("flex-1 sm:flex-none text-xs", isPublic ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20")}
                             onClick={() => setIsPublic(true)}
                           >
                              <Globe className="w-3 h-3 mr-1" /> Public
@@ -185,7 +185,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                           <Button 
                             size="sm"
                             variant={!isPublic ? "default" : "secondary"}
-                            className={cn("text-xs", !isPublic ? "bg-red-600 hover:bg-red-700" : "bg-white/10 hover:bg-white/20")}
+                            className={cn("flex-1 sm:flex-none text-xs", !isPublic ? "bg-red-600 hover:bg-red-700" : "bg-white/10 hover:bg-white/20")}
                             onClick={() => setIsPublic(false)}
                           >
                              <Lock className="w-3 h-3 mr-1" /> Private
