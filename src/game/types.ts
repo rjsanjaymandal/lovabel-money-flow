@@ -31,9 +31,11 @@ export interface GameState {
   version: number;
   turnStartTime: number;
   hasDrawnThisTurn?: boolean; // Track if current player has already drawn
+  settings?: GameSettings;
 }
 
 export interface GameSettings {
   startingCards: number; // 1-10
   allowStacking: boolean; // Can stack +2 on +2?
+  maxPlayers: number;
 }

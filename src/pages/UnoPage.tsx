@@ -53,7 +53,7 @@ export default function UnoPage() {
         // 1. Get Room ID and Status
         const { data: room, error: roomError } = await supabase
             .from('uno_rooms')
-            .select('id, status')
+            .select('id, status, settings')
             .eq('code', roomCode)
             .single();
 
@@ -75,10 +75,13 @@ export default function UnoPage() {
             .single();
 
         if (stateData) {
-            const parsedState = mapDbToGame(stateData);
+            const parsedState = { ...mapDbToGame(stateData), settings: room.settings as any };
             
             // Auto-Join Logic (Only if waiting)
-            if (user && !parsedState.players.find(p => p.id === user.id)) {
+            // Enforce Max Players
+            const settings = room.settings as any;
+            const maxPlayers = settings?.max_players || 4;
+            if (user && !parsedState.players.find(p => p.id === user.id) && parsedState.players.length < maxPlayers) {
                 
                 if (room.status === 'playing') {
                      // Spectator mode? For now just show game
@@ -108,6 +111,9 @@ export default function UnoPage() {
                 }
             } else {
                 setGameState(parsedState);
+                if (!parsedState.players.find(p => p.id === user.id) && parsedState.players.length >= maxPlayers) {
+                     toast({ title: "Room Full", description: "This room has reached max capacity.", variant: "destructive" });
+                }
             }
         }
         setLoading(false);
@@ -170,7 +176,7 @@ export default function UnoPage() {
   }, [gameState, user, roomStatus]);
 
 
-  const handleCreateRoom = async (startingCards: number, isPublic: boolean) => {
+  const handleCreateRoom = async (startingCards: number, isPublic: boolean, maxPlayers: number) => {
     setLoading(true);
     try {
       if (!user) { toast({ title: "Login Required" }); return; }
@@ -183,7 +189,7 @@ export default function UnoPage() {
         .insert({ 
             code, 
             host_id: user.id, 
-            settings: { starting_cards: startingCards, is_public: isPublic }, 
+            settings: { starting_cards: startingCards, is_public: isPublic, max_players: maxPlayers }, 
             status: 'waiting' 
         })
         .select()

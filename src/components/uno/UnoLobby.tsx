@@ -21,7 +21,7 @@ interface RoomData {
 }
 
 interface UnoLobbyProps {
-  onCreateRoom: (startingCards: number, isPublic: boolean) => void;
+  onCreateRoom: (startingCards: number, isPublic: boolean, maxPlayers: number) => void;
   onJoinRoom: (code: string) => void;
   isLoading: boolean;
 }
@@ -30,8 +30,10 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
   const [mode, setMode] = useState<"menu" | "create" | "join" | "browse">("menu");
   const [joinCode, setJoinCode] = useState("");
   const [startingCards, setStartingCards] = useState([7]);
+  const [maxPlayers, setMaxPlayers] = useState([4]);
   const [isPublic, setIsPublic] = useState(true);
   const [activeRooms, setActiveRooms] = useState<RoomData[]>([]);
+  const [myRooms, setMyRooms] = useState<RoomData[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const navigate = useNavigate();
 
@@ -39,8 +41,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
   const fetchRooms = async () => {
       setIsFetching(true);
       
-      // Fetch latest game states
-      const { data: states, error } = await supabase
+      const { data: states } = await supabase
         .from('uno_game_states')
         .select(`
             *,
@@ -61,21 +62,55 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
               code: s.uno_rooms.code,
               status: s.uno_rooms.status,
               settings: s.uno_rooms.settings
-          }))
-          // Filter: only showing 'waiting' rooms that are public
-          // We assume missing settings or missing is_public means Public by default
-          .filter((s:any) => s.status === 'waiting' && s.settings?.is_public !== false);
+          }));
           
-          setActiveRooms(mapped);
+          setActiveRooms(mapped.filter((s:any) => s.status === 'waiting' && s.settings?.is_public !== false));
       }
       setIsFetching(false);
   };
 
-  useEffect(() => {
-      if (mode === 'browse') {
-          fetchRooms();
-          // Optional: real-time subscription could go here
+  const fetchMyRooms = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: myRoomsData } = await supabase
+          .from('uno_rooms')
+          .select(`
+              id,
+              code,
+              status,
+              settings,
+              uno_game_states (
+                  players
+              )
+          `)
+          .eq('host_id', user.id)
+          .neq('status', 'finished')
+          .order('created_at', { ascending: false });
+
+      if (myRoomsData) {
+          const mapped = myRoomsData.map((r: any) => ({
+              id: r.id, // room id
+              room_id: r.id,
+              players: r.uno_game_states?.[0]?.players || [],
+              code: r.code,
+              status: r.status,
+              settings: r.settings
+          }));
+          setMyRooms(mapped);
       }
+  };
+
+  const handleDeleteRoom = async (roomId: string) => {
+      const { error } = await supabase.from('uno_rooms').delete().eq('id', roomId);
+      if (!error) {
+          setMyRooms(prev => prev.filter(r => r.room_id !== roomId));
+      }
+  };
+
+  useEffect(() => {
+      if (mode === 'browse') fetchRooms();
+      if (mode === 'create') fetchMyRooms();
   }, [mode]);
 
   return (
@@ -158,40 +193,59 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                       Game Settings
                   </div>
                   <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-white/80">Starting Cards</Label>
-                        <span className="text-primary font-bold text-xl px-3 py-1 bg-primary/10 rounded-lg">{startingCards[0]}</span>
+                      {/* Starting Cards Slider */}
+                      <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-white/80">Starting Cards</Label>
+                            <span className="text-primary font-bold text-xl px-3 py-1 bg-primary/10 rounded-lg">{startingCards[0]}</span>
+                          </div>
+                          <Slider 
+                              value={startingCards} 
+                              onValueChange={setStartingCards} 
+                              min={1} 
+                              max={10} 
+                              step={1}
+                              className="py-2"
+                          />
                       </div>
-                      <Slider 
-                          value={startingCards} 
-                          onValueChange={setStartingCards} 
-                          min={1} 
-                          max={10} 
-                          step={1}
-                          className="py-2"
-                      />
-                      <p className="text-xs text-white/40">Standard Uno is 7 cards. Drag to adjust.</p>
-                  </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-white/5 gap-3">
-                      <Label className="text-white/80">Room Visibility</Label>
-                      <div className="flex gap-2 w-full sm:w-auto">
-                          <Button 
-                            size="sm"
-                            variant={isPublic ? "default" : "secondary"}
-                            className={cn("flex-1 sm:flex-none text-xs", isPublic ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20")}
-                            onClick={() => setIsPublic(true)}
-                          >
-                             <Globe className="w-3 h-3 mr-1" /> Public
-                          </Button>
-                          <Button 
-                            size="sm"
-                            variant={!isPublic ? "default" : "secondary"}
-                            className={cn("flex-1 sm:flex-none text-xs", !isPublic ? "bg-red-600 hover:bg-red-700" : "bg-white/10 hover:bg-white/20")}
-                            onClick={() => setIsPublic(false)}
-                          >
-                             <Lock className="w-3 h-3 mr-1" /> Private
-                          </Button>
+                      {/* Max Players Slider */}
+                      <div className="space-y-3 pt-2 border-t border-white/5">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-white/80">Max Players</Label>
+                            <span className="text-primary font-bold text-xl px-3 py-1 bg-primary/10 rounded-lg">{maxPlayers[0]}</span>
+                          </div>
+                          <Slider 
+                              value={maxPlayers} 
+                              onValueChange={setMaxPlayers} 
+                              min={2} 
+                              max={8} 
+                              step={1}
+                              className="py-2"
+                          />
+                      </div>
+
+                      {/* Visibility Toggle */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-white/5 gap-3">
+                          <Label className="text-white/80">Room Visibility</Label>
+                          <div className="flex gap-2 w-full sm:w-auto">
+                              <Button 
+                                size="sm"
+                                variant={isPublic ? "default" : "secondary"}
+                                className={cn("flex-1 sm:flex-none text-xs", isPublic ? "bg-green-600 hover:bg-green-700" : "bg-white/10 hover:bg-white/20")}
+                                onClick={() => setIsPublic(true)}
+                              >
+                                 <Globe className="w-3 h-3 mr-1" /> Public
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant={!isPublic ? "default" : "secondary"}
+                                className={cn("flex-1 sm:flex-none text-xs", !isPublic ? "bg-red-600 hover:bg-red-700" : "bg-white/10 hover:bg-white/20")}
+                                onClick={() => setIsPublic(false)}
+                              >
+                                 <Lock className="w-3 h-3 mr-1" /> Private
+                              </Button>
+                          </div>
                       </div>
                   </div>
                 </div>
@@ -206,12 +260,47 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                     </Button>
                     <Button 
                         className="flex-[2] h-12 text-lg font-bold bg-primary hover:bg-primary/90"
-                        onClick={() => onCreateRoom(startingCards[0], isPublic)}
+                        onClick={() => onCreateRoom(startingCards[0], isPublic, maxPlayers[0])}
                         disabled={isLoading}
                     >
                         {isLoading ? <span className="animate-pulse">Creating...</span> : "Start Game"}
                     </Button>
                 </div>
+
+                {/* My Created Rooms Section */}
+                {myRooms.length > 0 && (
+                    <div className="pt-6 border-t border-white/10 animate-in slide-in-from-bottom-4">
+                        <h3 className="text-sm font-bold text-white/50 uppercase tracking-widest mb-4">My Active Rooms</h3>
+                        <div className="space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                            {myRooms.map(room => (
+                                <div key={room.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group">
+                                    <div className="flex flex-col" onClick={() => onJoinRoom(room.code)}>
+                                        <span className="font-bold text-white cursor-pointer hover:underline">{room.code}</span>
+                                        <span className="text-xs text-white/40">{room.players.length} Players • {room.status}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button 
+                                            size="sm" 
+                                            variant="secondary" 
+                                            className="h-8 bg-white/10 hover:bg-white/20 text-white"
+                                            onClick={() => onJoinRoom(room.code)}
+                                        >
+                                            Join
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="destructive" 
+                                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => handleDeleteRoom(room.room_id)}
+                                        >
+                                            <RotateCcw className="w-4 h-4 rotate-45" /> {/* Using rotate as X */}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
               </div>
             )}
 

@@ -14,9 +14,9 @@ interface UnoWaitingRoomProps {
     onCopyCode: () => void;
 }
 
-export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCopyCode }: UnoWaitingRoomProps) => {
     const isHost = gameState.players[0]?.id === userId;
     const { toast } = useToast();
+    const maxPlayers = gameState.settings?.maxPlayers ?? gameState.settings?.max_players ?? 4;
 
     return (
         <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
@@ -38,12 +38,6 @@ export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCop
                     >
                         <span className="text-3xl sm:text-5xl font-black tracking-[0.2em] text-white font-mono">
                             {roomCode} 
-                            {/* Note: gameState.roomId is the UUID in DB, but the code is passed via URL usually. 
-                                Wait, gameState.roomId in types.ts is the ID. 
-                                The code is usually passed in URL params or derived.
-                                Ideally this component receives the 'code' prop if logical. 
-                                But current UnoPage passes 'roomCode' via useParams. 
-                            */}
                         </span>
                         <Copy className="w-6 h-6 text-white/50 group-hover:text-white transition-colors" />
                     </button>
@@ -54,7 +48,7 @@ export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCop
                     <div className="space-y-4">
                         <div className="flex items-center justify-between text-white/80 px-2">
                             <span className="flex items-center gap-2 font-bold"><Users className="w-4 h-4" /> Players Joined</span>
-                            <span className="text-sm bg-white/10 px-2 py-1 rounded-md">{gameState.players.length} / 4</span>
+                            <span className="text-sm bg-white/10 px-2 py-1 rounded-md">{gameState.players.length} / {maxPlayers}</span>
                         </div>
                         
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -78,7 +72,7 @@ export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCop
                             ))}
                             
                             {/* Empty Slots */}
-                            {Array.from({ length: Math.max(0, 4 - gameState.players.length) }).map((_, i) => (
+                            {Array.from({ length: Math.max(0, maxPlayers - gameState.players.length) }).map((_, i) => (
                                 <div key={`empty-${i}`} className="flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-dashed border-white/5 opacity-50">
                                     <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
                                         <Loader2 className="w-5 h-5 text-white/20 animate-spin" />
