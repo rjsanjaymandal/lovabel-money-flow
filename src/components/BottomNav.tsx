@@ -39,6 +39,12 @@ export function BottomNav() {
       isActive: location.pathname.startsWith("/uno"),
       onClick: () => navigate("/uno"),
     },
+    {
+      icon: Newspaper,
+      label: "News",
+      isActive: location.pathname === "/news",
+      onClick: () => navigate("/news"),
+    },
   ];
 
   // Logic: Show on Dashboard, News, and Uno Lobby (/uno).
@@ -59,12 +65,12 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-6 left-4 right-4 z-50 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px]">
-      <div className="glass-panel rounded-2xl p-2 flex items-center justify-between shadow-2xl shadow-primary/10">
+      <div className="glass-panel rounded-2xl p-2 flex items-center overflow-x-auto scrollbar-hide shadow-2xl shadow-primary/10 gap-1">
         {navItems.map((item, index) => (
           <button
             key={index}
             onClick={item.onClick}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl group ${
+            className={`relative flex-1 min-w-[72px] flex flex-col items-center justify-center gap-1 py-2 transition-all duration-300 touch-manipulation rounded-xl group ${
               item.isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:bg-muted"
