@@ -18,12 +18,13 @@ interface UnoTableProps {
   onPassTurn?: () => void; // Optional for compatibility, made required by usage if provided
   onExit?: () => void;
   hideRoomCode?: boolean;
+  roomCode: string;
 }
 
 import { Copy, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, onCallUno, onPassTurn, onExit, hideRoomCode }: UnoTableProps) => {
+export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, onCallUno, onPassTurn, onExit, hideRoomCode, roomCode }: UnoTableProps) => {
   const me = gameState.players.find(p => p.id === currentPlayerId);
   const otherPlayers = gameState.players.filter(p => p.id !== currentPlayerId);
   const { toast } = useToast();
@@ -43,7 +44,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(gameState.roomId);
+    navigator.clipboard.writeText(roomCode);
     toast({ title: "Copied!", description: "Room code copied to clipboard." });
   };
   
@@ -150,7 +151,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
                      >
                         <div>
                             <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider block leading-none mb-0.5">Room Code</span>
-                            <p className="text-xl font-black text-white leading-none">{gameState.roomId}</p>
+                            <p className="text-xl font-black text-white leading-none">{roomCode}</p>
                         </div>
                         <Copy className="w-4 h-4 text-white/50" />
                      </div>

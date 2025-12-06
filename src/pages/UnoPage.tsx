@@ -366,6 +366,7 @@ export default function UnoPage() {
           <UnoWaitingRoom 
             gameState={gameState}
             userId={user?.id}
+            roomCode={roomCode}
             onStartGame={handleStartGame}
             onCopyCode={() => {
                 navigator.clipboard.writeText(roomCode);
@@ -383,7 +384,9 @@ export default function UnoPage() {
         onDrawCard={handleDrawCard}
         onCallUno={() => toast({ title: "UNO Called!" })}
         onPassTurn={handlePassTurn}
+        onPassTurn={handlePassTurn}
         onExit={() => navigate("/uno")}
+        roomCode={roomCode}
     />
   );
 }

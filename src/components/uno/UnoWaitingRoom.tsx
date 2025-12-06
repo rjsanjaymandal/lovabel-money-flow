@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils";
 interface UnoWaitingRoomProps {
     gameState: GameState;
     userId: string;
+    roomCode: string;
     onStartGame: () => void;
     onCopyCode: () => void;
 }
 
-export const UnoWaitingRoom = ({ gameState, userId, onStartGame, onCopyCode }: UnoWaitingRoomProps) => {
+export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCopyCode }: UnoWaitingRoomProps) => {
     const isHost = gameState.players[0]?.id === userId;
     const { toast } = useToast();
 
@@ -35,8 +36,8 @@ export const UnoWaitingRoom = ({ gameState, userId, onStartGame, onCopyCode }: U
                         onClick={onCopyCode}
                         className="mx-auto group flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 transition-all cursor-pointer active:scale-95"
                     >
-                        <span className="text-5xl font-black tracking-[0.2em] text-white font-mono">
-                            {gameState.roomId} 
+                        <span className="text-3xl sm:text-5xl font-black tracking-[0.2em] text-white font-mono">
+                            {roomCode} 
                             {/* Note: gameState.roomId is the UUID in DB, but the code is passed via URL usually. 
                                 Wait, gameState.roomId in types.ts is the ID. 
                                 The code is usually passed in URL params or derived.
