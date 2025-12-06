@@ -226,7 +226,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
                whileTap={isMyTurn && !isDrawing && !gameState.hasDrawnThisTurn ? { scale: 0.95 } : {}}
                onClick={isMyTurn && !isDrawing && !gameState.hasDrawnThisTurn ? handleDrawClick : undefined}
                className={cn(
-                   "relative w-28 h-40 sm:w-36 sm:h-52 bg-slate-900 rounded-xl border-2 border-white/10 shadow-2xl flex items-center justify-center cursor-pointer transition-all",
+                   "relative w-24 h-32 sm:w-36 sm:h-52 bg-slate-900 rounded-xl border-2 border-white/10 shadow-2xl flex items-center justify-center cursor-pointer transition-all",
                    (!isMyTurn || isDrawing || gameState.hasDrawnThisTurn) && "opacity-50 grayscale cursor-not-allowed"
                )}
              >
@@ -250,7 +250,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
              </motion.div>
 
              {/* Discard Pile */}
-             <div className="relative w-28 h-40 sm:w-36 sm:h-52 flex items-center justify-center">
+             <div className="relative w-24 h-32 sm:w-36 sm:h-52 flex items-center justify-center">
                  {/* Direction Indicator Ring */}
                  <div className={cn(
                     "absolute -inset-8 border-[3px] border-dashed border-white/10 rounded-full transition-all duration-1000 w-[180%] h-[150%] left-[-40%] top-[-25%]",
@@ -265,8 +265,8 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
                         className="absolute"
                     >
                         {topCard 
-                            ? <UnoCard card={topCard} size="lg" className="shadow-2xl" /> 
-                            : <div className="w-28 h-40 border-2 border-white/10 border-dashed rounded-xl" />
+                            ? <UnoCard card={topCard} size="lg" className="shadow-2xl w-24 h-32 sm:w-36 sm:h-52" /> 
+                            : <div className="w-24 h-32 sm:w-36 sm:h-52 border-2 border-white/10 border-dashed rounded-xl" />
                         }
                     </motion.div>
                  </AnimatePresence>
@@ -314,7 +314,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
 
          {/* Player Hand Scroll Container */}
          <div className="w-full overflow-x-auto [&::-webkit-scrollbar]:hidden px-2 pb-8 sm:pb-12 pt-4">
-             <div className="flex items-end justify-center min-w-max mx-auto -space-x-12 sm:-space-x-20 hover:space-x-1 sm:hover:space-x-4 transition-all duration-300 py-2 px-4 h-[220px] sm:h-[250px]">
+             <div className="flex items-end justify-center min-w-max mx-auto -space-x-12 sm:-space-x-20 hover:space-x-1 sm:hover:space-x-4 transition-all duration-300 py-2 px-4 h-[180px] sm:h-[250px]">
                  {me?.hand.map((card, i) => {
                      const isPlayable = isMyTurn && isValidMove(card, topCard);
                      const total = me.hand.length;
