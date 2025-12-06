@@ -270,8 +270,10 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                 {/* My Created Rooms Section */}
                 {myRooms.length > 0 && (
                     <div className="pt-6 border-t border-white/10 animate-in slide-in-from-bottom-4">
-                        <h3 className="text-sm font-bold text-white/50 uppercase tracking-widest mb-4">My Active Rooms</h3>
-                        <div className="space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                        <h3 className="text-sm font-bold text-white/50 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <Users className="w-4 h-4" /> My Active Rooms
+                        </h3>
+                        <div className="space-y-3 max-h-[30vh] sm:max-h-[200px] overflow-y-auto scrollbar-hide pr-1">
                             {myRooms.map(room => (
                                 <div key={room.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group">
                                     <div className="flex flex-col" onClick={() => onJoinRoom(room.code)}>
@@ -336,7 +338,7 @@ export const UnoLobby = ({ onCreateRoom, onJoinRoom, isLoading }: UnoLobbyProps)
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 h-[60vh] sm:h-[500px] overflow-y-auto pr-1 scrollbar-hide content-start">
                         {activeRooms.length === 0 && !isFetching && (
                             <div className="col-span-full text-center py-12 text-white/30 border-2 border-dashed border-white/10 rounded-xl">
                                 <p>No active rooms found.</p>

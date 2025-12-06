@@ -358,6 +358,30 @@ export default function UnoPage() {
       }).eq('room_id', gameState.roomId);
   };
 
+  const handleQuitGame = async () => {
+    if (!user) {
+        navigate("/uno");
+        return;
+    }
+
+    // Safe Cleanup: If waiting, remove player to free slot
+    // If playing, we might want to keep them or mark as disconnected
+    // For now, just remove if waiting.
+    if (gameState && currentStatus === 'waiting') {
+        const newPlayers = gameState.players.filter(p => p.id !== user.id);
+        await supabase.from('uno_game_states').update({
+            players: newPlayers as any,
+            version: gameState.version + 1
+        }).eq('room_id', gameState.roomId);
+    }
+    
+    // Future: If playing, maybe auto-fold? 
+    // Right now, just leave.
+    setGameState(null);
+    setRoomStatus('waiting');
+    navigate("/uno");
+  };
+
   if (!roomCode) {
     return <UnoLobby onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} isLoading={loading} />;
   }
@@ -391,7 +415,8 @@ export default function UnoPage() {
         onCallUno={() => toast({ title: "UNO Called!" })}
         onPassTurn={handlePassTurn}
         onPassTurn={handlePassTurn}
-        onExit={() => navigate("/uno")}
+        onPassTurn={handlePassTurn}
+        onExit={handleQuitGame}
         roomCode={roomCode}
     />
   );

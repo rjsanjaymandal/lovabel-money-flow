@@ -21,8 +21,19 @@ interface UnoTableProps {
   roomCode: string;
 }
 
-import { Copy, ArrowLeft } from "lucide-react";
+import { Copy, ArrowLeft, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, onCallUno, onPassTurn, onExit, hideRoomCode, roomCode }: UnoTableProps) => {
   const me = gameState.players.find(p => p.id === currentPlayerId);
@@ -140,9 +151,25 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
          <div className="flex justify-between items-start">
              <div className="flex gap-2">
                  {onExit && (
-                     <Button size="icon" variant="ghost" className="rounded-full bg-black/40 text-white hover:bg-white/20 backdrop-blur-md" onClick={onExit}>
-                         <ArrowLeft className="w-5 h-5" />
-                     </Button>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" className="rounded-full bg-black/40 text-white hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md transition-colors">
+                                <LogOut className="w-5 h-5 pl-0.5" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-zinc-900 border-white/10 text-white">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Quit Game?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-white/60">
+                                    Are you sure you want to leave? You won't be able to rejoin easily if the game is full.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={onExit} className="bg-red-600 hover:bg-red-700 text-white border-0">Yes, Quit</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                     </AlertDialog>
                  )}
                  {!hideRoomCode && (
                      <div 

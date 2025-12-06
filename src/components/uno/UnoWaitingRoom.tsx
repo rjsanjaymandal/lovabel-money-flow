@@ -14,6 +14,7 @@ interface UnoWaitingRoomProps {
     onCopyCode: () => void;
 }
 
+export const UnoWaitingRoom = ({ gameState, userId, roomCode, onStartGame, onCopyCode }: UnoWaitingRoomProps) => {
     const isHost = gameState.players[0]?.id === userId;
     const { toast } = useToast();
     const maxPlayers = gameState.settings?.maxPlayers ?? gameState.settings?.max_players ?? 4;
