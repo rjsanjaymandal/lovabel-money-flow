@@ -414,8 +414,6 @@ export default function UnoPage() {
         onDrawCard={handleDrawCard}
         onCallUno={() => toast({ title: "UNO Called!" })}
         onPassTurn={handlePassTurn}
-        onPassTurn={handlePassTurn}
-        onPassTurn={handlePassTurn}
         onExit={handleQuitGame}
         roomCode={roomCode}
     />

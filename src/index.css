@@ -87,6 +87,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
+    scroll-behavior: smooth;
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */

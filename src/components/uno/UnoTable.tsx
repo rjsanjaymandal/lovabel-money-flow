@@ -341,7 +341,7 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
          </div>
 
          {/* Player Hand Scroll Container */}
-         <div className="w-full overflow-x-auto [&::-webkit-scrollbar]:hidden px-2 pb-8 sm:pb-12 pt-4">
+         <div className="w-full overflow-x-auto no-scrollbar px-2 pb-8 sm:pb-12 pt-4">
              <div className="flex items-end justify-center min-w-max mx-auto -space-x-12 sm:-space-x-20 hover:space-x-1 sm:hover:space-x-4 transition-all duration-300 py-2 px-4 h-[180px] sm:h-[250px]">
                  {me?.hand.map((card, i) => {
                      const isPlayable = isMyTurn && isValidMove(card, topCard);
