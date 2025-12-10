@@ -8,6 +8,7 @@ import { GameState, UnoCard, Player } from "@/game/types";
 import { createDeck, isValidMove, getNextPlayerIndex, shuffleDeck } from "@/game/engine";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 export default function UnoPage() {
   const { roomCode } = useParams();
@@ -458,29 +459,35 @@ export default function UnoPage() {
 
   if (currentStatus === 'waiting') {
       return (
-          <UnoWaitingRoom 
-            gameState={gameState}
-            userId={user?.id}
-            roomCode={roomCode}
-            onStartGame={handleStartGame}
-            onCopyCode={() => {
-                navigator.clipboard.writeText(roomCode);
-                toast({ title: "Copied!", description: "Room code copied." });
-            }}
-          />
+          <>
+            <SEO title={roomCode ? `Uno Room ${roomCode}` : "Play Uno"} description="Join the Uno waiting room and challenge your friends!" />
+            <UnoWaitingRoom 
+                gameState={gameState}
+                userId={user?.id}
+                roomCode={roomCode}
+                onStartGame={handleStartGame}
+                onCopyCode={() => {
+                    navigator.clipboard.writeText(roomCode);
+                    toast({ title: "Copied!", description: "Room code copied." });
+                }}
+            />
+          </>
       );
   }
 
   return (
-    <UnoTable 
-        gameState={{...gameState, hasDrawnThisTurn: gameState.hasDrawnThisTurn}} 
-        currentPlayerId={user?.id || ""} 
-        onPlayCard={handlePlayCard} 
-        onDrawCard={handleDrawCard}
-        onCallUno={() => toast({ title: "UNO Called!" })}
-        onPassTurn={handlePassTurn}
-        onExit={handleQuitGame}
-        roomCode={roomCode}
-    />
+    <>
+      <SEO title={`Playing Uno (${roomCode})`} description="Active Uno Game in progress." />
+      <UnoTable 
+            gameState={{...gameState, hasDrawnThisTurn: gameState.hasDrawnThisTurn}} 
+            currentPlayerId={user?.id || ""} 
+            onPlayCard={handlePlayCard} 
+            onDrawCard={handleDrawCard}
+            onCallUno={() => toast({ title: "UNO Called!" })}
+            onPassTurn={handlePassTurn}
+            onExit={handleQuitGame}
+            roomCode={roomCode}
+        />
+    </>
   );
 }
