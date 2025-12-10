@@ -36,6 +36,7 @@ export default function UnoPage() {
     // Status is often not in uno_game_states, so we default to waiting or use roomStatus
     status: row.status || 'waiting', 
     version: row.version || 0,
+    // Use updated_at solely for timer sync. Fallback to Date.now() only if absolutely missing (unlikely)
     turnStartTime: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
     hasDrawnThisTurn: row.has_drawn_this_turn || false
   });
@@ -227,7 +228,7 @@ export default function UnoPage() {
 
       const { error: stateError } = await supabase
         .from('uno_game_states')
-        .insert(dbPayload);
+        .insert(dbPayload as any);
 
       if (stateError) throw stateError;
       
@@ -340,7 +341,7 @@ export default function UnoPage() {
         current_player_index: nextIndex,
         version: gameState.version + 1,
         has_drawn_this_turn: false,
-        turnStartTime: Date.now() // Reset timer for next player
+        // updated_at automagically updates on version bump or any change
     }).eq('room_id', gameState.roomId);
   };
 
@@ -348,14 +349,31 @@ export default function UnoPage() {
       if (!gameState || !user) return;
       if (gameState.players[0].id !== user.id) return; // Only Host
 
-      // Update Room Status -> triggers subscription update for all
-      await supabase.from('uno_rooms').update({ status: 'playing' }).eq('id', gameState.roomId);
-      
-      // Reset game state timer
-      await supabase.from('uno_game_states').update({
-          turnStartTime: Date.now(), 
-          version: gameState.version + 1
-      }).eq('room_id', gameState.roomId);
+      setLoading(true);
+      try {
+          // 1. Reset Game State Timer FIRST (so updated_at is fresh when people join)
+          // We bump version to ensure the row actually updates and triggers updated_at
+          const { error: stateError } = await supabase.from('uno_game_states').update({
+              version: gameState.version + 1,
+              has_drawn_this_turn: false, // Ensure clean slate
+              current_player_index: 0
+          }).eq('room_id', gameState.roomId);
+
+          if (stateError) throw stateError;
+
+          // 2. Update Room Status -> triggers subscription update for all -> 'playing'
+          const { error: roomError } = await supabase.from('uno_rooms').update({ 
+               status: 'playing' 
+          }).eq('id', gameState.roomId);
+          
+          if (roomError) throw roomError;
+
+      } catch (error: any) {
+          console.error("Start Game Error:", error);
+          toast({ title: "Failed to Start", description: error.message, variant: "destructive" });
+      } finally {
+          setLoading(false);
+      }
   };
 
   const handleQuitGame = async () => {
@@ -364,22 +382,69 @@ export default function UnoPage() {
         return;
     }
 
-    // Safe Cleanup: If waiting, remove player to free slot
-    // If playing, we might want to keep them or mark as disconnected
-    // For now, just remove if waiting.
-    if (gameState && currentStatus === 'waiting') {
-        const newPlayers = gameState.players.filter(p => p.id !== user.id);
-        await supabase.from('uno_game_states').update({
-            players: newPlayers as any,
-            version: gameState.version + 1
-        }).eq('room_id', gameState.roomId);
+    const exitLocal = () => {
+        setGameState(null);
+        setRoomStatus('waiting');
+        navigate("/uno");
+    };
+
+    if (!gameState) {
+        exitLocal();
+        return;
+    }
+
+    const myIndex = gameState.players.findIndex(p => p.id === user.id);
+    if (myIndex === -1) {
+        exitLocal();
+        return;
+    }
+
+    const newPlayers = gameState.players.filter(p => p.id !== user.id);
+
+    try {
+        if (currentStatus === 'waiting') {
+             await supabase.from('uno_game_states').update({
+                players: newPlayers as any,
+                version: gameState.version + 1
+            }).eq('room_id', gameState.roomId);
+        } else if (currentStatus === 'playing') {
+             // If ONLY 1 player remains, they win immediately
+             if (newPlayers.length === 1) {
+                 const winner = newPlayers[0];
+                 await supabase.from('uno_game_states').update({
+                    players: newPlayers as any,
+                    winner: winner as any,
+                    version: gameState.version + 1
+                 }).eq('room_id', gameState.roomId);
+                 
+                 await supabase.from('uno_rooms').update({ status: 'finished' }).eq('id', gameState.roomId);
+             } else {
+                 // Adjust Turn Logic to keep game flowing
+                 let newIndex = gameState.currentPlayerIndex;
+                 
+                 // If I was situated BEFORE the current player, everyone shifts down one index
+                 if (myIndex < gameState.currentPlayerIndex) {
+                     newIndex = Math.max(0, newIndex - 1);
+                 }
+                 
+                 // If the index is now out of bounds (e.g. last player quit), wrap to 0
+                 if (newIndex >= newPlayers.length) {
+                     newIndex = 0;
+                 }
+                 
+                 await supabase.from('uno_game_states').update({
+                    players: newPlayers as any,
+                    current_player_index: newIndex,
+                    version: gameState.version + 1
+                 }).eq('room_id', gameState.roomId);
+             }
+        }
+    } catch (error) {
+        console.error("Error quitting game:", error);
+        toast({ title: "Error leaving", description: "You might still be in the room.", variant: "destructive" });
     }
     
-    // Future: If playing, maybe auto-fold? 
-    // Right now, just leave.
-    setGameState(null);
-    setRoomStatus('waiting');
-    navigate("/uno");
+    exitLocal();
   };
 
   if (!roomCode) {

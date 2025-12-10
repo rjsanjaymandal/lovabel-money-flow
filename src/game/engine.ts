@@ -41,7 +41,12 @@ export const createDeck = (includeExtensions: boolean = false): UnoCard[] => {
 };
 
 export const shuffleDeck = (deck: UnoCard[]): UnoCard[] => {
-  return [...deck].sort(() => Math.random() - 0.5);
+  const newDeck = [...deck];
+  for (let i = newDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+  }
+  return newDeck;
 };
 
 export const isValidMove = (card: UnoCard, topCard: UnoCard): boolean => {

@@ -15,7 +15,7 @@ interface UnoTableProps {
   onPlayCard: (card: UnoCardType) => void;
   onDrawCard: () => void;
   onCallUno: () => void;
-  onPassTurn?: () => void; // Optional for compatibility, made required by usage if provided
+  onPassTurn?: () => void;
   onExit?: () => void;
   hideRoomCode?: boolean;
   roomCode: string;
@@ -59,7 +59,9 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
     toast({ title: "Copied!", description: "Room code copied to clipboard." });
   };
   
-  const isMyTurn = gameState.players[gameState.currentPlayerIndex].id === currentPlayerId;
+  // GUARD: Ensure current Player exists (fixes crash if player quits)
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const isMyTurn = currentPlayer?.id === currentPlayerId;
   const topCard = gameState.discardPile[gameState.discardPile.length - 1];
 
   // Check if player has any valid moves
@@ -199,7 +201,8 @@ export const UnoTable = ({ gameState, currentPlayerId, onPlayCard, onDrawCard, o
          {/* Opponents Horizontal Scroll */}
          <div className="flex gap-4 overflow-x-auto max-w-full pb-2 scrollbar-hide snap-x items-start mask-linear-fade">
              {otherPlayers.map((player, idx) => {
-                 const isActive = gameState.players[gameState.currentPlayerIndex].id === player.id;
+                 // GUARD: Ensure player exists
+                 const isActive = gameState.players[gameState.currentPlayerIndex]?.id === player.id;
                  return (
                          <motion.div 
                              key={player.id} 
