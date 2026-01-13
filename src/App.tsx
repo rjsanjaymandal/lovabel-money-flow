@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { BottomNav } from "./components/BottomNav";
+import { MainLayout } from "./components/MainLayout";
 import { Loader2 } from "lucide-react";
 
 // Lazy Load Pages
@@ -40,24 +41,30 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        {/* Force Rebuild for UnoBotPage */}
-        {/* Routes for the application */}
         <Suspense fallback={<PageLoader />}>
           <Routes>
+            {/* Public / Standalone Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/transactions" element={<AllTransactions />} />
-            <Route path="/lend-borrow" element={<AllLendBorrow />} />
-            <Route path="/person/:personName" element={<PersonHistory />} />
-            <Route path="/news" element={<NewsView />} />
-            <Route path="/uno" element={<UnoPage />} />
+            
+            {/* Game Routes (Full Screen) */}
             <Route path="/uno/bot" element={<UnoBotPage />} />
             <Route path="/uno/:roomCode" element={<UnoPage />} />
-            <Route path="*" element={<NotFound />} />
+
+            {/* Application Layout Routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/transactions" element={<AllTransactions />} />
+              <Route path="/lend-borrow" element={<AllLendBorrow />} />
+              <Route path="/person/:personName" element={<PersonHistory />} />
+              <Route path="/news" element={<NewsView />} />
+              {/* Uno Lobby */}
+              <Route path="/uno" element={<UnoPage />} />
+              {/* Fallback for authenticated 404s or generic */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </Suspense>
-        <BottomNav />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

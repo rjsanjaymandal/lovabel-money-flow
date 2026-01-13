@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, ArrowRight, Sparkles, UserPlus, LogIn, Mail, Lock } from "lucide-react";
+import { Wallet, ArrowRight, Sparkles, LogIn, Mail, Lock } from "lucide-react";
 import { getSafeErrorMessage } from "@/lib/error-handler";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -80,7 +80,7 @@ const Auth = () => {
            navigate("/dashboard?tab=spend");
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Authentication Failed",
         description: getSafeErrorMessage(error),
@@ -121,7 +121,7 @@ const Auth = () => {
             </div>
 
             {/* --- Tabs --- */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full mb-8">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")} className="w-full mb-8">
               <TabsList className="grid w-full grid-cols-2 bg-black/20 p-1 rounded-2xl h-12">
                 <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white transition-all duration-300">
                   Sign In
@@ -165,7 +165,7 @@ const Auth = () => {
                     <div className="relative">
                       <Input
                         type="email"
-                        placeholder="name@example.com"
+                        placeholder="sam@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -182,7 +182,7 @@ const Auth = () => {
                     <div className="relative">
                       <Input
                         type="password"
-                        placeholder="••••••••"
+                        placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required

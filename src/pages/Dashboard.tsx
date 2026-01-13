@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 // Force rebuild
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, User, Gamepad2 } from "lucide-react";
+import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, Gamepad2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
@@ -35,7 +36,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [people, setPeople] = useState<Person[]>([]);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
@@ -215,140 +216,38 @@ const Dashboard = () => {
           )}
       </header>
 
-      {/* Floating Island Navbar (Desktop Only) */}
-      <div className="fixed top-4 left-0 right-0 z-50 hidden sm:flex justify-center px-4 pointer-events-none">
-        <header className="pointer-events-auto w-full max-w-5xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 flex items-center transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
-          
-          {/* 1. Left Section (Logo) - Flex 1 to push center */}
-          <div className="flex-1 flex justify-start min-w-0">
-            <div 
-              className={`flex items-center gap-2 sm:gap-3 cursor-pointer group select-none pl-2 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`} 
-              onClick={() => handleTabChange("spend")}
-            >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 flex-shrink-0">
-                <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div className="hidden sm:block truncate">
-                <h1 className="text-base font-bold tracking-tight group-hover:text-primary transition-colors leading-none truncate">
-                  EasyExpense
-                </h1>
-                <p className="text-[10px] text-muted-foreground font-medium group-hover:text-primary/70 transition-colors truncate">Financial Freedom</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Center Section (Nav) - Flex None to stay centered */}
-          <nav className={`flex-none flex items-center gap-1 bg-muted/50 p-1 rounded-full border border-white/5 transition-all duration-300 ${isSearchOpen ? 'w-0 opacity-0 overflow-hidden p-0 border-0' : 'w-auto opacity-100'}`}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleTabChange("spend")}
-              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
-                activeTab === "spend" 
-                  ? "bg-background shadow-sm text-foreground scale-105" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              }`}
-            >
-              <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              Spends
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleTabChange("budget")}
-              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
-                activeTab === "budget" 
-                  ? "bg-background shadow-sm text-foreground scale-105" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              }`}
-            >
-              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              Budget
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleTabChange("lend")}
-              className={`rounded-full px-3 sm:px-5 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-all duration-300 ${
-                activeTab === "lend" 
-                  ? "bg-background shadow-sm text-foreground scale-105" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              }`}
-            >
-              <HandCoins className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              Lend
-            </Button>
-          </nav>
-
-          {/* 3. Right Section (Actions) - Flex 1 and Justify End to balance Left */}
-          <div className={`flex-1 flex justify-end items-center gap-2 pr-1 min-w-0 transition-all duration-300 ${isSearchOpen ? 'flex-grow pl-2' : ''}`}>
-             
-            {/* Streak Counter (Desktop) */}
-            {!isSearchOpen && (
-              <div className="hidden md:block mr-2 flex-shrink-0">
-                <StreakCounter userId={user?.id} />
-              </div>
-            )}
-
-            {/* Desktop Search */}
-            <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-full' : 'w-9 flex-shrink-0'}`}>
-              <div 
-                className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 ${isSearchOpen ? 'left-3' : 'left-1/2 -translate-x-1/2'}`}
-                onClick={() => !isSearchOpen && setIsSearchOpen(true)}
-              >
-                <Search className={`w-4 h-4 text-muted-foreground cursor-pointer ${isSearchOpen ? '' : 'hover:text-primary'}`} />
-              </div>
-              
-              <Input 
-                ref={isSearchOpen ? searchInputRef : null}
-                placeholder="Search transactions..." 
-                className={`h-9 bg-muted/50 border-0 rounded-full focus-visible:ring-1 focus-visible:ring-primary/50 transition-all duration-300 ${
-                  isSearchOpen ? 'w-full pl-9 pr-9 opacity-100' : 'w-9 opacity-0 cursor-pointer'
-                }`}
+      {/* Desktop Header */}
+      <div className="hidden sm:flex items-center justify-between px-2 mb-6 mt-4">
+        <div>
+           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+           <p className="text-sm text-muted-foreground">Overview of your activity</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative w-64 transition-all focus-within:w-72">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+             <Input 
+                placeholder="Search..." 
+                className="pl-9 h-10 bg-background/50 border-input/60 rounded-xl focus:bg-background transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onClick={() => !isSearchOpen && setIsSearchOpen(true)}
-              />
-              
-              {isSearchOpen && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-9 w-9 rounded-full hover:bg-transparent text-muted-foreground hover:text-foreground"
-                  onClick={toggleSearch}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-
-            <div className={`w-px h-4 bg-border/50 mx-1 flex-shrink-0 ${isSearchOpen ? 'hidden' : 'block'}`} />
-            
-            <div className={`flex-shrink-0 ${isSearchOpen ? 'hidden' : 'flex'}`}>
-              <UserProfile 
-                 userId={user?.id}
-                 onManageCategories={() => setCategoryManagerOpen(true)}
-                 trigger={
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="rounded-full w-8 h-8 sm:w-9 sm:h-9 hover:bg-background/80 hover:scale-105 transition-all p-0 overflow-hidden border border-transparent hover:border-white/10"
-                    >
-                      <img 
-                        src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`} 
-                        alt="Profile"
-                        className="h-full w-full object-cover"
-                      />
-                    </Button>
-                 }
-              />
-            </div>
+             />
+             {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
           </div>
-        </header>
+          <StreakCounter userId={user?.id} />
+        </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-24 sm:pb-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-0 pb-24 sm:pb-8 max-w-7xl mx-auto w-full">
         <Tabs key={activeTab} value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsContent value="spend" className="mt-0 animate-slide-in">
             <TransactionView 

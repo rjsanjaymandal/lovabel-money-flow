@@ -36,7 +36,7 @@ export function BottomNav() {
     {
       icon: Gamepad2,
       label: "Games",
-      isActive: location.pathname.startsWith("/uno"),
+      isActive: location.pathname === "/uno",
       onClick: () => navigate("/uno"),
     },
     {
@@ -52,19 +52,18 @@ export function BottomNav() {
   // Actually usually /uno/bot is a game, so hide there too.
   // So Show if: /dashboard, /news, /uno (exact).
   
-  const isGameRoom = location.pathname.match(/^\/uno\/.+$/); 
-  // matches /uno/anything.
+  // The MainLayout handles where this component is rendered.
+  // We can simplify the hiding logic, or keep the specific hiding for /uno/:roomCode if that route ends up using MainLayout (which it shouldn't based on App.tsx changes).
+  // But just in case, let's keep the game room check.
+
+  const isGameRoom = location.pathname.match(/^\/uno\/.+$/) && location.pathname !== "/uno/bot";
+  // actually /uno/bot is also a game room. 
   
-  if (
-      location.pathname === "/auth" || 
-      location.pathname === "/" || 
-      location.pathname.startsWith("/uno")
-  ) {
-    return null;
-  }
+  // If we are in MainLayout, we generally show it. But let's be safe.
+  if (isGameRoom) return null;
 
   return (
-    <nav className="fixed bottom-6 left-4 right-4 z-50 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px]">
+    <nav className="fixed bottom-6 left-4 right-4 z-50 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[400px] md:hidden">
       <div className="glass-panel rounded-2xl p-2 flex items-center overflow-x-auto scrollbar-hide shadow-2xl shadow-primary/10 gap-1">
         {navItems.map((item, index) => (
           <button

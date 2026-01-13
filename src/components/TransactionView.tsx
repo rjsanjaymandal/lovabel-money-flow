@@ -121,169 +121,154 @@ export function TransactionView({ userId, user, categories, onTransactionAdded, 
 
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in pb-24 sm:pb-24 px-4 sm:px-0 h-auto flex flex-col sm:block relative z-10">
+    <div className="space-y-8 animate-fade-in pb-24 sm:pb-24 px-4 sm:px-6 max-w-[1600px] mx-auto relative z-10 pt-24 sm:pt-6">
       <ZenBackground />
+      
       {/* Header Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2 px-0 sm:px-0 shrink-0">
-        <div className="space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground/90 hidden sm:block">
-            {getGreeting()}, <span className="text-primary">{userName}</span>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative">
+        <div className="space-y-2 relative z-20">
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-indigo-200 backdrop-blur-xl">
+             <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+             Financial Command Center
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white drop-shadow-sm">
+            {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">{userName}</span>
           </h2>
-          <p className="text-muted-foreground/60 font-medium hidden sm:block">
-            Here's your financial overview.
+          <p className="text-lg text-indigo-100/70 font-medium max-w-2xl">
+            Track your expenses, manage budgets, and achieve your financial goals with AI-powered insights.
           </p>
         </div>
         
-        {/* Desktop Floating Pill Header */}
-        <div className="hidden sm:flex pointer-events-auto w-full max-w-md bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full px-2 py-2 sm:px-4 sm:py-2.5 items-center justify-between transition-all duration-300 hover:bg-background/70 hover:shadow-primary/5 hover:scale-[1.005]">
-          <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
-          <div className="h-6 w-px bg-border/50 mx-2" />
+        {/* Glass Controls Pill - Redesigned */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-xl border border-white/10 p-2 rounded-3xl shadow-xl self-start xl:self-auto relative z-20">
+          <div className="scale-100">
+            <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
+          </div>
+          <div className="h-8 w-px bg-white/10 mx-1 hidden sm:block" />
           <ModeToggle />
         </div>
+      </div>
 
-        {/* Mobile Month Selector */}
-        <div className="sm:hidden w-full bg-background/80 rounded-2xl p-1.5 backdrop-blur-md border border-white/5 flex gap-2">
-           <div className="flex-1">
-             <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        {/* Row 1: Full Width Stats */}
+        <div className="xl:col-span-3">
+          <MonthlyStats
+            income={stats.income}
+            expenses={stats.expenses}
+            balance={stats.balance}
+            userName={userName}
+          />
+        </div>
+
+        {/* Row 2: Main Content Split */}
+        
+        {/* Left Column: Charts (2/3 width on large screens) */}
+        <div className="xl:col-span-2 space-y-6">
+           {/* Chart Container */}
+           <div className="h-[400px]">
+              <SpendingChart userId={userId} selectedMonth={selectedMonth} />
            </div>
-           <ModeToggle />
-        </div>
-      </div>
-
-      {/* Stats Overview (Unified for Mobile & Desktop) */}
-      <MonthlyStats
-        income={stats.income}
-        expenses={stats.expenses}
-        balance={stats.balance}
-        userName={userName}
-      />
-
-      {/* Mobile Actions (Inline - Like Desktop) */}
-      <div className="sm:hidden flex items-center gap-2 mb-6">
-        <div className="flex-1">
-          <AddTransactionDialog 
-            onSuccess={handleTransactionSuccess} 
-            categories={categories}
-            open={isAddDialogOpen}
-            onOpenChange={setIsAddDialogOpen}
-            defaultValues={voiceData}
-          >
-            <Button className="w-full h-12 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] bg-primary text-primary-foreground border-0 font-semibold text-base">
-              <Plus className="w-5 h-5 mr-2" />
-              Add Transaction
-            </Button>
-          </AddTransactionDialog>
-        </div>
-        
-        <VoiceInput 
-          onResult={handleVoiceResult} 
-          variant="outline"
-          className="h-12 w-12 rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm"
-        />
-        
-        <ScanReceiptButton 
-          onScanComplete={(data) => {
-            setVoiceData({
-              amount: data.amount?.toString() || "",
-              description: data.merchant || "",
-              type: "expense"
-            });
-            setIsAddDialogOpen(true);
-          }}
-          variant="outline"
-          className="h-12 w-12 rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm"
-        />
-
-        <ExportButton
-          transactions={transactions}
-          selectedMonth={selectedMonth}
-          income={stats.income}
-          expenses={stats.expenses}
-          variant="outline"
-          className="h-12 w-12 rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm p-0"
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="flex flex-col sm:grid sm:gap-8 sm:lg:grid-cols-3 flex-1 sm:flex-none min-h-0">
-        {/* Left Column: Chart & Actions & List */}
-        <div className="contents sm:block sm:lg:col-span-2 sm:space-y-8">
-          {/* Actions (Desktop) */}
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="flex-1 flex gap-2">
-              <AddTransactionDialog 
+           
+           {/* Actions Row */}
+           <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+             <AddTransactionDialog 
                 onSuccess={handleTransactionSuccess} 
                 categories={categories}
                 open={isAddDialogOpen}
                 onOpenChange={setIsAddDialogOpen}
                 defaultValues={voiceData}
               >
-                <Button className="w-full h-12 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-[1.02] bg-primary text-primary-foreground border-0 font-semibold text-base">
+                <Button className="h-12 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 font-semibold px-6 flex-shrink-0">
                   <Plus className="w-5 h-5 mr-2" />
                   Add Transaction
                 </Button>
               </AddTransactionDialog>
-              <VoiceInput 
-                onResult={handleVoiceResult} 
-                variant="outline"
-                className="h-12 w-12 rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm"
-              />
-            </div>
-            <ExportButton
-              transactions={transactions}
+              
+              <div className="flex gap-2">
+                <VoiceInput 
+                  onResult={handleVoiceResult} 
+                  variant="outline"
+                  className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white"
+                />
+                 <ScanReceiptButton 
+                  onScanComplete={(data) => {
+                    setVoiceData({
+                      amount: data.amount?.toString() || "",
+                      description: data.merchant || "",
+                      type: "expense"
+                    });
+                    setIsAddDialogOpen(true);
+                  }}
+                  variant="outline"
+                  className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white"
+                />
+                <ExportButton
+                  transactions={transactions}
+                  selectedMonth={selectedMonth}
+                  income={stats.income}
+                  expenses={stats.expenses}
+                  variant="outline"
+                  className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white p-0"
+                />
+              </div>
+           </div>
+
+           {/* Transaction List */}
+           <div className="rounded-[2.5rem] bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden shadow-xl min-h-[500px]">
+              <div className="p-6 border-b border-white/5 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/5">
+                   <Newspaper className="w-5 h-5 text-indigo-300" />
+                </div>
+                <h3 className="font-semibold text-lg text-white">Recent Activity</h3>
+              </div>
+              <div className="p-2">
+                 <MonthlyTransactionList
+                   userId={userId}
+                   selectedMonth={selectedMonth}
+                   onTransactionsLoaded={setTransactions}
+                 />
+              </div>
+           </div>
+        </div>
+
+        {/* Right Column: Widgets (1/3 width) */}
+        <div className="space-y-6">
+          <div className="rounded-[2rem] bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+             <BudgetCard
+              userId={userId}
               selectedMonth={selectedMonth}
-              income={stats.income}
-              expenses={stats.expenses}
+              totalExpenses={stats.expenses}
+              budget={monthlyBudget}
             />
           </div>
-
-
-
-          {/* Spending Graph - Zen Style (Now visible on mobile, Order 1) */}
-          <div className="order-1 sm:order-none mb-6 sm:mb-0 rounded-3xl bg-card/40 border border-white/10 p-6 backdrop-blur-xl shadow-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                <BarChart3 className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-lg text-foreground/80">Spending Analysis</h3>
-            </div>
-            <SpendingChart userId={userId} selectedMonth={selectedMonth} />
+          
+          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-6 shadow-xl space-y-4">
+             <h3 className="font-semibold text-white flex items-center gap-2">
+               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+               Quick Insights
+             </h3>
+             <AIInsights
+                userId={userId}
+                selectedMonth={selectedMonth}
+                income={stats.income}
+                expenses={stats.expenses}
+                transactions={transactions}
+                budget={monthlyBudget}
+              />
           </div>
 
-          {/* Transaction List (Order 3) */}
-          <div className="order-3 sm:order-none flex-1">
-             <MonthlyTransactionList
-               userId={userId}
-               selectedMonth={selectedMonth}
-               onTransactionsLoaded={setTransactions}
-             />
+          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+             <SubscriptionManager userId={userId} onTransactionAdded={handleTransactionSuccess} />
+          </div>
+          
+          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+             <MonthlyLendBorrowSummary userId={userId} selectedMonth={selectedMonth} />
           </div>
         </div>
 
-        {/* Right Column: Insights & Budget (Order 2) */}
-        <div className="order-2 sm:order-none space-y-6 mb-6 sm:mb-0">
-          <BudgetCard
-            userId={userId}
-            selectedMonth={selectedMonth}
-            totalExpenses={stats.expenses}
-            budget={monthlyBudget}
-          />
-          <MonthlyLendBorrowSummary userId={userId} selectedMonth={selectedMonth} />
-          <SubscriptionManager userId={userId} onTransactionAdded={handleTransactionSuccess} />
-          <AIInsights
-            userId={userId}
-            selectedMonth={selectedMonth}
-            income={stats.income}
-            expenses={stats.expenses}
-            transactions={transactions}
-            budget={monthlyBudget}
-          />
-        </div>
       </div>
-      
-      {/* Mobile Bottom Actions Bar */}
-      {/* Mobile Bottom Dock */}
-
     </div>
   );
 }
