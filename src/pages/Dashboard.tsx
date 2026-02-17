@@ -27,6 +27,8 @@ import { StreakCounter } from "@/components/StreakCounter";
 import { ZenBackground } from "@/components/ZenBackground";
 import { MonthSelector } from "@/components/MonthSelector";
 import { ModeToggle } from "@/components/mode-toggle";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface Person {
   name: string;
@@ -177,76 +179,96 @@ const Dashboard = () => {
       <ZenBackground />
       {/* Premium Header */}
       {/* Floating Island Navbar */}
-      {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-2xl border-b border-white/5 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300 sm:hidden">
-        {isSearchOpen ? (
-          <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <Input
-                ref={searchInputRef}
-                placeholder="Search transactions..."
-                className="h-10 pl-9 text-base bg-white/10 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/40"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSearch}
-              className="h-10 w-10 rounded-full hover:bg-white/10 flex-shrink-0"
+      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden pointer-events-none pt-[env(safe-area-inset-top)] mt-2 px-3">
+        <div
+          className={cn(
+            "mx-auto bg-background/40 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] px-4 flex items-center justify-between transition-all duration-500 pointer-events-auto",
+            isSearchOpen
+              ? "h-16 rounded-[1.5rem] w-full"
+              : "h-14 rounded-2xl w-full max-w-[400px]",
+          )}
+        >
+          {isSearchOpen ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="flex items-center w-full gap-3"
             >
-              <X className="w-5 h-5 text-muted-foreground" />
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20 cursor-pointer active:scale-95 transition-transform"
-                onClick={() => handleTabChange("spend")}
-              >
-                <Wallet className="w-5 h-5 text-white" />
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                <Input
+                  ref={searchInputRef}
+                  placeholder="Search transactions..."
+                  className="h-10 pl-9 text-base bg-white/5 border-0 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/40"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-[0.2em] leading-none mb-1">
-                  {getGreeting()}
-                </span>
-                <h1 className="text-base font-bold tracking-tight leading-none text-foreground">
-                  {user?.user_metadata?.full_name?.split(" ")[0] || "Sanjay"}
-                </h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <StreakCounter userId={user?.id} />
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleSearch}
-                className="h-9 w-9 rounded-full bg-white/5 border border-white/10 text-muted-foreground active:scale-90 transition-all"
+                className="h-10 w-10 rounded-xl hover:bg-white/10 flex-shrink-0 active:scale-90 transition-transform"
               >
-                <Search className="w-4 h-4" />
+                <X className="w-5 h-5 text-muted-foreground" />
               </Button>
-              <UserProfile
-                userId={user?.id}
-                onManageCategories={() => setCategoryManagerOpen(true)}
-                trigger={
-                  <div className="h-9 w-9 rounded-full border border-primary/20 p-0.5 active:scale-90 transition-transform overflow-hidden cursor-pointer">
-                    <img
-                      src={
-                        user?.user_metadata?.avatar_url ||
-                        `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`
-                      }
-                      alt="Profile"
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  </div>
-                }
-              />
-            </div>
-          </>
-        )}
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-2.5">
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20 cursor-pointer shrink-0"
+                  onClick={() => handleTabChange("spend")}
+                >
+                  <Wallet className="w-5 h-5 text-white" />
+                </motion.div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest leading-none mb-1 opacity-60 truncate">
+                    {getGreeting()}
+                  </span>
+                  <h1 className="text-sm font-black tracking-tight leading-none text-foreground truncate">
+                    {user?.user_metadata?.full_name?.split(" ")[0] || "Sanjay"}
+                  </h1>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <StreakCounter userId={user?.id} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSearch}
+                  className="h-9 w-9 rounded-xl bg-white/5 border border-white/5 text-muted-foreground active:scale-90 transition-all shrink-0"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+                <UserProfile
+                  userId={user?.id}
+                  onManageCategories={() => setCategoryManagerOpen(true)}
+                  trigger={
+                    <motion.div
+                      whileTap={{ scale: 0.9 }}
+                      className="h-9 w-9 rounded-xl border border-primary/20 p-0.5 overflow-hidden cursor-pointer bg-white/5 shrink-0 flex items-center justify-center"
+                    >
+                      <img
+                        src={
+                          user?.user_metadata?.avatar_url ||
+                          `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`
+                        }
+                        alt="Profile"
+                        className="h-full w-full rounded-[0.55rem] object-cover flex-shrink-0"
+                      />
+                    </motion.div>
+                  }
+                />
+              </div>
+            </motion.div>
+          )}
+        </div>
       </header>
 
       {/* Desktop Header */}
@@ -301,7 +323,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-24 sm:pt-0 pb-24 sm:pb-8 max-w-7xl mx-auto w-full relative z-0">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-0 pb-24 sm:pb-8 max-w-7xl mx-auto w-full relative z-0">
         <Tabs
           key={activeTab}
           value={activeTab}

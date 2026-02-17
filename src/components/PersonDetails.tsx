@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +12,14 @@ import {
   CheckCircle,
   Trash2,
   Sparkles,
+  ChevronLeft,
+  ArrowLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { getSafeErrorMessage } from "@/lib/error-handler";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const amountSchema = z
   .number()
@@ -45,6 +49,13 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
     description: "",
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const playHaptic = useCallback(() => {
+    if (window.navigator?.vibrate) {
+      window.navigator.vibrate(10);
+    }
+  }, []);
 
   useEffect(() => {
     if (userId && personName) {
@@ -64,6 +75,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
   };
 
   const handleQuickAdd = async (type: "lent" | "borrowed") => {
+    playHaptic();
     if (!quickAddForm.amount) {
       toast({
         title: "Oops! ⚠️",
@@ -79,7 +91,6 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Validate amount
       const parsedAmount = parseFloat(quickAddForm.amount);
       const validationResult = amountSchema.safeParse(parsedAmount);
 
@@ -120,6 +131,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
   };
 
   const handleSettle = async (id: string) => {
+    playHaptic();
     const { error } = await supabase
       .from("lend_borrow")
       .update({ status: "settled" })
@@ -141,6 +153,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
   };
 
   const handleClearAll = async () => {
+    playHaptic();
     const pendingIds = records
       .filter((r) => r.status === "pending")
       .map((r) => r.id);
@@ -181,298 +194,265 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
   }, 0);
 
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-6 h-full flex flex-col animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in pb-24">
+      {/* Back Button & Header */}
+      <div className="flex items-center gap-4 px-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            playHaptic();
+            navigate(-1);
+          }}
+          className="rounded-2xl w-12 h-12 bg-white/5 border border-white/5 active:scale-90 transition-all"
+        >
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Button>
+        <div>
+          <h2 className="text-2xl font-black tracking-tight leading-tight">
+            {personName}
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+            Transaction History
+          </p>
+        </div>
+      </div>
+
       {/* Mobile-optimized Balance Card */}
-      <Card
-        className={`border-2 shadow-lg overflow-hidden relative ${
-          netBalance >= 0 ? "border-green-500/20" : "border-red-500/20"
-        }`}
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-[3rem] p-8 border backdrop-blur-3xl shadow-2xl transition-all duration-500",
+          netBalance >= 0
+            ? "bg-emerald-500/10 border-emerald-500/20"
+            : "bg-rose-500/10 border-rose-500/20",
+        )}
       >
-        <div
-          className={`absolute inset-0 ${
-            netBalance >= 0 ? "bg-green-500/5" : "bg-red-500/5"
-          }`}
-        />
-        <CardHeader className="relative pb-3 sm:pb-4">
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-0.5 sm:space-y-1 flex-1 min-w-0">
-              <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
-                <span className="truncate">{personName}</span>
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary flex-shrink-0" />
-              </CardTitle>
-              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                Net Balance
-              </p>
-            </div>
-            {pendingRecords.length > 0 && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleClearAll}
-                className="hover:scale-105 transition-transform touch-manipulation h-8 text-xs sm:h-9 sm:text-sm"
-              >
-                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Clear All</span>
-                <span className="xs:hidden">Clear</span>
-              </Button>
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+          <Sparkles className="w-48 h-48" />
+        </div>
+
+        <div className="relative flex flex-col items-center text-center space-y-4">
+          <Badge
+            variant="outline"
+            className={cn(
+              "px-4 py-1.5 rounded-full border-2 font-black text-[10px] tracking-widest uppercase",
+              netBalance >= 0
+                ? "border-emerald-500/30 text-emerald-500"
+                : "border-rose-500/30 text-rose-500",
             )}
-          </div>
-        </CardHeader>
-        <CardContent className="relative pt-0">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <p
-              className={`text-3xl sm:text-4xl md:text-5xl font-bold ${
-                netBalance >= 0 ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              ₹{Math.abs(netBalance).toFixed(2)}
+          >
+            {netBalance >= 0 ? "Receivable 💰" : "Payable 💸"}
+          </Badge>
+
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-60">
+              Net Balance
             </p>
-            <Badge
-              variant="outline"
-              className={`text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-0.5 sm:py-1 font-semibold ${
-                netBalance >= 0
-                  ? "border-green-500 bg-green-500/10 text-green-700"
-                  : "border-red-500 bg-red-500/10 text-red-700"
-              }`}
+            <p
+              className={cn(
+                "text-5xl sm:text-6xl font-black tracking-tighter tabular-nums",
+                netBalance >= 0 ? "text-emerald-500" : "text-rose-500",
+              )}
             >
-              {netBalance >= 0 ? "You'll Get 💰" : "You Owe 💸"}
-            </Badge>
+              ₹{Math.abs(netBalance).toLocaleString()}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+
+          {pendingRecords.length > 0 && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleClearAll}
+              className="rounded-2xl h-11 px-6 font-black tracking-tight shadow-xl shadow-rose-500/20 active:scale-95 transition-all text-sm"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Settle Entire Account
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* Mobile-optimized Quick Add Form */}
-      <Card className="border-2 shadow-md animate-scale-in">
-        <CardHeader className="pb-3 sm:pb-4">
-          <CardTitle className="text-base sm:text-lg md:text-xl flex items-center gap-1.5 sm:gap-2">
-            Quick Add Transaction ⚡
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-4">
-          <div className="space-y-3">
-            <div className="space-y-1.5 sm:space-y-2">
-              <Label
-                htmlFor="amount"
-                className="text-xs sm:text-sm font-semibold"
-              >
-                Amount (₹)
-              </Label>
-              <Input
-                id="amount"
-                placeholder="0.00"
-                type="number"
-                step="0.01"
-                min="0.01"
-                max="99999999.99"
-                value={quickAddForm.amount}
-                onChange={(e) =>
-                  setQuickAddForm({ ...quickAddForm, amount: e.target.value })
-                }
-                className="h-11 sm:h-12 text-base sm:text-lg touch-manipulation"
-              />
-            </div>
-            <div className="space-y-1.5 sm:space-y-2">
-              <Label
-                htmlFor="description"
-                className="text-xs sm:text-sm font-semibold"
-              >
-                Description
-              </Label>
-              <Input
-                id="description"
-                placeholder="What's this for?"
-                maxLength={500}
-                value={quickAddForm.description}
-                onChange={(e) =>
-                  setQuickAddForm({
-                    ...quickAddForm,
-                    description: e.target.value,
-                  })
-                }
-                className="h-11 sm:h-12 touch-manipulation"
-              />
-            </div>
+      <div className="rounded-[2.5rem] bg-white/5 border border-white/5 p-6 sm:p-8 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black">
+            ⚡
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <Button
-              className="h-12 sm:h-13 bg-red-500 hover:bg-red-600 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
-              onClick={() => handleQuickAdd("lent")}
-            >
-              <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-              Given (Red)
-            </Button>
-            <Button
-              className="h-12 sm:h-13 bg-green-500 hover:bg-green-600 transition-all hover:scale-105 active:scale-95 text-white font-semibold touch-manipulation text-sm sm:text-base"
-              onClick={() => handleQuickAdd("borrowed")}
-            >
-              <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-              Taken (Green)
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          <h3 className="text-xl font-black tracking-tight">Quick Add</h3>
+        </div>
 
-      {/* Mobile-optimized Transactions List */}
-      <div className="flex-1 overflow-auto space-y-3 sm:space-y-4">
-        {pendingRecords.length > 0 && (
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-1.5 sm:gap-2">
-              Pending Transactions
-              <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                {pendingRecords.length}
-              </Badge>
-            </h3>
-            <div className="space-y-2">
-              {pendingRecords.map((record, index) => (
-                <Card
-                  key={record.id}
-                  className="hover:shadow-lg transition-all duration-200 border-l-4 hover:scale-[1.01] active:scale-[0.99]"
-                  style={{
-                    borderLeftColor:
-                      record.type === "lent" ? "#ef4444" : "#22c55e", // Red-500 : Green-500
-                    animationDelay: `${index * 0.05}s`,
-                  }}
-                >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="space-y-3">
-                      {/* Top row: icon, badge, description */}
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <div
-                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            record.type === "lent"
-                              ? "bg-red-100 text-red-600"
-                              : "bg-green-100 text-green-600"
-                          }`}
-                        >
-                          {record.type === "lent" ? (
-                            <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                          ) : (
-                            <ArrowDownRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Badge
-                            variant="outline"
-                            className={`font-semibold text-[10px] sm:text-xs mb-1 ${
-                              record.type === "lent"
-                                ? "border-red-200 bg-red-50 text-red-700"
-                                : "border-green-200 bg-green-50 text-green-700"
-                            }`}
-                          >
-                            {record.type === "lent" ? "Given 📤" : "Taken 📥"}
-                          </Badge>
-                          {record.description && (
-                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                              {record.description}
-                            </p>
-                          )}
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                            {format(new Date(record.date), "MMM d, yyyy")}
-                          </p>
-                        </div>
+        <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="amount"
+              className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground/60"
+            >
+              Amount (₹)
+            </Label>
+            <Input
+              id="amount"
+              placeholder="0.00"
+              type="number"
+              value={quickAddForm.amount}
+              onChange={(e) =>
+                setQuickAddForm({ ...quickAddForm, amount: e.target.value })
+              }
+              className="h-14 text-2xl font-black bg-white/5 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/20 tabular-nums px-5"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label
+              htmlFor="description"
+              className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground/60"
+            >
+              Note
+            </Label>
+            <Input
+              id="description"
+              placeholder="Ex: Dinner, Fuel, Rent..."
+              value={quickAddForm.description}
+              onChange={(e) =>
+                setQuickAddForm({
+                  ...quickAddForm,
+                  description: e.target.value,
+                })
+              }
+              className="h-14 bg-white/5 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/20 px-5"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            className="h-14 rounded-2xl bg-rose-500 text-white font-black shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+            onClick={() => handleQuickAdd("lent")}
+          >
+            <ArrowUpRight className="w-5 h-5 mr-1" />
+            LENT
+          </Button>
+          <Button
+            className="h-14 rounded-2xl bg-emerald-500 text-white font-black shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+            onClick={() => handleQuickAdd("borrowed")}
+          >
+            <ArrowDownRight className="w-5 h-5 mr-1" />
+            TAKEN
+          </Button>
+        </div>
+      </div>
+
+      {/* Transactions List */}
+      <div className="space-y-6">
+        <AnimatePresence mode="popLayout">
+          {pendingRecords.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-black tracking-tight px-2">
+                Pending Transactions ({pendingRecords.length})
+              </h3>
+              <div className="space-y-3">
+                {pendingRecords.map((record, index) => (
+                  <motion.div
+                    key={record.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, x: 20 }}
+                    className="relative group p-4 rounded-3xl bg-background/40 backdrop-blur-3xl border border-white/5 shadow-lg flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div
+                        className={cn(
+                          "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+                          record.type === "lent"
+                            ? "bg-rose-500/10 text-rose-500"
+                            : "bg-emerald-500/10 text-emerald-500",
+                        )}
+                      >
+                        {record.type === "lent" ? (
+                          <ArrowUpRight className="w-6 h-6" />
+                        ) : (
+                          <ArrowDownRight className="w-6 h-6" />
+                        )}
                       </div>
-
-                      {/* Bottom row: amount and settle button */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                        <p
-                          className={`text-lg sm:text-xl font-bold ${
-                            record.type === "lent"
-                              ? "text-red-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {record.type === "lent" ? "-" : "+"}₹
-                          {record.amount.toFixed(2)}
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-foreground truncate">
+                          {record.description ||
+                            (record.type === "lent"
+                              ? "Money Given"
+                              : "Money Taken")}
                         </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSettle(record.id)}
-                          className="hover:scale-105 active:scale-95 transition-transform touch-manipulation h-8 sm:h-9 text-xs sm:text-sm"
-                        >
-                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          Settle
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {settledRecords.length > 0 && (
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-1.5 sm:gap-2">
-              Settled Transactions ✅
-              <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                {settledRecords.length}
-              </Badge>
-            </h3>
-            <div className="space-y-2">
-              {settledRecords.map((record) => (
-                <Card
-                  key={record.id}
-                  className="opacity-60 hover:opacity-80 transition-opacity"
-                >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-muted flex-shrink-0">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] sm:text-xs"
-                          >
-                            {record.type === "lent" ? "Given" : "Taken"}
-                          </Badge>
-                          {record.description && (
-                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                              {record.description}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                           {format(new Date(record.date), "MMM d, yyyy")}
                         </p>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <p className="text-sm sm:text-base font-semibold text-muted-foreground whitespace-nowrap">
-                          {record.type === "lent" ? "-" : "+"}₹
-                          {record.amount.toFixed(2)}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <p
+                        className={cn(
+                          "text-lg font-black tracking-tighter tabular-nums",
+                          record.type === "lent"
+                            ? "text-rose-500"
+                            : "text-emerald-500",
+                        )}
+                      >
+                        ₹{record.amount.toFixed(0)}
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleSettle(record.id)}
+                        className="h-8 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest px-3 border border-white/5"
+                      >
+                        Settle
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {settledRecords.length > 0 && (
+            <div className="space-y-4 pt-4">
+              <h3 className="text-lg font-black tracking-tight px-2 text-muted-foreground/60">
+                Settled Account
+              </h3>
+              <div className="space-y-3 opacity-60">
+                {settledRecords.map((record) => (
+                  <div
+                    key={record.id}
+                    className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                        <CheckCircle className="w-5 h-5 opacity-40" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-muted-foreground line-through">
+                          {record.description || "Transaction"}
                         </p>
-                        <Badge
-                          variant="secondary"
-                          className="text-[9px] sm:text-xs"
-                        >
-                          Settled
-                        </Badge>
+                        <p className="text-[10px] font-medium text-muted-foreground/40">
+                          {format(new Date(record.date), "MMM d, yyyy")}
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <p className="text-sm font-black text-muted-foreground tabular-nums opacity-40">
+                      ₹{record.amount.toFixed(0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
 
         {records.length === 0 && (
-          <Card className="border-2 border-dashed">
-            <CardContent className="p-8 sm:p-12 text-center space-y-2 sm:space-y-3">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted mx-auto flex items-center justify-center">
-                <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
-              </div>
-              <p className="text-sm sm:text-base md:text-lg font-semibold text-muted-foreground">
-                No transactions yet
-              </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Add your first transaction above to get started!
-              </p>
-            </CardContent>
-          </Card>
+          <div className="py-20 text-center space-y-4 bg-white/5 rounded-[3rem] border border-dashed border-white/10 mx-2">
+            <div className="w-16 h-16 rounded-3xl bg-white/5 mx-auto flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-muted-foreground/20" />
+            </div>
+            <p className="text-sm font-bold text-muted-foreground/40">
+              No activity yet
+            </p>
+          </div>
         )}
       </div>
     </div>

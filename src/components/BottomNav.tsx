@@ -87,8 +87,8 @@ export function BottomNav() {
   if (isGameRoom) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-safe pointer-events-none md:hidden sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[420px] sm:pb-0">
-      <div className="glass-panel mx-4 mb-4 sm:mx-0 sm:mb-0 w-full rounded-[2rem] p-1.5 flex items-center justify-between shadow-2xl shadow-primary/20 pointer-events-auto border-white/10 ring-1 ring-white/5 backdrop-blur-3xl bg-background/40">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-[max(0.75rem,env(safe-area-inset-bottom))] pointer-events-none md:hidden sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[420px] sm:pb-0">
+      <div className="glass-panel mx-4 sm:mx-0 w-full rounded-[2.5rem] p-1.5 flex items-center justify-between shadow-2xl shadow-primary/20 pointer-events-auto border-white/10 ring-1 ring-white/5 backdrop-blur-3xl bg-background/40">
         {navItems.map((item, index) => (
           <button
             key={index}

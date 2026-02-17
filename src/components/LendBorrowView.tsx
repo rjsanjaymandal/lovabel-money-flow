@@ -36,6 +36,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const amountSchema = z
   .number()
@@ -286,76 +287,67 @@ export function LendBorrowView({
   );
 
   return (
-    <div className="space-y-6 animate-fade-in pb-20">
-      {/* ... previous content ... */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {/* Summary Cards */}
-        <Card className="border-none shadow-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <CardContent className="p-4 sm:p-5 relative">
-            <div className="absolute top-2 right-2 opacity-10 rotate-12">
-              <ArrowUpRight className="w-24 h-24 text-emerald-500" />
-            </div>
-            <div className="relative pt-12">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-500 font-bold shrink-0">
-                  <ArrowUpRight className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground/60">
-                  You're Owed
-                </span>
+    <div className="space-y-8 animate-fade-in pb-24">
+      {/* Summary Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-emerald-500/10 backdrop-blur-3xl border border-emerald-500/10 p-6 flex flex-col justify-between group">
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+            <ArrowUpRight className="w-24 h-24 text-emerald-500" />
+          </div>
+          <div className="relative pt-8">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                <ArrowUpRight className="w-4 h-4" />
               </div>
-              <p className="text-xl sm:text-2xl md:text-3xl font-black text-emerald-600 tracking-tight">
-                ₹{stats.totalOwedToYou.toLocaleString()}
-              </p>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">
+                You're Owed
+              </span>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-lg bg-gradient-to-br from-rose-500/10 to-rose-500/5 backdrop-blur-xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <CardContent className="p-4 sm:p-5 relative">
-            <div className="absolute top-2 right-2 opacity-10 -rotate-12">
-              <ArrowDownLeft className="w-24 h-24 text-rose-500" />
-            </div>
-            <div className="relative pt-12">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-500 font-bold shrink-0">
-                  <ArrowDownLeft className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground/60">
-                  You Owe
-                </span>
-              </div>
-              <p className="text-xl sm:text-2xl md:text-3xl font-black text-rose-600 tracking-tight">
-                ₹{stats.totalYouOwe.toLocaleString()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Header & Add Button */}
-      <div className="flex items-center justify-between px-1">
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-            People
-          </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            {people.length} active{" "}
-            {people.length === 1 ? "contact" : "contacts"}
-          </p>
+            <p className="text-3xl font-black text-foreground tracking-tighter">
+              ₹{stats.totalOwedToYou.toLocaleString()}
+            </p>
+          </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-rose-500/10 backdrop-blur-3xl border border-rose-500/10 p-6 flex flex-col justify-between group">
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+            <ArrowDownLeft className="w-24 h-24 text-rose-500" />
+          </div>
+          <div className="relative pt-8">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 rounded-lg bg-rose-500 text-white shadow-lg shadow-rose-500/20">
+                <ArrowDownLeft className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-rose-500/80">
+                You Owe
+              </span>
+            </div>
+            <p className="text-3xl font-black text-foreground tracking-tighter">
+              ₹{stats.totalYouOwe.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Header & Actions */}
+      <div className="flex items-center justify-between px-2">
+        <div>
+          <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
+            People
+            <span className="text-xs font-bold text-muted-foreground/40 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+              {people.length}
+            </span>
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-2">
           <AddTransactionDialog>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="rounded-full w-10 h-10 shadow-sm border-white/10 bg-white/5 active:scale-90"
-              title="Add Transaction"
+              className="rounded-2xl w-12 h-12 bg-white/5 border border-white/5 text-muted-foreground active:scale-90"
             >
-              <Wallet className="w-5 h-5 text-muted-foreground" />
+              <Wallet className="w-5 h-5" />
             </Button>
           </AddTransactionDialog>
           <SplitBillDialog people={people} onSuccess={onPersonAdded} />
@@ -363,84 +355,113 @@ export function LendBorrowView({
         </div>
       </div>
 
-      {/* People Grid */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* People List/Grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {people.length === 0 ? (
-          <Card className="col-span-full border-dashed border-2 border-muted bg-muted/5 p-8 sm:p-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
-              <Users className="w-8 h-8 text-muted-foreground" />
+          <div className="col-span-full py-20 px-4 rounded-[3rem] bg-white/5 border border-dashed border-white/10 text-center flex flex-col items-center gap-4">
+            <div className="w-20 h-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-muted-foreground/20">
+              <Users className="w-10 h-10" />
             </div>
-            <h3 className="text-lg font-semibold mb-1">No contacts yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Add people to start tracking who owes you and who you owe.
-            </p>
-          </Card>
+            <div>
+              <h3 className="text-lg font-bold text-foreground/80">
+                No contacts yet
+              </h3>
+              <p className="text-sm text-muted-foreground/40 max-w-[200px] mx-auto">
+                Start tracking who owes you and who you owe.
+              </p>
+            </div>
+          </div>
         ) : (
           people.map((person, index) => (
-            <Card
+            <motion.div
               key={person.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
               onClick={() =>
                 navigate(`/person/${encodeURIComponent(person.name)}`)
               }
-              className="group cursor-pointer border-none bg-card/40 hover:bg-card/60 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl relative overflow-hidden"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="relative group cursor-pointer"
             >
               <div
-                className={`absolute top-0 left-0 w-1 h-full transition-colors duration-300 ${
-                  person.balance >= 0 ? "bg-emerald-500" : "bg-rose-500"
-                }`}
+                className={cn(
+                  "absolute inset-0 rounded-[2.25rem] transition-all duration-300 group-hover:scale-[1.02] -z-10 bg-background/40 backdrop-blur-3xl border border-white/5 shadow-xl group-hover:shadow-primary/5 group-hover:border-white/10",
+                  person.balance >= 0
+                    ? "group-hover:bg-emerald-500/5"
+                    : "group-hover:bg-rose-500/5",
+                )}
               />
 
-              <CardContent className="p-4 sm:p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold shadow-lg ${
-                        person.balance >= 0
-                          ? "bg-emerald-500/10 text-emerald-500"
-                          : "bg-rose-500/10 text-rose-500"
-                      }`}
-                    >
-                      {person.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-base sm:text-lg leading-none mb-1.5 group-hover:text-primary transition-colors">
-                        {person.name}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className={`text-[10px] sm:text-xs font-medium border-0 ${
+              <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div
+                    className={cn(
+                      "w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg transition-transform duration-500 group-hover:rotate-6",
+                      person.balance >= 0
+                        ? "bg-emerald-500/10 text-emerald-500 shadow-emerald-500/10"
+                        : "bg-rose-500/10 text-rose-500 shadow-rose-500/10",
+                    )}
+                  >
+                    {person.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-black text-lg text-foreground truncate">
+                      {person.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0 animate-pulse",
                           person.balance >= 0
-                            ? "bg-emerald-500/10 text-emerald-500"
-                            : "bg-rose-500/10 text-rose-500"
-                        }`}
+                            ? "bg-emerald-500"
+                            : "bg-rose-500",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "text-[10px] font-black uppercase tracking-widest",
+                          person.balance >= 0
+                            ? "text-emerald-500/60"
+                            : "text-rose-500/60",
+                        )}
                       >
-                        {person.balance >= 0 ? "Owes you" : "You owe"}
-                      </Badge>
+                        {person.balance >= 0
+                          ? "Settlement Pending"
+                          : "Payment Overdue"}
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="text-right">
-                    <p
-                      className={`text-lg sm:text-xl font-bold tracking-tight ${
-                        person.balance >= 0
-                          ? "text-emerald-500"
-                          : "text-rose-500"
-                      }`}
-                    >
-                      ₹{Math.abs(person.balance).toLocaleString()}
-                    </p>
+                <div className="text-right flex flex-col items-end">
+                  <p
+                    className={cn(
+                      "text-xl font-black tracking-tighter tabular-nums",
+                      person.balance >= 0
+                        ? "text-emerald-500"
+                        : "text-rose-500",
+                    )}
+                  >
+                    ₹{Math.abs(person.balance).toLocaleString()}
+                  </p>
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full bg-white/5 flex items-center justify-center transition-all duration-300 group-hover:translate-x-1 group-hover:bg-white/10",
+                      person.balance >= 0
+                        ? "text-emerald-500"
+                        : "text-rose-500",
+                    )}
+                  >
                     <ArrowUpRight
-                      className={`w-4 h-4 ml-auto mt-1 opacity-50 ${
-                        person.balance >= 0
-                          ? "text-emerald-500"
-                          : "text-rose-500 rotate-180"
-                      }`}
+                      className={cn(
+                        "w-4 h-4",
+                        person.balance < 0 && "rotate-180",
+                      )}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           ))
         )}
       </div>
