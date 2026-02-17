@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Users,
   Plus,
+  UserPlus,
   TrendingUp,
   TrendingDown,
   ArrowUpRight,
@@ -185,6 +186,7 @@ export function LendBorrowView({
               <Input
                 id="amount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0.01"
                 placeholder="0.00"
@@ -249,9 +251,11 @@ export function LendBorrowView({
   const DrawerDialogContent = isMobile ? (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button className="rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105 bg-primary text-primary-foreground px-4 sm:px-6 h-12 font-bold">
-          <Plus className="w-5 h-5 mr-2" />
-          Add New
+        <Button
+          size="icon"
+          className="rounded-2xl shadow-lg shadow-primary/20 bg-primary text-primary-foreground w-12 h-12 active:scale-95 transition-all"
+        >
+          <UserPlus className="w-5 h-5" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="bg-background/95 backdrop-blur-2xl border-t border-white/10 rounded-t-[2.5rem] p-6 pt-2 max-h-[90vh]">
@@ -270,9 +274,9 @@ export function LendBorrowView({
   ) : (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105 bg-primary text-primary-foreground px-4 sm:px-6 h-11 font-bold">
-          <Plus className="w-5 h-5 mr-2" />
-          Add New
+        <Button className="rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105 bg-primary text-primary-foreground px-6 h-11 font-bold">
+          <UserPlus className="w-5 h-5 mr-2" />
+          Add Contact
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md border-white/5 bg-card/95 backdrop-blur-2xl shadow-2xl p-8 rounded-[2.5rem]">
@@ -289,65 +293,64 @@ export function LendBorrowView({
   return (
     <div className="space-y-8 animate-fade-in pb-24">
       {/* Summary Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-emerald-500/10 backdrop-blur-3xl border border-emerald-500/10 p-6 flex flex-col justify-between group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+      {/* Summary Section - More compact on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="relative overflow-hidden rounded-[2rem] bg-emerald-500/10 backdrop-blur-3xl border border-emerald-500/10 p-5 flex flex-col justify-between group h-32 tracking-tight">
+          <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500 pointer-events-none">
             <ArrowUpRight className="w-24 h-24 text-emerald-500" />
           </div>
-          <div className="relative pt-8">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
-                <ArrowUpRight className="w-4 h-4" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1 rounded-lg bg-emerald-500 text-white">
+                <ArrowUpRight className="w-3 h-3" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">
+              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
                 You're Owed
               </span>
             </div>
-            <p className="text-3xl font-black text-foreground tracking-tighter">
+            <p className="text-3xl font-black text-foreground tracking-tighter tabular-nums">
               ₹{stats.totalOwedToYou.toLocaleString()}
             </p>
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-rose-500/10 backdrop-blur-3xl border border-rose-500/10 p-6 flex flex-col justify-between group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+        <div className="relative overflow-hidden rounded-[2rem] bg-rose-500/10 backdrop-blur-3xl border border-rose-500/10 p-5 flex flex-col justify-between group h-32 tracking-tight">
+          <div className="absolute -top-4 -right-4 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500 pointer-events-none">
             <ArrowDownLeft className="w-24 h-24 text-rose-500" />
           </div>
-          <div className="relative pt-8">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-rose-500 text-white shadow-lg shadow-rose-500/20">
-                <ArrowDownLeft className="w-4 h-4" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1 rounded-lg bg-rose-500 text-white">
+                <ArrowDownLeft className="w-3 h-3" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-rose-500/80">
+              <span className="text-[9px] font-black uppercase tracking-widest text-rose-500/80">
                 You Owe
               </span>
             </div>
-            <p className="text-3xl font-black text-foreground tracking-tighter">
+            <p className="text-3xl font-black text-foreground tracking-tighter tabular-nums">
               ₹{stats.totalYouOwe.toLocaleString()}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Header & Actions */}
-      <div className="flex items-center justify-between px-2">
-        <div>
-          <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
-            People
-            <span className="text-xs font-bold text-muted-foreground/40 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-              {people.length}
-            </span>
-          </h2>
-        </div>
+      {/* Header & Actions - Refined for Mobile */}
+      <div className="flex items-center justify-between px-2 sm:px-0">
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+          People
+          <span className="text-[10px] sm:text-xs font-bold text-muted-foreground/40 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+            {people.length}
+          </span>
+        </h2>
 
         <div className="flex items-center gap-2">
           <AddTransactionDialog>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-2xl w-12 h-12 bg-white/5 border border-white/5 text-muted-foreground active:scale-90"
+              className="rounded-2xl w-11 h-11 sm:w-12 sm:h-12 bg-white/5 border border-white/5 text-muted-foreground active:scale-90"
             >
-              <Wallet className="w-5 h-5" />
+              <Wallet className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </Button>
           </AddTransactionDialog>
           <SplitBillDialog people={people} onSuccess={onPersonAdded} />
@@ -356,17 +359,18 @@ export function LendBorrowView({
       </div>
 
       {/* People List/Grid */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* People List/Grid */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {people.length === 0 ? (
-          <div className="col-span-full py-20 px-4 rounded-[3rem] bg-white/5 border border-dashed border-white/10 text-center flex flex-col items-center gap-4">
-            <div className="w-20 h-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-muted-foreground/20">
-              <Users className="w-10 h-10" />
+          <div className="col-span-full py-16 px-4 rounded-[2.5rem] bg-white/5 border border-dashed border-white/10 text-center flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/20">
+              <Users className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground/80">
+              <h3 className="text-base font-bold text-foreground/80">
                 No contacts yet
               </h3>
-              <p className="text-sm text-muted-foreground/40 max-w-[200px] mx-auto">
+              <p className="text-xs text-muted-foreground/40 max-w-[180px] mx-auto leading-relaxed">
                 Start tracking who owes you and who you owe.
               </p>
             </div>
@@ -375,68 +379,68 @@ export function LendBorrowView({
           people.map((person, index) => (
             <motion.div
               key={person.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.03 }}
               onClick={() =>
                 navigate(`/person/${encodeURIComponent(person.name)}`)
               }
-              className="relative group cursor-pointer"
+              className="relative group cursor-pointer active:scale-[0.98] transition-all"
             >
               <div
                 className={cn(
-                  "absolute inset-0 rounded-[2.25rem] transition-all duration-300 group-hover:scale-[1.02] -z-10 bg-background/40 backdrop-blur-3xl border border-white/5 shadow-xl group-hover:shadow-primary/5 group-hover:border-white/10",
+                  "absolute inset-0 rounded-2xl transition-all duration-300 -z-10 bg-background/40 backdrop-blur-2xl border border-white/5 shadow-lg group-hover:border-white/15",
                   person.balance >= 0
                     ? "group-hover:bg-emerald-500/5"
                     : "group-hover:bg-rose-500/5",
                 )}
               />
 
-              <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
+              <div className="px-3.5 py-3.5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <div
                     className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-lg transition-transform duration-500 group-hover:rotate-6",
+                      "w-11 h-11 rounded-xl flex items-center justify-center text-base font-black shadow-lg shrink-0",
                       person.balance >= 0
-                        ? "bg-emerald-500/10 text-emerald-500 shadow-emerald-500/10"
-                        : "bg-rose-500/10 text-rose-500 shadow-rose-500/10",
+                        ? "bg-emerald-500/10 text-emerald-500 shadow-emerald-500/5"
+                        : "bg-rose-500/10 text-rose-500 shadow-rose-500/5",
                     )}
                   >
                     {person.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-black text-lg text-foreground truncate">
+                    <h3 className="font-bold text-sm text-foreground truncate">
                       {person.name}
                     </h3>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 mt-0.5">
                       <div
                         className={cn(
-                          "w-1.5 h-1.5 rounded-full shrink-0 animate-pulse",
+                          "w-1 h-1 rounded-full shrink-0",
                           person.balance >= 0
                             ? "bg-emerald-500"
-                            : "bg-rose-500",
+                            : "bg-rose-500 animate-pulse",
                         )}
                       />
                       <span
                         className={cn(
-                          "text-[10px] font-black uppercase tracking-widest",
+                          "text-[9px] font-black uppercase tracking-widest truncate",
                           person.balance >= 0
                             ? "text-emerald-500/60"
                             : "text-rose-500/60",
                         )}
                       >
                         {person.balance >= 0
-                          ? "Settlement Pending"
-                          : "Payment Overdue"}
+                          ? "Pending settlement"
+                          : "Overdue payment"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-right flex flex-col items-end">
+                <div className="text-right flex items-center gap-3 shrink-0">
                   <p
                     className={cn(
-                      "text-xl font-black tracking-tighter tabular-nums",
+                      "text-base font-black tracking-tight tabular-nums",
                       person.balance >= 0
                         ? "text-emerald-500"
                         : "text-rose-500",
@@ -446,7 +450,7 @@ export function LendBorrowView({
                   </p>
                   <div
                     className={cn(
-                      "w-8 h-8 rounded-full bg-white/5 flex items-center justify-center transition-all duration-300 group-hover:translate-x-1 group-hover:bg-white/10",
+                      "w-7 h-7 rounded-full bg-white/5 flex items-center justify-center transition-all duration-300",
                       person.balance >= 0
                         ? "text-emerald-500"
                         : "text-rose-500",
@@ -454,7 +458,7 @@ export function LendBorrowView({
                   >
                     <ArrowUpRight
                       className={cn(
-                        "w-4 h-4",
+                        "w-3.5 h-3.5",
                         person.balance < 0 && "rotate-180",
                       )}
                     />

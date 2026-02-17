@@ -310,10 +310,14 @@ export const SplitBillDialog = ({
   const TriggerButton = (
     <Button
       variant="outline"
-      className="rounded-full shadow-sm hover:shadow-md transition-all h-10 px-4 border-white/10 bg-white/5"
+      size={isMobile ? "icon" : "default"}
+      className={cn(
+        "rounded-2xl shadow-sm hover:shadow-md transition-all border-white/10 bg-white/5 h-12",
+        isMobile ? "w-12" : "px-4",
+      )}
     >
-      <Calculator className="w-4 h-4 mr-2" />
-      Split Bill
+      <Calculator className={cn("w-5 h-5", !isMobile && "mr-2")} />
+      {!isMobile && "Split Bill"}
     </Button>
   );
 
