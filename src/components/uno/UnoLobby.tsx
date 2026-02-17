@@ -195,7 +195,7 @@ export const UnoLobby = ({
           </Button>
         )}
 
-        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl overflow-hidden relative">
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl overflow-hidden relative rounded-[2rem]">
           {/* Decorative Gradient Blob */}
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/30 blur-3xl rounded-full" />
           <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-600/30 blur-3xl rounded-full" />
@@ -360,7 +360,7 @@ export const UnoLobby = ({
                       {myRooms.map((room) => (
                         <div
                           key={room.id}
-                          className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group"
+                          className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group"
                         >
                           <div
                             className="flex flex-col"

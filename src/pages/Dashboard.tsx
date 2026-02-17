@@ -4,7 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet, Receipt, HandCoins, Settings, Search, X, Target, Gamepad2 } from "lucide-react";
+import {
+  LogOut,
+  Wallet,
+  Receipt,
+  HandCoins,
+  Settings,
+  Search,
+  X,
+  Target,
+  Gamepad2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from "@/components/CategoryManager";
 import { TransactionView } from "@/components/TransactionView";
@@ -14,6 +24,9 @@ import { UserProfile } from "@/components/UserProfile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { StreakCounter } from "@/components/StreakCounter";
+import { ZenBackground } from "@/components/ZenBackground";
+import { MonthSelector } from "@/components/MonthSelector";
+import { ModeToggle } from "@/components/mode-toggle";
 
 interface Person {
   name: string;
@@ -41,14 +54,19 @@ const Dashboard = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "lend" ? "lend" : "spend");
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "lend" ? "lend" : "spend",
+  );
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -60,7 +78,9 @@ const Dashboard = () => {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate("/auth");
       } else {
@@ -99,17 +119,20 @@ const Dashboard = () => {
       records.forEach((record) => {
         if (record.status === "pending") {
           const current = personMap.get(record.person_name) || 0;
-          const amount = record.type === "lent" ? record.amount : -record.amount;
+          const amount =
+            record.type === "lent" ? record.amount : -record.amount;
           personMap.set(record.person_name, current + amount);
         } else if (!personMap.has(record.person_name)) {
           personMap.set(record.person_name, 0);
         }
       });
 
-      const peopleList: Person[] = Array.from(personMap.entries()).map(([name, balance]) => ({
-        name,
-        balance,
-      }));
+      const peopleList: Person[] = Array.from(personMap.entries()).map(
+        ([name, balance]) => ({
+          name,
+          balance,
+        }),
+      );
 
       peopleList.sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
 
@@ -134,6 +157,13 @@ const Dashboard = () => {
     }
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -144,113 +174,171 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe relative overflow-x-hidden">
+      <ZenBackground />
       {/* Premium Header */}
       {/* Floating Island Navbar */}
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 sm:hidden bg-background/50 backdrop-blur-xl border-b border-white/10 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300">
-          {isSearchOpen ? (
-            <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-              <Search className="w-5 h-5 text-primary flex-shrink-0" />
-              <Input 
-                ref={searchInputRef}
-                placeholder="Search transactions..." 
-                className="h-10 text-base bg-muted/50 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-muted-foreground/50"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleSearch}
-                className="h-10 w-10 rounded-full hover:bg-muted flex-shrink-0"
-              >
-                <X className="w-6 h-6 text-muted-foreground" />
-              </Button>
+      <header className="fixed top-0 left-0 right-0 z-40 bg-background/50 backdrop-blur-xl border-b border-white/10 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300 sm:hidden">
+        {isSearchOpen ? (
+          <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Search className="w-5 h-5 text-primary flex-shrink-0" />
+            <Input
+              ref={searchInputRef}
+              placeholder="Search transactions..."
+              className="h-10 text-base bg-muted/50 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-muted-foreground/50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSearch}
+              className="h-10 w-10 rounded-full hover:bg-muted flex-shrink-0"
+            >
+              <X className="w-6 h-6 text-muted-foreground" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div
+              className="flex items-center gap-3 cursor-pointer select-none"
+              onClick={() => handleTabChange("spend")}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
+                  <Wallet className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
+                  Lovabel
+                </h1>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                  Money Flow
+                </p>
+              </div>
             </div>
-          ) : (
-            <>
-              <div 
-                className="flex items-center gap-3 cursor-pointer select-none" 
-                onClick={() => handleTabChange("spend")}
-              >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-                    <Wallet className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
-                    EasyExpense
-                  </h1>
-                  <p className="text-[10px] text-muted-foreground font-medium">Financial Freedom</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <StreakCounter userId={user?.id} />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={toggleSearch}
-                  className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Search className="w-5 h-5" />
-                </Button>
-                <UserProfile 
-                  userId={user?.id}
-                  onManageCategories={() => setCategoryManagerOpen(true)}
-                  trigger={
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5 transition-colors p-0 overflow-hidden">
-                      <div className="h-full w-full rounded-full border border-primary/10 overflow-hidden">
-                         <img 
-                           src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`} 
-                           alt="Profile"
-                           className="h-full w-full object-cover"
-                         />
-                      </div>
-                    </Button>
-                  }
-                />
-              </div>
-            </>
-          )}
-      </header>
-
-      {/* Desktop Header */}
-      <div className="hidden sm:flex items-center justify-between px-2 mb-6 mt-4">
-        <div>
-           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-           <p className="text-sm text-muted-foreground">Overview of your activity</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative w-64 transition-all focus-within:w-72">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-             <Input 
-                placeholder="Search..." 
-                className="pl-9 h-10 bg-background/50 border-input/60 rounded-xl focus:bg-background transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-             />
-             {searchQuery && (
+            <div className="flex items-center gap-1">
+              <StreakCounter userId={user?.id} />
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full"
-                onClick={() => setSearchQuery("")}
+                onClick={toggleSearch}
+                className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
               >
-                <X className="w-3 h-3" />
+                <Search className="w-5 h-5" />
               </Button>
-            )}
+              <UserProfile
+                userId={user?.id}
+                onManageCategories={() => setCategoryManagerOpen(true)}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full hover:bg-primary/5 transition-colors p-0 overflow-hidden"
+                  >
+                    <div className="h-full w-full rounded-full border border-primary/10 overflow-hidden">
+                      <img
+                        src={
+                          user?.user_metadata?.avatar_url ||
+                          `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`
+                        }
+                        alt="Profile"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </Button>
+                }
+              />
+            </div>
+          </>
+        )}
+      </header>
+
+      {/* Desktop Header */}
+      <div className="hidden sm:flex flex-col gap-6 px-4 md:px-6 mb-8 mt-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="inline-flex items-center rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+              {activeTab === "spend"
+                ? "Financial Overview"
+                : activeTab === "budget"
+                  ? "Budget Planning"
+                  : "Lending & Borrowing"}
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">
+              {getGreeting()},{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
+                {user?.user_metadata?.full_name?.split(" ")[0] ||
+                  user?.email?.split("@")[0] ||
+                  "Friend"}
+              </span>
+            </h1>
           </div>
-          <StreakCounter userId={user?.id} />
+          <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl border border-border/50 p-1.5 rounded-2xl shadow-sm">
+            <MonthSelector
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
+            />
+            <div className="h-8 w-px bg-border/50 mx-1" />
+            <ModeToggle />
+          </div>
+        </div>
+
+        {/* Search Bar (Desktop) */}
+        <div className="relative max-w-2xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60" />
+          <Input
+            placeholder="Search transactions, people or categories..."
+            className="pl-12 h-12 bg-card/40 border-border/50 rounded-2xl focus:bg-card focus:ring-primary/20 transition-all text-base"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-20 sm:pt-0 pb-24 sm:pb-8 max-w-7xl mx-auto w-full">
-        <Tabs key={activeTab} value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-24 sm:pt-0 pb-24 sm:pb-8 max-w-7xl mx-auto w-full relative z-0">
+        <Tabs
+          key={activeTab}
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full space-y-6"
+        >
+          <div className="hidden sm:flex items-center gap-2 bg-muted/30 p-1 rounded-2xl w-fit border border-border/50">
+            <TabsList className="bg-transparent h-10 gap-1 p-0">
+              <TabsTrigger
+                value="spend"
+                className="rounded-xl px-6 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Expenses
+              </TabsTrigger>
+              <TabsTrigger
+                value="budget"
+                className="rounded-xl px-6 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Budgets
+              </TabsTrigger>
+              <TabsTrigger
+                value="lend"
+                className="rounded-xl px-6 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Lend/Borrow
+              </TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="spend" className="mt-0 animate-slide-in">
-            <TransactionView 
+            <TransactionView
               userId={user?.id}
               user={user} // Pass user object
               categories={categories}
@@ -260,15 +348,21 @@ const Dashboard = () => {
                 setSearchQuery("");
                 setIsSearchOpen(false);
               }}
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
             />
           </TabsContent>
 
           <TabsContent value="budget" className="mt-0 animate-slide-in">
-            <BudgetView userId={user?.id} categories={categories} />
+            <BudgetView
+              userId={user?.id}
+              categories={categories}
+              selectedMonth={selectedMonth}
+            />
           </TabsContent>
-          
+
           <TabsContent value="lend" className="mt-0 animate-slide-in">
-            <LendBorrowView 
+            <LendBorrowView
               people={people}
               userId={user?.id}
               onPersonAdded={() => fetchPeople(user.id)}

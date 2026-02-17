@@ -64,7 +64,7 @@ export function Sidebar() {
       active: location.pathname === "/dashboard" && currentTab === "budget",
     },
     {
-      label: "Lending",
+      label: "Lend",
       icon: HandCoins,
       href: "/dashboard?tab=lend",
       active: location.pathname === "/dashboard" && currentTab === "lend",

@@ -1,5 +1,11 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Receipt, HandCoins, Target, Newspaper, Gamepad2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  HandCoins,
+  Target,
+  Newspaper,
+  Gamepad2,
+} from "lucide-react";
 
 export function BottomNav() {
   const navigate = useNavigate();
@@ -7,16 +13,18 @@ export function BottomNav() {
 
   // Get current tab from URL
   const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || 'spend';
+  const currentTab = searchParams.get("tab") || "spend";
 
   const isSpend = location.pathname === "/dashboard" && currentTab === "spend";
-  const isBudget = location.pathname === "/dashboard" && currentTab === "budget";
+  const isBudget =
+    location.pathname === "/dashboard" && currentTab === "budget";
   const isLend = location.pathname === "/dashboard" && currentTab === "lend";
-  const isGames = location.pathname === "/uno" || location.pathname === "/uno/bot"; // Bot page needs nav? Maybe not. Let's say only Lobby.
+  const isGames =
+    location.pathname === "/uno" || location.pathname === "/uno/bot"; // Bot page needs nav? Maybe not. Let's say only Lobby.
 
   const navItems = [
     {
-      icon: Receipt,
+      icon: LayoutDashboard,
       label: "Spends",
       isActive: isSpend,
       onClick: () => navigate("/dashboard?tab=spend"),
@@ -51,14 +59,15 @@ export function BottomNav() {
   // Hide on Auth, Root, and Uno Game Rooms (e.g. /uno/ABCD or /uno/bot).
   // Actually usually /uno/bot is a game, so hide there too.
   // So Show if: /dashboard, /news, /uno (exact).
-  
+
   // The MainLayout handles where this component is rendered.
   // We can simplify the hiding logic, or keep the specific hiding for /uno/:roomCode if that route ends up using MainLayout (which it shouldn't based on App.tsx changes).
   // But just in case, let's keep the game room check.
 
-  const isGameRoom = location.pathname.match(/^\/uno\/.+$/) && location.pathname !== "/uno/bot";
-  // actually /uno/bot is also a game room. 
-  
+  const isGameRoom =
+    location.pathname.match(/^\/uno\/.+$/) && location.pathname !== "/uno/bot";
+  // actually /uno/bot is also a game room.
+
   // If we are in MainLayout, we generally show it. But let's be safe.
   if (isGameRoom) return null;
 
@@ -78,16 +87,26 @@ export function BottomNav() {
             {item.isActive && (
               <div className="absolute inset-0 bg-primary/10 rounded-xl blur-md -z-10 scale-90 animate-pulse" />
             )}
-            <div className={`p-2 rounded-xl transition-all duration-300 ${
-              item.isActive ? "bg-primary/10 scale-110 shadow-sm" : "scale-100 group-hover:scale-105"
-            }`}>
-              <item.icon className={`h-5 w-5 transition-all duration-300 ${
-                item.isActive ? "stroke-[2.5px]" : "stroke-2"
-              }`} />
+            <div
+              className={`p-2 rounded-xl transition-all duration-300 ${
+                item.isActive
+                  ? "bg-primary/10 scale-110 shadow-sm"
+                  : "scale-100 group-hover:scale-105"
+              }`}
+            >
+              <item.icon
+                className={`h-5 w-5 transition-all duration-300 ${
+                  item.isActive ? "stroke-[2.5px]" : "stroke-2"
+                }`}
+              />
             </div>
-            <span className={`text-[10px] font-medium transition-all duration-300 ${
-              item.isActive ? "opacity-100 font-semibold translate-y-0" : "opacity-60 translate-y-0.5"
-            }`}>
+            <span
+              className={`text-[10px] font-medium transition-all duration-300 ${
+                item.isActive
+                  ? "opacity-100 font-semibold translate-y-0"
+                  : "opacity-60 translate-y-0.5"
+              }`}
+            >
               {item.label}
             </span>
           </button>

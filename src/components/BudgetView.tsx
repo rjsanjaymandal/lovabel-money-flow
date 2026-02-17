@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 interface BudgetViewProps {
   userId: string;
   categories: string[];
+  selectedMonth: Date;
 }
 
 interface Budget {
@@ -19,7 +20,11 @@ interface Budget {
   spent: number;
 }
 
-export function BudgetView({ userId, categories }: BudgetViewProps) {
+export function BudgetView({
+  userId,
+  categories,
+  selectedMonth,
+}: BudgetViewProps) {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [isSetBudgetOpen, setIsSetBudgetOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -29,9 +34,8 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
   const fetchBudgets = useCallback(async () => {
     if (!userId) return;
 
-    const currentDate = new Date();
-    const startDate = format(startOfMonth(currentDate), "yyyy-MM-dd");
-    const endDate = format(endOfMonth(currentDate), "yyyy-MM-dd");
+    const startDate = format(startOfMonth(selectedMonth), "yyyy-MM-dd");
+    const endDate = format(endOfMonth(selectedMonth), "yyyy-MM-dd");
 
     // Fetch budgets
     const { data: budgetData } = await supabase
@@ -94,10 +98,7 @@ export function BudgetView({ userId, categories }: BudgetViewProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchBudgets]); // Added fetchBudgets to dependencies
-  // The original instruction had conflicting dependencies like [fetchNews] and [fetchTransactions].
-  // Assuming the intent was to correctly add dependencies for the existing code,
-  // fetchBudgets (memoized with useCallback) and userId are the correct dependencies.
+  }, [userId, selectedMonth]);
 
   const handleEdit = (budget: Budget) => {
     setEditingBudget(budget);

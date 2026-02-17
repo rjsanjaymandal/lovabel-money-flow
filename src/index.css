@@ -35,7 +35,7 @@
     --input: 214 32% 91%;
     --ring: 221 83% 53%;          /* Match Primary */
 
-    --radius: 1rem;
+    --radius: 2rem;
     
     /* Custom Gradients */
     --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); /* Blue to Indigo */
@@ -107,7 +107,11 @@
   }
 
   .glass-card {
-    @apply bg-gradient-to-b from-white/95 to-white/85 dark:from-slate-900/95 dark:to-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-sm;
+    @apply bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2rem];
+  }
+
+  .glass-card-interactive {
+    @apply glass-card hover:bg-white/10 dark:hover:bg-black/30 transition-all duration-300 hover:scale-[1.01] hover:border-white/20;
   }
 
   .text-gradient {
@@ -135,5 +139,17 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 text-white;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-br from-rose-500 to-pink-500 shadow-lg shadow-rose-500/20 text-white;
+  }
+
+  .gradient-card {
+    @apply glass-card;
   }
 }

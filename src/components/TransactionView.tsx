@@ -16,7 +16,6 @@ import { VoiceInput } from "@/components/VoiceInput";
 import { ScanReceiptButton } from "@/components/ScanReceiptButton";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { ModeToggle } from "@/components/mode-toggle";
-import { ZenBackground } from "@/components/ZenBackground";
 import { User } from "@supabase/supabase-js";
 
 import { SearchResults } from "@/components/SearchResults";
@@ -29,6 +28,8 @@ interface TransactionViewProps {
   onTransactionAdded: () => void;
   searchQuery?: string;
   onClearSearch?: () => void;
+  selectedMonth: Date;
+  onMonthChange: (date: Date) => void;
 }
 
 export function TransactionView({
@@ -38,8 +39,9 @@ export function TransactionView({
   onTransactionAdded,
   searchQuery,
   onClearSearch,
+  selectedMonth,
+  onMonthChange,
 }: TransactionViewProps) {
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [stats, setStats] = useState({ income: 0, expenses: 0, balance: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -111,25 +113,6 @@ export function TransactionView({
     onTransactionAdded();
   };
 
-  const [userName, setUserName] = useState("Friend");
-
-  useEffect(() => {
-    if (user?.user_metadata?.full_name) {
-      setUserName(user.user_metadata.full_name.split(" ")[0]);
-    } else if (user?.email) {
-      // Extract name from email (e.g. rjsan... -> Rjsan)
-      const name = user.email.split("@")[0];
-      setUserName(name.charAt(0).toUpperCase() + name.slice(1));
-    }
-  }, [user]);
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
-
   if (searchQuery) {
     return (
       <SearchResults
@@ -141,41 +124,7 @@ export function TransactionView({
   }
 
   return (
-    <div className="space-y-8 animate-fade-in pb-24 sm:pb-24 px-4 sm:px-6 max-w-[1600px] mx-auto relative z-10 pt-24 sm:pt-6">
-      <ZenBackground />
-
-      {/* Header Section */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative">
-        <div className="space-y-2 relative z-20">
-          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-indigo-200 backdrop-blur-xl">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-            Financial Command Center
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white drop-shadow-sm">
-            {getGreeting()},{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
-              {userName}
-            </span>
-          </h2>
-          <p className="text-lg text-indigo-100/70 font-medium max-w-2xl">
-            Track your expenses, manage budgets, and achieve your financial
-            goals with AI-powered insights.
-          </p>
-        </div>
-
-        {/* Glass Controls Pill - Redesigned */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-xl border border-white/10 p-2 rounded-3xl shadow-xl self-start xl:self-auto relative z-20">
-          <div className="scale-100">
-            <MonthSelector
-              selectedMonth={selectedMonth}
-              onMonthChange={setSelectedMonth}
-            />
-          </div>
-          <div className="h-8 w-px bg-white/10 mx-1 hidden sm:block" />
-          <ModeToggle />
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-fade-in pb-24 sm:pb-24 px-1 sm:px-2 max-w-[1600px] mx-auto relative z-10">
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Row 1: Full Width Stats */}
@@ -184,7 +133,6 @@ export function TransactionView({
             income={stats.income}
             expenses={stats.expenses}
             balance={stats.balance}
-            userName={userName}
           />
         </div>
 

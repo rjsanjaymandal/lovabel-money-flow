@@ -167,10 +167,10 @@ const MonthlyTransactionListComponent = ({
                 {dayTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="group relative flex items-center gap-3 p-3 sm:gap-4 sm:p-4 rounded-2xl sm:rounded-3xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/5"
+                    className="group relative flex items-center gap-3 p-3 sm:gap-4 sm:p-5 rounded-[2rem] bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/5"
                   >
                     <div
-                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-500 group-hover:rotate-12 ${
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl sm:rounded-[1.5rem] flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-500 group-hover:rotate-12 ${
                         transaction.type === "income"
                           ? "bg-emerald-500/10 text-emerald-500"
                           : "bg-rose-500/10 text-rose-500"
