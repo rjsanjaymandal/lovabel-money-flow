@@ -1,10 +1,23 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { checkAchievement } from "@/utils/gamification";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -17,7 +30,13 @@ interface SetBudgetDialogProps {
   currentBudget?: { category: string; amount: number; id: string } | null;
 }
 
-export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, currentBudget }: SetBudgetDialogProps) {
+export function SetBudgetDialog({
+  open,
+  onOpenChange,
+  categories,
+  onSuccess,
+  currentBudget,
+}: SetBudgetDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState("");
@@ -41,7 +60,9 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
       const budgetData = {
@@ -75,10 +96,11 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
 
       onSuccess();
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message,
+        description:
+          error instanceof Error ? error.message : "Failed to save budget.",
         variant: "destructive",
       });
     } finally {
@@ -90,15 +112,23 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{currentBudget ? "Edit Budget" : "Set New Budget"}</DialogTitle>
+          <DialogTitle>
+            {currentBudget ? "Edit Budget" : "Set New Budget"}
+          </DialogTitle>
           <DialogDescription>
-            {currentBudget ? "Update the monthly limit for this category." : "Set a monthly spending limit for a category."}
+            {currentBudget
+              ? "Update the monthly limit for this category."
+              : "Set a monthly spending limit for a category."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label>Category</Label>
-            <Select value={category} onValueChange={setCategory} disabled={!!currentBudget}>
+            <Select
+              value={category}
+              onValueChange={setCategory}
+              disabled={!!currentBudget}
+            >
               <SelectTrigger className="h-12 rounded-xl">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
@@ -115,7 +145,9 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
           <div className="space-y-2">
             <Label>Monthly Limit</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                ₹
+              </span>
               <Input
                 type="number"
                 value={amount}
@@ -126,8 +158,16 @@ export function SetBudgetDialog({ open, onOpenChange, categories, onSuccess, cur
             </div>
           </div>
 
-          <Button type="submit" className="w-full h-12 rounded-xl text-base font-medium" disabled={loading}>
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Budget"}
+          <Button
+            type="submit"
+            className="w-full h-12 rounded-xl text-base font-medium"
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "Save Budget"
+            )}
           </Button>
         </form>
       </DialogContent>

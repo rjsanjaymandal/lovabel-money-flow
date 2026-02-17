@@ -1,10 +1,31 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
-export const SpendingChart = ({ userId, selectedMonth }: { userId: string; selectedMonth: Date }) => {
-  const [chartData, setChartData] = useState<any[]>([]);
+interface ChartDataItem {
+  category: string;
+  income: number;
+  expense: number;
+}
+
+export const SpendingChart = ({
+  userId,
+  selectedMonth,
+}: {
+  userId: string;
+  selectedMonth: Date;
+}) => {
+  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
 
   useEffect(() => {
     if (userId && selectedMonth) {
@@ -26,7 +47,7 @@ export const SpendingChart = ({ userId, selectedMonth }: { userId: string; selec
     if (!transactions) return;
 
     // Group by category
-    const categoryMap = new Map();
+    const categoryMap = new Map<string, { income: number; expense: number }>();
     transactions.forEach((t) => {
       const existing = categoryMap.get(t.category) || { income: 0, expense: 0 };
       if (t.type === "income") {
@@ -37,8 +58,8 @@ export const SpendingChart = ({ userId, selectedMonth }: { userId: string; selec
       categoryMap.set(t.category, existing);
     });
 
-    const data = Array.from(categoryMap.entries())
-      .map(([category, values]: [string, any]) => ({
+    const data: ChartDataItem[] = Array.from(categoryMap.entries())
+      .map(([category, values]) => ({
         category,
         income: values.income,
         expense: values.expense,
@@ -65,44 +86,48 @@ export const SpendingChart = ({ userId, selectedMonth }: { userId: string; selec
           <BarChart data={chartData} barGap={4}>
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34d399" stopOpacity={1}/>
-                <stop offset="100%" stopColor="#34d399" stopOpacity={0.2}/>
+                <stop offset="0%" stopColor="#34d399" stopOpacity={1} />
+                <stop offset="100%" stopColor="#34d399" stopOpacity={0.2} />
               </linearGradient>
               <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity={1}/>
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.2}/>
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity={1} />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.2} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-            <XAxis 
-              dataKey="category" 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="rgba(255,255,255,0.05)"
+            />
+            <XAxis
+              dataKey="category"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
+              tick={{ fill: "#94a3b8", fontSize: 11 }}
               dy={10}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.05)', radius: 8 }}
+              cursor={{ fill: "rgba(255,255,255,0.05)", radius: 8 }}
               contentStyle={{
                 backgroundColor: "rgba(15, 23, 42, 0.9)",
                 backdropFilter: "blur(12px)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "16px",
                 color: "#fff",
-                boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)"
+                boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)",
               }}
-              itemStyle={{ fontSize: '12px', fontWeight: 500 }}
+              itemStyle={{ fontSize: "12px", fontWeight: 500 }}
             />
-            <Bar 
-              dataKey="income" 
-              fill="url(#incomeGradient)" 
-              radius={[6, 6, 6, 6]} 
+            <Bar
+              dataKey="income"
+              fill="url(#incomeGradient)"
+              radius={[6, 6, 6, 6]}
               maxBarSize={40}
             />
-            <Bar 
-              dataKey="expense" 
-              fill="url(#expenseGradient)" 
-              radius={[6, 6, 6, 6]} 
+            <Bar
+              dataKey="expense"
+              fill="url(#expenseGradient)"
+              radius={[6, 6, 6, 6]}
               maxBarSize={40}
             />
           </BarChart>

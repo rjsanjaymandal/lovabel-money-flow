@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +23,13 @@ interface EditProfileDialogProps {
   initialAvatar?: string;
 }
 
-export function EditProfileDialog({ open, onOpenChange, onProfileUpdated, initialName, initialAvatar }: EditProfileDialogProps) {
+export function EditProfileDialog({
+  open,
+  onOpenChange,
+  onProfileUpdated,
+  initialName,
+  initialAvatar,
+}: EditProfileDialogProps) {
   const [fullName, setFullName] = useState(initialName || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
   const [loading, setLoading] = useState(false);
@@ -44,13 +57,17 @@ export function EditProfileDialog({ open, onOpenChange, onProfileUpdated, initia
 
       if (error) throw error;
 
-      toast({ title: "Profile Updated", description: "Your changes have been saved." });
+      toast({
+        title: "Profile Updated",
+        description: "Your changes have been saved.",
+      });
       onProfileUpdated(); // Callback to refresh parent
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message,
+        description:
+          error instanceof Error ? error.message : "Failed to update profile.",
         variant: "destructive",
       });
     } finally {
@@ -70,13 +87,13 @@ export function EditProfileDialog({ open, onOpenChange, onProfileUpdated, initia
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative group">
-               <Avatar className="h-24 w-24 border-4 border-muted shadow-xl">
+              <Avatar className="h-24 w-24 border-4 border-muted shadow-xl">
                 <AvatarImage src={avatarUrl} />
                 <AvatarFallback>{fullName?.[0] || "?"}</AvatarFallback>
               </Avatar>
-              <Button 
-                size="icon" 
-                variant="secondary" 
+              <Button
+                size="icon"
+                variant="secondary"
                 className="absolute bottom-0 right-0 rounded-full w-8 h-8 shadow-md"
                 onClick={regenerateAvatar}
                 type="button"
@@ -85,7 +102,9 @@ export function EditProfileDialog({ open, onOpenChange, onProfileUpdated, initia
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Click button to generate new avatar</p>
+            <p className="text-xs text-muted-foreground">
+              Click button to generate new avatar
+            </p>
           </div>
 
           {/* Name Section */}
@@ -102,9 +121,19 @@ export function EditProfileDialog({ open, onOpenChange, onProfileUpdated, initia
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
             Save Changes
           </Button>
         </DialogFooter>

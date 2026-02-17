@@ -1,0 +1,145 @@
+
+> vite_react_shadcn_ts@0.0.0 lint
+> eslint .
+
+
+G:\lovabel-money-flow\scripts\backup_data.ts
+  32:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\AIInsights.tsx
+   47:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  207:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  416:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  439:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\BadgesSection.tsx
+  20:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\BudgetView.tsx
+  86:6  warning  React Hook useEffect has a missing dependency: 'fetchBudgets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\MarketTicker.tsx
+  191:6  warning  React Hook useEffect has a missing dependency: 'fetchIndianStocks'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\NewsView.tsx
+  163:51  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  212:6   warning  React Hook useEffect has a missing dependency: 'fetchNews'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\PersonDetails.tsx
+  53:6  warning  React Hook useEffect has a missing dependency: 'fetchRecords'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\Sidebar.tsx
+  14:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\SpendingChart.tsx
+   7:46  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  13:6   warning  React Hook useEffect has a missing dependency: 'fetchChartData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  41:42  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\ThreeDChart.tsx
+  119:6  warning  React Hook useEffect has a missing dependency: 'fetchChartData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\TransactionList.tsx
+  26:6  warning  React Hook useEffect has a missing dependency: 'fetchTransactions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\TransactionView.tsx
+  43:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\UserProfile.tsx
+  27:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\VoiceCommand.tsx
+  64:20  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  65:20  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  99:6   warning  React Hook useEffect has a missing dependency: 'handleCommand'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\components\VoiceInput.tsx
+  65:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\components\theme-provider.tsx
+  65:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\badge.tsx
+  29:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\button.tsx
+  47:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\command.tsx
+  24:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+G:\lovabel-money-flow\src\components\ui\form.tsx
+  129:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\navigation-menu.tsx
+  111:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\sidebar.tsx
+  636:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\sonner.tsx
+  27:19  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\ui\textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+G:\lovabel-money-flow\src\components\ui\toggle.tsx
+  37:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+G:\lovabel-money-flow\src\components\uno\UnoLobby.tsx
+   32:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\pages\AllLendBorrow.tsx
+  29:6  warning  React Hook useEffect has a missing dependency: 'checkAuth'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\pages\AllTransactions.tsx
+  28:6  warning  React Hook useEffect has a missing dependency: 'checkAuth'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\pages\UnoBotPage.tsx
+   82:6  warning  React Hook useEffect has missing dependencies: 'gameState' and 'playBotTurn'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  101:8  warning  React Hook useEffect has missing dependencies: 'handleDrawCard' and 'toast'. Either include them or remove the dependency array   react-hooks/exhaustive-deps
+
+G:\lovabel-money-flow\src\pages\UnoPage.tsx
+   56:31  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  136:40  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  137:31  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  174:55  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  208:6   warning  React Hook useEffect has missing dependencies: 'toast' and 'user'. Either include them or remove the dependency array            react-hooks/exhaustive-deps
+  231:6   warning  React Hook useEffect has missing dependencies: 'handleDrawCard' and 'toast'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  295:30  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  300:19  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  365:37  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  366:32  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  403:23  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  404:34  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  405:32  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  461:21  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  503:36  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  514:38  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  515:33  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  541:38  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\src\utils\receiptParser.ts
+  55:18  error  Unnecessary escape character: \/  no-useless-escape
+  55:20  error  Unnecessary escape character: \-  no-useless-escape
+  55:33  error  Unnecessary escape character: \/  no-useless-escape
+  55:35  error  Unnecessary escape character: \-  no-useless-escape
+  56:16  error  Unnecessary escape character: \/  no-useless-escape
+  56:18  error  Unnecessary escape character: \-  no-useless-escape
+  56:31  error  Unnecessary escape character: \/  no-useless-escape
+  56:33  error  Unnecessary escape character: \-  no-useless-escape
+
+G:\lovabel-money-flow\supabase\functions\generate-insights\index.ts
+  22:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+G:\lovabel-money-flow\tailwind.config.ts
+  142:13  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+Γ£û 72 problems (50 errors, 22 warnings)
+

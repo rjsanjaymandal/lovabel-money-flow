@@ -52,8 +52,8 @@ const extractAmount = (text: string): number | undefined => {
 const extractDate = (text: string): Date | undefined => {
   // Common date formats: DD/MM/YYYY, YYYY-MM-DD, DD-MMM-YYYY
   const datePatterns = [
-    /\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/, // DD/MM/YYYY or DD-MM-YYYY
-    /\b(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\b/, // YYYY-MM-DD
+    /\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/, // DD/MM/YYYY or DD-MM-YYYY
+    /\b(\d{4})[/-](\d{1,2})[/-](\d{1,2})\b/, // YYYY-MM-DD
     /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{2,4})\b/i // DD Mon YYYY
   ];
 

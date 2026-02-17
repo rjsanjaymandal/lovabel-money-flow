@@ -25,7 +25,9 @@ const PersonHistory = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -49,11 +51,13 @@ const PersonHistory = () => {
 
       toast({
         title: "Person Deleted",
-        description: `All records for ${decodeURIComponent(personName)} have been deleted.`,
+        description: `All records for ${decodeURIComponent(
+          personName
+        )} have been deleted.`,
       });
 
       navigate("/dashboard?tab=lend");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
         description: "Failed to delete person. Please try again.",
@@ -74,16 +78,20 @@ const PersonHistory = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/dashboard?tab=lend')}
+            onClick={() => navigate("/dashboard?tab=lend")}
             className="rounded-full h-9 w-9 sm:h-10 sm:w-10 touch-manipulation active:scale-95 transition-transform hover:bg-accent/10"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">{decodeURIComponent(personName)}</h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Transaction History</p>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">
+              {decodeURIComponent(personName)}
+            </h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              Transaction History
+            </p>
           </div>
-          
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
@@ -98,12 +106,16 @@ const PersonHistory = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Person?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete <strong>{decodeURIComponent(personName)}</strong> and all associated transaction history. This action cannot be undone.
+                  This will permanently delete{" "}
+                  <strong>{decodeURIComponent(personName)}</strong> and all
+                  associated transaction history. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                <AlertDialogAction 
+                <AlertDialogCancel className="rounded-xl">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
                   onClick={handleDeletePerson}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
                 >
@@ -117,7 +129,10 @@ const PersonHistory = () => {
 
       {/* Content */}
       <main className="px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
-        <PersonDetails personName={decodeURIComponent(personName)} userId={userId} />
+        <PersonDetails
+          personName={decodeURIComponent(personName)}
+          userId={userId}
+        />
       </main>
     </div>
   );

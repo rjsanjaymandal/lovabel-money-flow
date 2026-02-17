@@ -1,9 +1,24 @@
-import { Users, Plus, TrendingUp, TrendingDown, Home, Receipt, HandCoins, Settings } from "lucide-react";
+import {
+  Users,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Home,
+  Receipt,
+  HandCoins,
+  Settings,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +26,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const amountSchema = z.number()
+const amountSchema = z
+  .number()
   .positive({ message: "Amount must be greater than zero" })
   .finite({ message: "Amount must be a valid number" })
   .max(99999999.99, { message: "Amount is too large" });
@@ -29,7 +45,13 @@ interface PeopleSidebarProps {
   onManageCategories: () => void;
 }
 
-export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPersonAdded, onManageCategories }: PeopleSidebarProps) {
+export function PeopleSidebar({
+  people,
+  selectedPerson,
+  onSelectPerson,
+  onPersonAdded,
+  onManageCategories,
+}: PeopleSidebarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -44,7 +66,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
     e.preventDefault();
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       // Validate amount only if provided
@@ -52,7 +76,7 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
       if (formData.amount) {
         const parsedAmount = parseFloat(formData.amount);
         const validationResult = amountSchema.safeParse(parsedAmount);
-        
+
         if (!validationResult.success) {
           throw new Error(validationResult.error.errors[0].message);
         }
@@ -84,10 +108,11 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
         date: new Date().toISOString().split("T")[0],
       });
       onPersonAdded();
-    } catch (error: any) {
-      const message = error.message.includes("Amount") 
-        ? error.message 
-        : "Unable to add contact. Please try again.";
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error && error.message.includes("Amount")
+          ? error.message
+          : "Unable to add contact. Please try again.";
       toast({
         title: "Error",
         description: message,
@@ -146,18 +171,25 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
               </div>
               <div>
                 <h3 className="text-base font-semibold">Contacts</h3>
-                <p className="text-xs text-muted-foreground">{people.length} people</p>
+                <p className="text-xs text-muted-foreground">
+                  {people.length} people
+                </p>
               </div>
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="h-9 w-9 p-0 rounded-full gradient-primary hover:opacity-90 transition-opacity">
+                <Button
+                  size="sm"
+                  className="h-9 w-9 p-0 rounded-full gradient-primary hover:opacity-90 transition-opacity"
+                >
                   <Plus className="h-4 w-4 text-white" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl">Add New Contact 👤</DialogTitle>
+                  <DialogTitle className="text-2xl">
+                    Add New Contact 👤
+                  </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
@@ -168,7 +200,10 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       maxLength={100}
                       value={formData.person_name}
                       onChange={(e) =>
-                        setFormData({ ...formData, person_name: e.target.value })
+                        setFormData({
+                          ...formData,
+                          person_name: e.target.value,
+                        })
                       }
                       required
                       className="h-11"
@@ -176,7 +211,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Initial Amount (₹) - Optional</Label>
+                    <Label htmlFor="amount">
+                      Initial Amount (₹) - Optional
+                    </Label>
                     <Input
                       id="amount"
                       type="number"
@@ -185,7 +222,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       max="99999999.99"
                       placeholder="0.00"
                       value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, amount: e.target.value })
+                      }
                       className="h-11"
                     />
                   </div>
@@ -196,7 +235,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       id="date"
                       type="date"
                       value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, date: e.target.value })
+                      }
                       required
                       className="h-11"
                     />
@@ -210,13 +251,19 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       maxLength={500}
                       value={formData.description}
                       onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
                       }
                       className="h-11"
                     />
                   </div>
 
-                  <Button type="submit" className="w-full h-11 gradient-primary hover:opacity-90 transition-opacity">
+                  <Button
+                    type="submit"
+                    className="w-full h-11 gradient-primary hover:opacity-90 transition-opacity"
+                  >
                     Add Contact
                   </Button>
                 </form>
@@ -232,7 +279,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                   <Users className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">No contacts yet</p>
-                <p className="text-xs text-muted-foreground">Add someone to get started!</p>
+                <p className="text-xs text-muted-foreground">
+                  Add someone to get started!
+                </p>
               </div>
             ) : (
               people.map((person) => (
@@ -250,7 +299,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            person.balance >= 0 ? "gradient-success" : "gradient-accent"
+                            person.balance >= 0
+                              ? "gradient-success"
+                              : "gradient-accent"
                           }`}
                         >
                           {person.balance >= 0 ? (
@@ -260,7 +311,9 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate">{person.name}</p>
+                          <p className="text-sm font-semibold truncate">
+                            {person.name}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {person.balance >= 0 ? "You'll get" : "You owe"}
                           </p>
@@ -274,7 +327,8 @@ export function PeopleSidebar({ people, selectedPerson, onSelectPerson, onPerson
                             : "border-accent/30 bg-accent/10 text-accent"
                         }`}
                       >
-                        {person.balance >= 0 ? "+" : "-"}₹{Math.abs(person.balance).toFixed(0)}
+                        {person.balance >= 0 ? "+" : "-"}₹
+                        {Math.abs(person.balance).toFixed(0)}
                       </Badge>
                     </div>
                   </div>

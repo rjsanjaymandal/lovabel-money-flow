@@ -7,18 +7,67 @@ import { parseVoiceInput, VoiceData } from "@/utils/voiceParser";
 interface VoiceInputProps {
   onResult: (data: VoiceData) => void;
   className?: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 }
 
-export function VoiceInput({ onResult, className, variant = "outline" }: VoiceInputProps) {
+// Add interfaces for Speech Recognition to avoid 'any'
+interface SpeechRecognitionResult {
+  readonly [index: number]: SpeechRecognitionAlternative;
+  readonly length: number;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  readonly results: {
+    readonly [index: number]: SpeechRecognitionResult;
+    readonly length: number;
+  };
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (event: Event) => void;
+  onend: (event: Event) => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  start: () => void;
+  stop: () => void;
+}
+
+export function VoiceInput({
+  onResult,
+  className,
+  variant = "outline",
+}: VoiceInputProps) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
+      const win = window as unknown as Record<
+        string,
+        new () => SpeechRecognition
+      >;
+      const recognitionConstructor = win.webkitSpeechRecognition;
+      const recognition = new recognitionConstructor() as SpeechRecognition;
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = "en-IN"; // Default to Indian English
@@ -32,13 +81,13 @@ export function VoiceInput({ onResult, className, variant = "outline" }: VoiceIn
         setIsListening(false);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setIsProcessing(true);
-        
+
         // Process the text
         const data = parseVoiceInput(transcript);
-        
+
         toast({
           title: "Heard:",
           description: `"${transcript}"`,
@@ -48,7 +97,7 @@ export function VoiceInput({ onResult, className, variant = "outline" }: VoiceIn
         setIsProcessing(false);
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error("Speech recognition error", event.error);
         setIsListening(false);
         setIsProcessing(false);
@@ -89,7 +138,9 @@ export function VoiceInput({ onResult, className, variant = "outline" }: VoiceIn
       size="icon"
       onClick={toggleListening}
       className={`rounded-full transition-all duration-300 ${
-        isListening ? "animate-pulse scale-110 shadow-lg shadow-red-500/20" : "hover:bg-primary/10 hover:text-primary"
+        isListening
+          ? "animate-pulse scale-110 shadow-lg shadow-red-500/20"
+          : "hover:bg-primary/10 hover:text-primary"
       } ${className}`}
       title="Tap to Speak"
     >

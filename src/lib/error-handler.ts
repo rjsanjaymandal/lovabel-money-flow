@@ -1,5 +1,5 @@
-export const getSafeErrorMessage = (error: any): string => {
-  const msg = error?.message?.toLowerCase() || '';
+export const getSafeErrorMessage = (error: unknown): string => {
+  const msg = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   
   // Authentication errors - prevent user enumeration
   if (msg.includes('auth') || msg.includes('jwt') || msg.includes('token') || 
@@ -36,7 +36,7 @@ export const getSafeErrorMessage = (error: any): string => {
   
   // Keep amount validation errors for better UX (already sanitized)
   if (msg.includes('amount must')) {
-    return error.message;
+    return error instanceof Error ? error.message : String(error);
   }
   
   // Generic fallback - never expose raw errors

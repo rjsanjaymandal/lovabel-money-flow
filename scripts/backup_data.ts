@@ -29,7 +29,7 @@ const TABLES = [
 
 async function backup() {
   console.log('🚀 Starting backup...');
-  const backupData: Record<string, any[]> = {};
+  const backupData: Record<string, unknown[]> = {};
 
   for (const table of TABLES) {
     console.log(`📦 Backing up ${table}...`);

@@ -12,13 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-interface Transaction {
-  date: string;
-  type: string;
-  category: string;
-  amount: number;
-  description: string | null;
-}
+import { Transaction } from "@/types/finance";
 
 interface ExportButtonProps {
   transactions: Transaction[];
@@ -26,10 +20,23 @@ interface ExportButtonProps {
   income: number;
   expenses: number;
   className?: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 }
 
-export const ExportButton = ({ transactions, selectedMonth, income, expenses, className, variant = "outline" }: ExportButtonProps) => {
+export const ExportButton = ({
+  transactions,
+  selectedMonth,
+  income,
+  expenses,
+  className,
+  variant = "outline",
+}: ExportButtonProps) => {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
@@ -128,11 +135,17 @@ export const ExportButton = ({ transactions, selectedMonth, income, expenses, cl
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={exportToCSV} className="gap-2 cursor-pointer">
+        <DropdownMenuItem
+          onClick={exportToCSV}
+          className="gap-2 cursor-pointer"
+        >
           <FileText className="w-4 h-4" />
           Export as CSV
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToPDF} className="gap-2 cursor-pointer">
+        <DropdownMenuItem
+          onClick={exportToPDF}
+          className="gap-2 cursor-pointer"
+        >
           <File className="w-4 h-4" />
           Export as PDF
         </DropdownMenuItem>

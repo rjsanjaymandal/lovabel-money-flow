@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Wallet, ArrowRight, Sparkles, LogIn, Mail, Lock } from "lucide-react";
 import { getSafeErrorMessage } from "@/lib/error-handler";
 import { motion, AnimatePresence } from "framer-motion";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");

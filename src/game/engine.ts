@@ -1,4 +1,4 @@
-import { UnoCard, CardColor, CardType } from "./types";
+import { UnoCard, UnoCardColor as CardColor, UnoCardType as CardType } from "@/types/uno";
 
 // Standard Uno Deck Composition (108 cards adjusted)
 // We need to support 163 cards as requested, or flexible size.

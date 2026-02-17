@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Footprints, Target, Star, Flame, CreditCard, Lock } from "lucide-react";
+import {
+  Footprints,
+  Target,
+  Star,
+  Flame,
+  CreditCard,
+  Lock,
+  LucideIcon,
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Achievement {
@@ -17,7 +25,7 @@ interface UserAchievement {
   unlocked_at: string;
 }
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   Footprints,
   Target,
   Star,
@@ -58,11 +66,14 @@ export function BadgesSection({ userId }: { userId: string }) {
     fetchData();
   }, [userId]);
 
-  if (loading) return <div className="h-24 animate-pulse bg-muted/20 rounded-xl" />;
+  if (loading)
+    return <div className="h-24 animate-pulse bg-muted/20 rounded-xl" />;
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground px-1">Badges & Achievements</h3>
+      <h3 className="text-sm font-medium text-muted-foreground px-1">
+        Badges & Achievements
+      </h3>
       <ScrollArea className="w-full whitespace-nowrap pb-2">
         <div className="flex w-max space-x-3 p-1">
           {achievements.map((achievement) => {
@@ -80,13 +91,22 @@ export function BadgesSection({ userId }: { userId: string }) {
               >
                 <div
                   className={`p-2 rounded-full ${
-                    isUnlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    isUnlocked
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  {isUnlocked ? <Icon className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                  {isUnlocked ? (
+                    <Icon className="w-5 h-5" />
+                  ) : (
+                    <Lock className="w-5 h-5" />
+                  )}
                 </div>
                 <div className="text-center space-y-0.5">
-                  <p className="text-xs font-semibold truncate w-full" title={achievement.name}>
+                  <p
+                    className="text-xs font-semibold truncate w-full"
+                    title={achievement.name}
+                  >
                     {achievement.name}
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate w-full">

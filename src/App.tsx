@@ -17,9 +17,16 @@ const AllLendBorrow = lazy(() => import("./pages/AllLendBorrow"));
 const PersonHistory = lazy(() => import("./pages/PersonHistory"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 // Lazy Load Heavy Components
-const NewsView = lazy(() => import("./components/NewsView").then(module => ({ default: module.NewsView })));
+const NewsView = lazy(() =>
+  import("./components/NewsView").then((module) => ({
+    default: module.NewsView,
+  })),
+);
 const UnoPage = lazy(() => import("./pages/UnoPage"));
 const UnoBotPage = lazy(() => import("./pages/UnoBotPage"));
+
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,36 +44,46 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public / Standalone Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            
-            {/* Game Routes (Full Screen) */}
-            <Route path="/uno/bot" element={<UnoBotPage />} />
-            <Route path="/uno/:roomCode" element={<UnoPage />} />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public / Standalone Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
 
-            {/* Application Layout Routes */}
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/transactions" element={<AllTransactions />} />
-              <Route path="/lend-borrow" element={<AllLendBorrow />} />
-              <Route path="/person/:personName" element={<PersonHistory />} />
-              <Route path="/news" element={<NewsView />} />
-              {/* Uno Lobby */}
-              <Route path="/uno" element={<UnoPage />} />
+              <Route element={<ProtectedRoute />}>
+                {/* Game Routes (Full Screen) */}
+                <Route path="/uno/bot" element={<UnoBotPage />} />
+                <Route path="/uno/:roomCode" element={<UnoPage />} />
+
+                {/* Application Layout Routes */}
+                <Route element={<MainLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/transactions" element={<AllTransactions />} />
+                  <Route path="/lend-borrow" element={<AllLendBorrow />} />
+                  <Route
+                    path="/person/:personName"
+                    element={<PersonHistory />}
+                  />
+                  <Route path="/news" element={<NewsView />} />
+                  {/* Uno Lobby */}
+                  <Route path="/uno" element={<UnoPage />} />
+                </Route>
+              </Route>
+
               {/* Fallback for authenticated 404s or generic */}
               <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

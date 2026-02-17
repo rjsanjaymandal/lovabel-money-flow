@@ -2,7 +2,13 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,16 +26,20 @@ interface SplitBillDialogProps {
   onSuccess: () => void;
 }
 
-const amountSchema = z.number()
+const amountSchema = z
+  .number()
   .positive({ message: "Amount must be greater than zero" })
   .finite({ message: "Amount must be a valid number" })
   .max(99999999.99, { message: "Amount is too large" });
 
-export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => {
+export const SplitBillDialog = ({
+  people,
+  onSuccess,
+}: SplitBillDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  
+
   const [formData, setFormData] = useState({
     amount: "",
     description: "",
@@ -38,9 +48,9 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
   });
 
   const handlePersonToggle = (name: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const selected = prev.selectedPeople.includes(name)
-        ? prev.selectedPeople.filter(p => p !== name)
+        ? prev.selectedPeople.filter((p) => p !== name)
         : [...prev.selectedPeople, name];
       return { ...prev, selectedPeople: selected };
     });
@@ -48,7 +58,7 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.selectedPeople.length === 0) {
       toast({
         title: "Error",
@@ -61,23 +71,26 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       // Validate amount
       const parsedAmount = parseFloat(formData.amount);
       const validationResult = amountSchema.safeParse(parsedAmount);
-      
+
       if (!validationResult.success) {
         throw new Error(validationResult.error.errors[0].message);
       }
 
       const totalAmount = validationResult.data;
-      const splitCount = formData.selectedPeople.length + (formData.includeSelf ? 1 : 0);
+      const splitCount =
+        formData.selectedPeople.length + (formData.includeSelf ? 1 : 0);
       const splitAmount = totalAmount / splitCount;
 
       // Create records for each selected person
-      const records = formData.selectedPeople.map(personName => ({
+      const records = formData.selectedPeople.map((personName) => ({
         user_id: user.id,
         type: "lent", // You paid, so you lent them money
         person_name: personName,
@@ -93,7 +106,9 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
 
       toast({
         title: "Bill Split Successfully! 🎉",
-        description: `Added ₹${splitAmount.toFixed(2)} to ${formData.selectedPeople.length} people.`,
+        description: `Added ₹${splitAmount.toFixed(2)} to ${
+          formData.selectedPeople.length
+        } people.`,
       });
 
       setOpen(false);
@@ -104,10 +119,11 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
         includeSelf: true,
       });
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to split bill.",
+        description:
+          error instanceof Error ? error.message : "Failed to split bill.",
         variant: "destructive",
       });
     } finally {
@@ -118,7 +134,10 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="rounded-full shadow-sm hover:shadow-md transition-all">
+        <Button
+          variant="outline"
+          className="rounded-full shadow-sm hover:shadow-md transition-all"
+        >
           <Calculator className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           Split Bill
         </Button>
@@ -140,7 +159,9 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
               min="0.01"
               placeholder="0.00"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: e.target.value })
+              }
               required
               className="text-lg font-semibold"
             />
@@ -153,7 +174,9 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
               placeholder="Dinner, Taxi, etc."
               maxLength={100}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
             />
           </div>
 
@@ -161,17 +184,25 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
             <Label>Select People</Label>
             <ScrollArea className="h-[150px] border rounded-md p-2">
               {people.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No contacts found.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No contacts found.
+                </p>
               ) : (
                 <div className="space-y-2">
                   {people.map((person) => (
-                    <div key={person.name} className="flex items-center space-x-2 p-1 hover:bg-muted/50 rounded">
-                      <Checkbox 
+                    <div
+                      key={person.name}
+                      className="flex items-center space-x-2 p-1 hover:bg-muted/50 rounded"
+                    >
+                      <Checkbox
                         id={`person-${person.name}`}
                         checked={formData.selectedPeople.includes(person.name)}
                         onCheckedChange={() => handlePersonToggle(person.name)}
                       />
-                      <Label htmlFor={`person-${person.name}`} className="flex-1 cursor-pointer font-medium">
+                      <Label
+                        htmlFor={`person-${person.name}`}
+                        className="flex-1 cursor-pointer font-medium"
+                      >
                         {person.name}
                       </Label>
                     </div>
@@ -182,10 +213,12 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
           </div>
 
           <div className="flex items-center space-x-2 pt-2">
-            <Checkbox 
-              id="includeSelf" 
+            <Checkbox
+              id="includeSelf"
               checked={formData.includeSelf}
-              onCheckedChange={(checked) => setFormData({ ...formData, includeSelf: checked as boolean })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, includeSelf: checked as boolean })
+              }
             />
             <Label htmlFor="includeSelf" className="cursor-pointer">
               Include myself in the split
@@ -196,20 +229,37 @@ export const SplitBillDialog = ({ people, onSuccess }: SplitBillDialogProps) => 
             <div className="bg-muted/50 p-3 rounded-lg text-sm">
               <div className="flex justify-between mb-1">
                 <span>Total:</span>
-                <span className="font-bold">₹{parseFloat(formData.amount).toFixed(2)}</span>
+                <span className="font-bold">
+                  ₹{parseFloat(formData.amount).toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between mb-1">
                 <span>Split by:</span>
-                <span>{formData.selectedPeople.length + (formData.includeSelf ? 1 : 0)} people</span>
+                <span>
+                  {formData.selectedPeople.length +
+                    (formData.includeSelf ? 1 : 0)}{" "}
+                  people
+                </span>
               </div>
               <div className="flex justify-between pt-2 border-t border-border/50 text-primary font-bold">
                 <span>Per Person:</span>
-                <span>₹{(parseFloat(formData.amount) / (formData.selectedPeople.length + (formData.includeSelf ? 1 : 0))).toFixed(2)}</span>
+                <span>
+                  ₹
+                  {(
+                    parseFloat(formData.amount) /
+                    (formData.selectedPeople.length +
+                      (formData.includeSelf ? 1 : 0))
+                  ).toFixed(2)}
+                </span>
               </div>
             </div>
           )}
 
-          <Button type="submit" className="w-full rounded-xl h-11 shadow-lg" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full rounded-xl h-11 shadow-lg"
+            disabled={loading}
+          >
             {loading ? "Splitting..." : "Split Bill"}
           </Button>
         </form>

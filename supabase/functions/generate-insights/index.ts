@@ -18,8 +18,14 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    interface Transaction {
+      type: string;
+      category: string;
+      amount: number;
+    }
+
     // Prepare transaction summary
-    const categoryTotals = transactions.reduce((acc: any, t: any) => {
+    const categoryTotals = (transactions as Transaction[]).reduce((acc: Record<string, number>, t: Transaction) => {
       if (t.type === "expense") {
         acc[t.category] = (acc[t.category] || 0) + t.amount;
       }
@@ -27,7 +33,7 @@ serve(async (req) => {
     }, {});
 
     const topCategories = Object.entries(categoryTotals)
-      .sort(([, a]: any, [, b]: any) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([cat, amt]) => `${cat}: $${amt}`);
 
