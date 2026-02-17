@@ -140,11 +140,6 @@ export function TransactionView({
 
         {/* Left Column: Charts (2/3 width on large screens) */}
         <div className="xl:col-span-2 space-y-6">
-          {/* Chart Container */}
-          <div className="h-[400px]">
-            <SpendingChart userId={userId} selectedMonth={selectedMonth} />
-          </div>
-
           {/* Actions Row */}
           <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
             <AddTransactionDialog
@@ -187,6 +182,11 @@ export function TransactionView({
                 className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white p-0"
               />
             </div>
+          </div>
+
+          {/* Chart Container */}
+          <div className="h-[400px]">
+            <SpendingChart userId={userId} selectedMonth={selectedMonth} />
           </div>
 
           {/* Transaction List */}

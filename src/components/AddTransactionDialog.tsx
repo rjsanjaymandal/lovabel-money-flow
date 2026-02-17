@@ -19,8 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CalendarIcon,
@@ -207,184 +218,234 @@ export const AddTransactionDialog = ({
     }
   };
 
+  const isMobile = useIsMobile();
+
+  const FormContent = (
+    <form onSubmit={handleSubmit} className="space-y-0">
+      <div className="px-6 pb-6">
+        <Tabs
+          defaultValue="expense"
+          value={formData.type}
+          onValueChange={(v) =>
+            setFormData({ ...formData, type: v as "expense" | "income" })
+          }
+          className="w-full mb-6"
+        >
+          <TabsList className="grid w-full grid-cols-2 h-12 rounded-xl bg-muted/50 p-1">
+            <TabsTrigger
+              value="expense"
+              className="rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white transition-all font-bold"
+            >
+              <ArrowDownCircle className="w-4 h-4 mr-2" />
+              Expense
+            </TabsTrigger>
+            <TabsTrigger
+              value="income"
+              className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white transition-all font-bold"
+            >
+              <ArrowUpCircle className="w-4 h-4 mr-2" />
+              Income
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Amount Input - Hero Style */}
+        <div className="relative mb-6 group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <IndianRupee
+              className={cn(
+                "h-8 w-8 transition-colors",
+                formData.type === "expense"
+                  ? "text-rose-500"
+                  : "text-emerald-500",
+              )}
+            />
+          </div>
+          <Input
+            type="number"
+            step="0.01"
+            placeholder="0"
+            value={formData.amount}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: e.target.value })
+            }
+            className={cn(
+              "pl-12 h-20 text-5xl font-bold border-2 border-muted bg-transparent shadow-none focus-visible:ring-0 transition-colors rounded-2xl",
+              formData.type === "expense"
+                ? "focus:border-rose-500 text-rose-500 placeholder:text-rose-200"
+                : "focus:border-emerald-500 text-emerald-500 placeholder:text-emerald-200",
+            )}
+            required
+            autoFocus
+          />
+        </div>
+
+        <div className="space-y-4">
+          {/* Category */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">
+              Category
+            </Label>
+            <div className="relative">
+              <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground mr-2" />
+              <Select
+                value={formData.category}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value })
+                }
+                required
+              >
+                <SelectTrigger className="pl-10 h-12 rounded-xl bg-muted/30 border-muted-foreground/10 focus:ring-primary/20">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-white/5 bg-background/95 backdrop-blur-xl">
+                  {categories.map((cat) => (
+                    <SelectItem
+                      key={cat}
+                      value={cat}
+                      className="rounded-lg mb-1"
+                    >
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Date */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">
+              Date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full pl-3 text-left font-normal h-12 rounded-xl bg-muted/30 border-muted-foreground/10 hover:bg-muted/40",
+                    !formData.date && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                  {formData.date ? (
+                    format(formData.date, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto p-0 rounded-3xl overflow-hidden border-white/5"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={formData.date}
+                  onSelect={(date) =>
+                    date && setFormData({ ...formData, date })
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">
+              Note
+            </Label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Textarea
+                placeholder="What was this for?"
+                maxLength={500}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="pl-10 min-h-[100px] rounded-xl bg-muted/30 border-muted-foreground/10 resize-none focus:ring-primary/20"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 pt-2">
+        <Button
+          type="submit"
+          className={cn(
+            "w-full h-14 rounded-2xl text-lg font-bold shadow-xl transition-all active:scale-95",
+            formData.type === "expense"
+              ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/25"
+              : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25",
+          )}
+          disabled={loading}
+        >
+          {loading
+            ? "Saving..."
+            : `Save ${formData.type === "expense" ? "Expense" : "Income"}`}
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent className="bg-background/95 backdrop-blur-2xl border-t border-white/10 rounded-t-[2.5rem] max-h-[96vh]">
+          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-3 mb-2" />
+          <DrawerHeader className="relative px-6">
+            <div className="absolute right-6 top-0 flex gap-2">
+              <ScanReceiptButton
+                onScanComplete={handleScanComplete}
+                variant="ghost"
+                className="h-10 w-10 p-0 rounded-full bg-muted/50"
+              />
+              <VoiceInput
+                onResult={handleVoiceResult}
+                variant="ghost"
+                className="h-10 w-10 p-0 rounded-full bg-muted/50"
+              />
+            </div>
+            <DrawerTitle className="text-2xl font-black tracking-tight text-center mt-2">
+              {formData.type === "expense" ? "New Expense" : "New Income"}
+            </DrawerTitle>
+            <DrawerDescription className="sr-only">
+              Enter transaction details
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="overflow-y-auto no-scrollbar pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] border-none bg-card/95 backdrop-blur-xl shadow-2xl p-0 overflow-hidden gap-0">
-        <DialogHeader className="p-6 pb-2 relative">
-          <div className="absolute left-4 top-4 z-10 flex gap-2">
-            <ScanReceiptButton onScanComplete={handleScanComplete} />
-            <VoiceInput onResult={handleVoiceResult} />
+      <DialogContent className="sm:max-w-[460px] border-white/5 bg-card/95 backdrop-blur-2xl shadow-2xl p-0 overflow-hidden rounded-[2.5rem]">
+        <DialogHeader className="p-8 pb-2 relative">
+          <div className="absolute left-8 top-8 z-10 flex gap-2">
+            <ScanReceiptButton
+              onScanComplete={handleScanComplete}
+              className="h-10 w-10 p-0 rounded-xl bg-white/5 border-white/10 hover:bg-white/10"
+            />
+            <VoiceInput
+              onResult={handleVoiceResult}
+              className="h-10 w-10 p-0 rounded-xl bg-white/5 border-white/10 hover:bg-white/10"
+            />
           </div>
-          <DialogTitle className="text-2xl font-bold text-center">
+          <DialogTitle className="text-3xl font-black text-center tracking-tight">
             {formData.type === "expense" ? "New Expense" : "New Income"}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Enter the details of your new {formData.type}.
           </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-0">
-          <div className="px-6 pb-6">
-            <Tabs
-              defaultValue="expense"
-              value={formData.type}
-              onValueChange={(v) =>
-                setFormData({ ...formData, type: v as "expense" | "income" })
-              }
-              className="w-full mb-6"
-            >
-              <TabsList className="grid w-full grid-cols-2 h-12 rounded-xl bg-muted/50 p-1">
-                <TabsTrigger
-                  value="expense"
-                  className="rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white transition-all"
-                >
-                  <ArrowDownCircle className="w-4 h-4 mr-2" />
-                  Expense
-                </TabsTrigger>
-                <TabsTrigger
-                  value="income"
-                  className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white transition-all"
-                >
-                  <ArrowUpCircle className="w-4 h-4 mr-2" />
-                  Income
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {/* Amount Input - Hero Style */}
-            <div className="relative mb-6 group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <IndianRupee
-                  className={cn(
-                    "h-8 w-8 transition-colors",
-                    formData.type === "expense"
-                      ? "text-rose-500"
-                      : "text-emerald-500"
-                  )}
-                />
-              </div>
-              <Input
-                type="number"
-                step="0.01"
-                placeholder="0"
-                value={formData.amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: e.target.value })
-                }
-                className={cn(
-                  "pl-12 h-20 text-5xl font-bold border-2 border-muted bg-transparent shadow-none focus-visible:ring-0 transition-colors rounded-2xl",
-                  formData.type === "expense"
-                    ? "focus:border-rose-500 text-rose-500 placeholder:text-rose-200"
-                    : "focus:border-emerald-500 text-emerald-500 placeholder:text-emerald-200"
-                )}
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="space-y-4">
-              {/* Category */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground ml-1">
-                  Category
-                </Label>
-                <div className="relative">
-                  <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, category: value })
-                    }
-                    required
-                  >
-                    <SelectTrigger className="pl-10 h-11 rounded-xl bg-muted/30 border-muted-foreground/20">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Date */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground ml-1">
-                  Date
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal h-11 rounded-xl bg-muted/30 border-muted-foreground/20",
-                        !formData.date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                      {formData.date ? (
-                        format(formData.date, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.date}
-                      onSelect={(date) =>
-                        date && setFormData({ ...formData, date })
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground ml-1">
-                  Note
-                </Label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    placeholder="What was this for?"
-                    maxLength={500}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="pl-10 min-h-[80px] rounded-xl bg-muted/30 border-muted-foreground/20 resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 pt-2 bg-muted/10 border-t">
-            <Button
-              type="submit"
-              className={cn(
-                "w-full h-12 rounded-xl text-base font-semibold shadow-lg transition-all hover:scale-[1.02]",
-                formData.type === "expense"
-                  ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/25"
-                  : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25"
-              )}
-              disabled={loading}
-            >
-              {loading
-                ? "Saving..."
-                : `Save ${formData.type === "expense" ? "Expense" : "Income"}`}
-            </Button>
-          </div>
-        </form>
+        <div className="pt-4">{FormContent}</div>
       </DialogContent>
     </Dialog>
   );

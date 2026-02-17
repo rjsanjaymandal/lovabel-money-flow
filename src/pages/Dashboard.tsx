@@ -178,77 +178,70 @@ const Dashboard = () => {
       {/* Premium Header */}
       {/* Floating Island Navbar */}
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-background/50 backdrop-blur-xl border-b border-white/10 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300 sm:hidden">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-2xl border-b border-white/5 px-4 h-16 flex items-center justify-between safe-top transition-all duration-300 sm:hidden">
         {isSearchOpen ? (
-          <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-            <Search className="w-5 h-5 text-primary flex-shrink-0" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search transactions..."
-              className="h-10 text-base bg-muted/50 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-muted-foreground/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="flex items-center w-full gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+              <Input
+                ref={searchInputRef}
+                placeholder="Search transactions..."
+                className="h-10 pl-9 text-base bg-white/10 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/40"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSearch}
-              className="h-10 w-10 rounded-full hover:bg-muted flex-shrink-0"
+              className="h-10 w-10 rounded-full hover:bg-white/10 flex-shrink-0"
             >
-              <X className="w-6 h-6 text-muted-foreground" />
+              <X className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
         ) : (
           <>
-            <div
-              className="flex items-center gap-3 cursor-pointer select-none"
-              onClick={() => handleTabChange("spend")}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Wallet className="w-4 h-4 text-white" />
-                </div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20 cursor-pointer active:scale-95 transition-transform"
+                onClick={() => handleTabChange("spend")}
+              >
+                <Wallet className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
-                  Lovabel
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-[0.2em] leading-none mb-1">
+                  {getGreeting()}
+                </span>
+                <h1 className="text-base font-bold tracking-tight leading-none text-foreground">
+                  {user?.user_metadata?.full_name?.split(" ")[0] || "Sanjay"}
                 </h1>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                  Money Flow
-                </p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <StreakCounter userId={user?.id} />
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleSearch}
-                className="h-10 w-10 rounded-full hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors"
+                className="h-9 w-9 rounded-full bg-white/5 border border-white/10 text-muted-foreground active:scale-90 transition-all"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
               </Button>
               <UserProfile
                 userId={user?.id}
                 onManageCategories={() => setCategoryManagerOpen(true)}
                 trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-full hover:bg-primary/5 transition-colors p-0 overflow-hidden"
-                  >
-                    <div className="h-full w-full rounded-full border border-primary/10 overflow-hidden">
-                      <img
-                        src={
-                          user?.user_metadata?.avatar_url ||
-                          `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`
-                        }
-                        alt="Profile"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  </Button>
+                  <div className="h-9 w-9 rounded-full border border-primary/20 p-0.5 active:scale-90 transition-transform overflow-hidden cursor-pointer">
+                    <img
+                      src={
+                        user?.user_metadata?.avatar_url ||
+                        `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id}`
+                      }
+                      alt="Profile"
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  </div>
                 }
               />
             </div>
@@ -315,6 +308,33 @@ const Dashboard = () => {
           onValueChange={handleTabChange}
           className="w-full space-y-6"
         >
+          {/* Mobile Tab Switcher (Segmented Control) */}
+          <div className="sm:hidden px-1">
+            <div className="bg-white/5 border border-white/5 p-1 rounded-[1.5rem] flex items-center relative gap-1 backdrop-blur-md">
+              {["spend", "budget", "lend"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleTabChange(tab)}
+                  className={`relative flex-1 py-2.5 text-xs font-bold rounded-2xl transition-all duration-300 z-10 ${
+                    activeTab === tab
+                      ? "text-primary filter drop-shadow-[0_0_8px_rgba(235,113,101,0.5)]"
+                      : "text-muted-foreground/60 hover:text-muted-foreground"
+                  }`}
+                >
+                  {activeTab === tab && (
+                    <div className="absolute inset-0 bg-white/10 rounded-2xl shadow-sm animate-in fade-in zoom-in-95 duration-200" />
+                  )}
+                  <span className="capitalize">
+                    {tab === "spend"
+                      ? "Spends"
+                      : tab === "budget"
+                        ? "Goals"
+                        : "Lend"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="hidden sm:flex items-center gap-2 bg-muted/30 p-1 rounded-2xl w-fit border border-border/50">
             <TabsList className="bg-transparent h-10 gap-1 p-0">
               <TabsTrigger
