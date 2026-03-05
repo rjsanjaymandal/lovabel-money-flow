@@ -103,10 +103,10 @@ export function QuickAddTransaction({
             });
             setIsExpanded(false);
             onSuccess();
-        } catch (error: any) {
+        } catch (error) {
             toast({
                 title: "Error",
-                description: error.message || "Something went wrong",
+                description: (error as Error).message || "Something went wrong",
                 variant: "destructive",
             });
         } finally {
@@ -119,20 +119,20 @@ export function QuickAddTransaction({
             <motion.div
                 layout
                 className={cn(
-                    "bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl transition-all duration-500 overflow-hidden",
-                    isExpanded ? "p-6" : "p-2"
+                    "glass-card transition-all duration-500 overflow-hidden",
+                    isExpanded ? "p-6 sm:p-8" : "p-2"
                 )}
             >
                 {!isExpanded ? (
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setIsExpanded(true)}
-                            className="flex-1 flex items-center gap-3 px-4 py-3 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors text-left"
+                            className="flex-1 flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/70 transition-colors text-left"
                         >
-                            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                                <Plus className="w-5 h-5 text-primary" />
+                            <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center">
+                                <Plus className="w-5 h-5 text-violet-400" />
                             </div>
-                            <span className="font-medium tracking-tight">Quick add transaction...</span>
+                            <span className="font-semibold tracking-tight text-lg">Quick add transaction...</span>
                         </button>
                         <div className="flex items-center gap-1.5 px-2">
                             <VoiceInput
@@ -146,7 +146,7 @@ export function QuickAddTransaction({
                                     setIsExpanded(true);
                                 }}
                                 variant="ghost"
-                                className="h-10 w-10 rounded-xl hover:bg-white/10 text-primary"
+                                className="h-10 w-10 rounded-xl hover:bg-white/10 text-violet-400"
                             />
                             <ScanReceiptButton
                                 onScanComplete={(data) => {
@@ -160,41 +160,41 @@ export function QuickAddTransaction({
                                     setIsExpanded(true);
                                 }}
                                 variant="ghost"
-                                className="h-10 w-10 p-0 rounded-xl hover:bg-white/10 text-primary"
+                                className="h-10 w-10 p-0 rounded-xl hover:bg-white/10 text-violet-400"
                             />
                         </div>
                     </div>
                 ) : (
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-6"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-8"
                     >
                         {/* Header with Type Toggle */}
                         <div className="flex items-center justify-between">
-                            <div className="flex bg-muted/30 p-1 rounded-2xl gap-1">
+                            <div className="flex bg-white/5 p-1.5 rounded-[1.5rem] gap-1.5 backdrop-blur-xl border border-white/5">
                                 <button
                                     onClick={() => setFormData({ ...formData, type: "expense" })}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+                                        "px-6 py-2.5 rounded-2xl text-sm font-bold transition-all flex items-center gap-2",
                                         formData.type === "expense"
-                                            ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
-                                            : "text-muted-foreground hover:text-foreground"
+                                            ? "gradient-error-vibrant shadow-rose-500/40"
+                                            : "text-white/40 hover:text-white/70"
                                     )}
                                 >
-                                    <ArrowDownCircle className="w-3.5 h-3.5" />
+                                    <ArrowDownCircle className="w-4 h-4" />
                                     Expense
                                 </button>
                                 <button
                                     onClick={() => setFormData({ ...formData, type: "income" })}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+                                        "px-6 py-2.5 rounded-2xl text-sm font-bold transition-all flex items-center gap-2",
                                         formData.type === "income"
-                                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
-                                            : "text-muted-foreground hover:text-foreground"
+                                            ? "gradient-success-vibrant shadow-emerald-500/40"
+                                            : "text-white/40 hover:text-white/70"
                                     )}
                                 >
-                                    <ArrowUpCircle className="w-3.5 h-3.5" />
+                                    <ArrowUpCircle className="w-4 h-4" />
                                     Income
                                 </button>
                             </div>
@@ -202,43 +202,43 @@ export function QuickAddTransaction({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsExpanded(false)}
-                                className="h-8 w-8 rounded-full hover:bg-white/10"
+                                className="h-10 w-10 rounded-2xl hover:bg-white/10 text-white/50"
                             >
-                                <Plus className="w-4 h-4 rotate-45" />
+                                <Plus className="w-5 h-5 rotate-45" />
                             </Button>
                         </div>
 
                         {/* Main Inputs Grid */}
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 gap-6">
                             {/* Amount - Hero Style */}
                             <div className="relative group">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold opacity-30 group-focus-within:opacity-100 transition-opacity">₹</span>
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black opacity-20 group-focus-within:opacity-100 transition-opacity text-violet-400">₹</span>
                                 <Input
                                     type="number"
                                     placeholder="0.00"
                                     value={formData.amount}
                                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                    className="h-16 pl-10 text-3xl font-black bg-white/5 border-white/5 rounded-2xl focus:ring-primary/20 transition-all placeholder:text-muted-foreground/20"
+                                    className="h-24 pl-14 text-5xl font-black bg-white/5 border-white/5 rounded-[2rem] focus:ring-violet-500/30 transition-all placeholder:text-white/10 text-white selection:bg-violet-500/30"
                                     autoFocus
                                 />
                             </div>
 
                             {/* Category, Date & Note Row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Category Select */}
                                 <Select
                                     value={formData.category}
                                     onValueChange={(v) => setFormData({ ...formData, category: v })}
                                 >
-                                    <SelectTrigger className="h-14 bg-white/5 border-white/5 rounded-2xl focus:ring-primary/20 text-base font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <Tag className="w-4 h-4 text-primary/60" />
+                                    <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl focus:ring-violet-500/30 text-white/80 font-semibold group hover:bg-white/10 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <Tag className="w-5 h-5 text-violet-400/60 group-hover:text-violet-400 transition-colors" />
                                             <SelectValue placeholder="Category" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-2xl border-white/10 bg-background/95 backdrop-blur-xl">
+                                    <SelectContent className="rounded-3xl border-white/10 bg-slate-900/90 backdrop-blur-3xl text-white">
                                         {categories.map((cat) => (
-                                            <SelectItem key={cat} value={cat} className="rounded-xl mb-1">{cat}</SelectItem>
+                                            <SelectItem key={cat} value={cat} className="rounded-2xl mb-1 focus:bg-violet-500/20 focus:text-white">{cat}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -248,29 +248,30 @@ export function QuickAddTransaction({
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="h-14 px-4 bg-white/5 border-white/5 rounded-2xl hover:bg-white/10 transition-all text-sm font-medium"
+                                            className="h-16 px-6 bg-white/5 border-white/5 rounded-2xl hover:bg-white/10 transition-all text-white/80 font-semibold flex justify-start gap-3"
                                         >
-                                            <CalendarIcon className="w-4 h-4 mr-2 text-primary/60" />
+                                            <CalendarIcon className="w-5 h-5 text-violet-400/60" />
                                             {format(formData.date, "MMM d, yyyy")}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden border-white/10 bg-background/95 backdrop-blur-xl" align="center">
+                                    <PopoverContent className="w-auto p-0 rounded-[2.5rem] overflow-hidden border-white/10 bg-slate-900/95 backdrop-blur-3xl" align="center">
                                         <Calendar
                                             mode="single"
                                             selected={formData.date}
                                             onSelect={(d) => d && setFormData({ ...formData, date: d })}
+                                            className="p-4"
                                         />
                                     </PopoverContent>
                                 </Popover>
 
                                 {/* Note/Description */}
                                 <div className="relative group sm:col-span-2 lg:col-span-1">
-                                    <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40 group-focus-within:text-primary transition-colors" />
+                                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-violet-400 transition-colors" />
                                     <Input
-                                        placeholder="Add Note"
+                                        placeholder="Add a quick note..."
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        className="h-14 pl-10 bg-white/5 border-white/5 rounded-2xl focus:ring-primary/20 transition-all placeholder:text-muted-foreground/20"
+                                        className="h-16 pl-12 bg-white/5 border-white/5 rounded-2xl focus:ring-violet-500/30 transition-all placeholder:text-white/10 text-white"
                                     />
                                 </div>
                             </div>
@@ -278,8 +279,8 @@ export function QuickAddTransaction({
 
 
                         {/* Footer Actions */}
-                        <div className="flex items-center justify-between pt-2">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <VoiceInput
                                     onResult={(data) => {
                                         setFormData(prev => ({
@@ -290,7 +291,7 @@ export function QuickAddTransaction({
                                         }));
                                     }}
                                     variant="outline"
-                                    className="h-12 w-12 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-primary"
+                                    className="h-14 w-14 rounded-2xl border-white/5 bg-white/5 hover:bg-violet-500/20 text-violet-400 transition-all"
                                 />
                                 <ScanReceiptButton
                                     onScanComplete={(data) => {
@@ -303,15 +304,16 @@ export function QuickAddTransaction({
                                         }));
                                     }}
                                     variant="outline"
-                                    className="h-12 w-12 p-0 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-primary"
+                                    className="h-14 w-14 p-0 rounded-2xl border-white/5 bg-white/5 hover:bg-violet-500/20 text-violet-400 transition-all"
                                 />
+                                <span className="text-xs font-bold text-white/20 uppercase tracking-widest ml-2">Smart Input</span>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
                                 <Button
                                     variant="ghost"
                                     onClick={() => setIsExpanded(false)}
-                                    className="h-12 px-6 rounded-2xl font-semibold text-muted-foreground hover:text-foreground"
+                                    className="h-14 px-8 rounded-2xl font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all flex-1 sm:flex-none"
                                 >
                                     Cancel
                                 </Button>
@@ -319,17 +321,17 @@ export function QuickAddTransaction({
                                     onClick={() => handleSubmit()}
                                     disabled={loading}
                                     className={cn(
-                                        "h-12 px-8 rounded-2xl font-bold shadow-xl transition-all active:scale-95",
+                                        "h-14 px-10 rounded-2xl font-black shadow-2xl transition-all active:scale-95 flex-1 sm:flex-none text-lg",
                                         formData.type === "expense"
-                                            ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/20"
-                                            : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20"
+                                            ? "gradient-error-vibrant"
+                                            : "gradient-success-vibrant"
                                     )}
                                 >
                                     {loading ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <Loader2 className="w-6 h-6 animate-spin" />
                                     ) : (
-                                        <div className="flex items-center gap-2">
-                                            <Check className="w-5 h-5" />
+                                        <div className="flex items-center gap-3">
+                                            <Check className="w-6 h-6" />
                                             Add {formData.type === "expense" ? "Expense" : "Income"}
                                         </div>
                                     )}
@@ -339,6 +341,7 @@ export function QuickAddTransaction({
                     </motion.div>
                 )}
             </motion.div>
+
         </div>
     );
 }

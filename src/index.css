@@ -72,7 +72,13 @@
     --input: 217 33% 17%;
     --ring: 252 59% 50%;
     
-    --gradient-surface: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.4) 100%);
+    /* Major UI Update - Vibrant Gradients */
+    --gradient-vibrant-violet: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    --gradient-vibrant-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-vibrant-rose: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    --gradient-mesh: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                     radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                     radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
   }
 }
 
@@ -84,6 +90,8 @@
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
     font-family: "Outfit", sans-serif;
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
@@ -103,19 +111,23 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-xl;
+    @apply bg-white/10 dark:bg-slate-950/40 backdrop-blur-2xl border border-white/10 shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2rem];
+    @apply bg-white/5 dark:bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[2.5rem];
   }
 
   .glass-card-interactive {
-    @apply glass-card hover:bg-white/10 dark:hover:bg-black/30 transition-all duration-300 hover:scale-[1.01] hover:border-white/20;
+    @apply glass-card hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-500 hover:scale-[1.01] hover:border-white/20 hover:shadow-primary/5;
   }
 
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500;
+  .text-gradient-vibrant {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-indigo-400 to-cyan-400;
+  }
+  
+  .mesh-bg {
+    background-image: var(--gradient-mesh);
   }
 
   .safe-bottom {
@@ -127,13 +139,13 @@
   }
 
   .animate-in-up {
-    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
     to {
       opacity: 1;
@@ -141,15 +153,19 @@
     }
   }
 
-  .gradient-success {
-    @apply bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 text-white;
+  .gradient-success-vibrant {
+    background: var(--gradient-vibrant-emerald);
+    @apply shadow-lg shadow-emerald-500/20 text-white;
   }
 
-  .gradient-accent {
-    @apply bg-gradient-to-br from-rose-500 to-pink-500 shadow-lg shadow-rose-500/20 text-white;
+  .gradient-error-vibrant {
+    background: var(--gradient-vibrant-rose);
+    @apply shadow-lg shadow-rose-500/20 text-white;
   }
 
-  .gradient-card {
-    @apply glass-card;
+  .gradient-primary-vibrant {
+    background: var(--gradient-vibrant-violet);
+    @apply shadow-xl shadow-violet-500/20 text-white;
   }
 }
+

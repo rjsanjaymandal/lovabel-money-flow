@@ -139,15 +139,18 @@ export function TransactionView({
           </div>
 
           {/* Transaction List */}
-          <div className="rounded-[2.5rem] bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden shadow-xl min-h-[500px]">
-            <div className="p-6 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/5">
-                  <Newspaper className="w-5 h-5 text-indigo-300" />
+          <div className="glass-card shadow-2xl min-h-[500px] overflow-hidden">
+            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/10">
+                  <Newspaper className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold text-lg text-white">
-                  Recent Activity
-                </h3>
+                <div>
+                  <h3 className="font-black text-xl text-white tracking-tight">
+                    Recent Activity
+                  </h3>
+                  <p className="text-xs font-bold text-white/30 uppercase tracking-widest mt-1">Transaction Stream</p>
+                </div>
               </div>
               <ExportButton
                 transactions={transactions}
@@ -155,10 +158,10 @@ export function TransactionView({
                 income={stats.income}
                 expenses={stats.expenses}
                 variant="ghost"
-                className="h-10 w-10 rounded-xl hover:bg-white/10 text-muted-foreground"
+                className="h-12 w-12 rounded-2xl hover:bg-white/10 text-white/40 hover:text-white transition-all"
               />
             </div>
-            <div className="p-2">
+            <div className="p-4 sm:p-6">
               <MonthlyTransactionList
                 userId={userId}
                 selectedMonth={selectedMonth}
@@ -170,7 +173,7 @@ export function TransactionView({
 
         {/* Right Column: Widgets (1/3 width) */}
         <div className="space-y-6">
-          <div className="rounded-[2rem] bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+          <div className="glass-card p-1 shadow-2xl transition-all duration-300 hover:shadow-violet-500/5">
             <BudgetCard
               userId={userId}
               selectedMonth={selectedMonth}
@@ -179,11 +182,13 @@ export function TransactionView({
             />
           </div>
 
-          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-6 shadow-xl space-y-4">
-            <h3 className="font-semibold text-white flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              Quick Insights
-            </h3>
+          <div className="glass-card p-8 shadow-2xl space-y-6 transition-all duration-300 hover:shadow-indigo-500/5">
+            <div className="flex items-center justify-between">
+              <h3 className="font-black text-white flex items-center gap-3 uppercase tracking-widest text-xs">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                AI Insights
+              </h3>
+            </div>
             <AIInsights
               userId={userId}
               selectedMonth={selectedMonth}
@@ -194,14 +199,14 @@ export function TransactionView({
             />
           </div>
 
-          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+          <div className="glass-card p-1 shadow-2xl transition-all duration-300 hover:shadow-rose-500/5">
             <SubscriptionManager
               userId={userId}
               onTransactionAdded={handleTransactionSuccess}
             />
           </div>
 
-          <div className="rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-xl">
+          <div className="glass-card p-1 shadow-2xl transition-all duration-300 hover:shadow-emerald-500/5">
             <MonthlyLendBorrowSummary
               userId={userId}
               selectedMonth={selectedMonth}
