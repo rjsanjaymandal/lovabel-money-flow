@@ -1,0 +1,17 @@
+# npm audit report
+
+dompurify  <=3.2.3
+Severity: high
+DOMPurify allows tampering by prototype pollution - https://github.com/advisories/GHSA-mmhx-hmjr-r674
+DOMPurify allows Cross-site Scripting (XSS) - https://github.com/advisories/GHSA-vhxf-7vqr-mrjg
+DOMpurify has a nesting-based mXSS - https://github.com/advisories/GHSA-gx9m-whjm-85jf
+fix available via `npm audit fix`
+node_modules/jspdf/node_modules/dompurify
+  jspdf  
+  Depends on vulnerable versions of dompurify
+  node_modules/jspdf
+
+2 high severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix

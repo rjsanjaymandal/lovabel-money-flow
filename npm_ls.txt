@@ -1,0 +1,12 @@
+vite_react_shadcn_ts@0.0.0 D:\maysanlabs\lovabel-money-flow
+Γö£ΓöÇΓö¼ jspdf-autotable@5.0.7
+Γöé ΓööΓöÇΓöÇ jspdf@4.2.0 deduped
+Γö£ΓöÇΓö¼ jspdf@4.2.0
+Γöé ΓööΓöÇΓöÇ dompurify@3.3.1
+Γö£ΓöÇΓö¼ supabase@2.76.16
+Γöé ΓööΓöÇΓöÇ tar@7.5.9
+ΓööΓöÇΓö¼ vite-plugin-pwa@0.19.8
+  ΓööΓöÇΓö¼ workbox-build@7.4.0
+    ΓööΓöÇΓö¼ @rollup/plugin-terser@0.4.4
+      ΓööΓöÇΓöÇ serialize-javascript@6.0.2
+

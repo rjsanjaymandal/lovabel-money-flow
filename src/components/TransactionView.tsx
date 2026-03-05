@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Newspaper } from "lucide-react";
-import { AddTransactionDialog } from "@/components/AddTransactionDialog";
+import { QuickAddTransaction } from "@/components/QuickAddTransaction";
 import { MonthSelector } from "@/components/MonthSelector";
 import { MonthlyStats } from "@/components/MonthlyStats";
 import { BudgetCard } from "@/components/BudgetCard";
@@ -44,21 +44,7 @@ export function TransactionView({
 }: TransactionViewProps) {
   const [stats, setStats] = useState({ income: 0, expenses: 0, balance: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [voiceData, setVoiceData] = useState<
-    | { amount: string; description: string; type: "expense" | "income" }
-    | undefined
-  >(undefined);
   const [monthlyBudget, setMonthlyBudget] = useState(0);
-
-  const handleVoiceResult = (data: {
-    amount: string;
-    description: string;
-    type: "expense" | "income";
-  }) => {
-    setVoiceData(data);
-    setIsAddDialogOpen(true);
-  };
 
   // Memoize date range calculation
   const dateRange = useMemo(
@@ -118,15 +104,15 @@ export function TransactionView({
       <SearchResults
         userId={userId}
         searchQuery={searchQuery}
-        onClose={onClearSearch || (() => {})}
+        onClose={onClearSearch || (() => { })}
       />
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in pb-24 sm:pb-24 px-1 sm:px-2 max-w-[1600px] mx-auto relative z-10">
+    <div className="space-y-4 sm:space-y-8 animate-fade-in pb-24 px-1 sm:px-4 max-w-[1600px] mx-auto relative z-10">
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Row 1: Full Width Stats */}
         <div className="xl:col-span-3">
           <MonthlyStats
@@ -139,50 +125,13 @@ export function TransactionView({
         {/* Row 2: Main Content Split */}
 
         {/* Left Column: Charts (2/3 width on large screens) */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Actions Row */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-            <AddTransactionDialog
-              onSuccess={handleTransactionSuccess}
-              categories={categories}
-              open={isAddDialogOpen}
-              onOpenChange={setIsAddDialogOpen}
-              defaultValues={voiceData}
-            >
-              <Button className="h-12 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 font-semibold px-6 flex-shrink-0">
-                <Plus className="w-5 h-5 mr-2" />
-                Add Transaction
-              </Button>
-            </AddTransactionDialog>
-
-            <div className="flex gap-2">
-              <VoiceInput
-                onResult={handleVoiceResult}
-                variant="outline"
-                className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white"
-              />
-              <ScanReceiptButton
-                onScanComplete={(data) => {
-                  setVoiceData({
-                    amount: data.amount?.toString() || "",
-                    description: data.merchant || "",
-                    type: "expense",
-                  });
-                  setIsAddDialogOpen(true);
-                }}
-                variant="outline"
-                className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white"
-              />
-              <ExportButton
-                transactions={transactions}
-                selectedMonth={selectedMonth}
-                income={stats.income}
-                expenses={stats.expenses}
-                variant="outline"
-                className="h-12 w-12 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md text-white p-0"
-              />
-            </div>
-          </div>
+        <div className="xl:col-span-2 space-y-4 sm:space-y-6">
+          {/* Quick Add Transaction - Major Update */}
+          <QuickAddTransaction
+            userId={userId}
+            categories={categories}
+            onSuccess={handleTransactionSuccess}
+          />
 
           {/* Chart Container */}
           <div className="h-[400px]">
@@ -191,13 +140,23 @@ export function TransactionView({
 
           {/* Transaction List */}
           <div className="rounded-[2.5rem] bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden shadow-xl min-h-[500px]">
-            <div className="p-6 border-b border-white/5 flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-white/5">
-                <Newspaper className="w-5 h-5 text-indigo-300" />
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/5">
+                  <Newspaper className="w-5 h-5 text-indigo-300" />
+                </div>
+                <h3 className="font-semibold text-lg text-white">
+                  Recent Activity
+                </h3>
               </div>
-              <h3 className="font-semibold text-lg text-white">
-                Recent Activity
-              </h3>
+              <ExportButton
+                transactions={transactions}
+                selectedMonth={selectedMonth}
+                income={stats.income}
+                expenses={stats.expenses}
+                variant="ghost"
+                className="h-10 w-10 rounded-xl hover:bg-white/10 text-muted-foreground"
+              />
             </div>
             <div className="p-2">
               <MonthlyTransactionList
