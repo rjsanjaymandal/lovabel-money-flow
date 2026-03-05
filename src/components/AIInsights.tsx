@@ -351,8 +351,8 @@ export const AIInsights = ({
           content:
             remaining > 0
               ? `✅ **₹${remaining.toLocaleString()}** left (${(
-                  100 - percent
-                ).toFixed(1)}%).`
+                100 - percent
+              ).toFixed(1)}%).`
               : `🚨 Over by **₹${Math.abs(remaining).toLocaleString()}**!`,
           type: "insight",
           data: { remaining, budget, expenses, percent },
@@ -452,18 +452,16 @@ export const AIInsights = ({
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      txn.type === "income" ? "bg-emerald-500" : "bg-rose-500"
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full ${txn.type === "income" ? "bg-emerald-500" : "bg-rose-500"
+                      }`}
                   />
                   <span className="truncate max-w-[90px] text-muted-foreground">
                     {txn.description || txn.category}
                   </span>
                 </div>
                 <span
-                  className={`font-medium ${
-                    txn.type === "income" ? "text-emerald-400" : "text-rose-400"
-                  }`}
+                  className={`font-medium ${txn.type === "income" ? "text-emerald-400" : "text-rose-400"
+                    }`}
                 >
                   {txn.type === "income" ? "+" : "-"}₹
                   {Number(txn.amount).toLocaleString()}
@@ -477,25 +475,28 @@ export const AIInsights = ({
 
   return (
     <>
-      <Card className="border-border/50 shadow-lg animate-scale-in bg-gradient-to-br from-indigo-500/5 to-purple-500/5 relative z-50 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-purple-500/5 pointer-events-none" />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Sparkles className="w-5 h-5 text-indigo-500 animate-pulse" />
-            AI Financial Advisor
+      <Card className="glass-card-interactive border-white/5 bg-white/[0.02] overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 via-transparent to-cyan-500/5 pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full group-hover:bg-indigo-500/20 transition-all duration-700" />
+
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 relative z-10">
+            <div className="p-2.5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
+              <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
+            </div>
+            <span className="text-sm font-black text-white/70 uppercase tracking-[0.2em]">Cortex AI</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Get instant answers about your spending, budget, and financial
-            health.
+        <CardContent className="space-y-5 relative z-10">
+          <p className="text-xs font-bold text-white/40 uppercase tracking-widest leading-relaxed">
+            Get instant financial signals & budget intelligence from your personal advisor.
           </p>
           <Button
             onClick={() => setIsOpen(true)}
-            className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 cursor-pointer relative z-50 transition-all hover:scale-[1.02]"
+            className="w-full h-12 rounded-2xl gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 shadow-2xl cursor-pointer transition-all hover:scale-[1.02] font-black uppercase tracking-widest text-[10px]"
           >
-            <Bot className="w-4 h-4" />
-            Open Assistant
+            <Bot className="w-4 h-4 text-indigo-400" />
+            Launch Assistant
           </Button>
         </CardContent>
       </Card>
@@ -503,79 +504,73 @@ export const AIInsights = ({
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
           side="bottom"
-          className="h-[92vh] sm:h-[85vh] sm:max-w-lg sm:mx-auto sm:rounded-t-[32px] p-0 flex flex-col bg-background/95 backdrop-blur-2xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]"
+          className="h-[92vh] sm:h-[85vh] sm:max-w-lg sm:mx-auto sm:rounded-t-[3rem] p-0 flex flex-col bg-slate-950/80 backdrop-blur-3xl border-t border-white/10 shadow-[0_-20px_60px_rgba(0,0,0,0.4)]"
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-border/40 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 shadow-inner">
-                <Bot className="w-5 h-5 text-indigo-400" />
+          <div className="p-6 flex items-center justify-between border-b border-white/5 shrink-0 bg-white/[0.02]">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center border border-white/10 shadow-inner">
+                <Bot className="w-6 h-6 text-indigo-400" />
               </div>
               <div>
-                <h3 className="font-bold text-base leading-tight">FinBot</h3>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                    Online
+                <h3 className="font-black text-lg text-white tracking-tight uppercase">Cortex-1</h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                  <span className="text-[10px] text-white/30 font-black uppercase tracking-widest">
+                    Quantum Active
                   </span>
                 </div>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="h-10 w-10 rounded-xl text-white/20 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5"
+            >
+              <X className="w-5 h-5" />
+            </Button>
           </div>
 
           {/* Chat Area */}
-          <ScrollArea className="flex-1 px-4 sm:px-6 py-4 bg-gradient-to-b from-transparent to-black/5">
-            <div className="space-y-6 pb-4">
+          <ScrollArea className="flex-1 px-6 py-6 bg-gradient-to-b from-transparent to-white/[0.02]">
+            <div className="space-y-8 pb-10">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex gap-3 ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   {msg.role === "ai" && (
-                    <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-white/5 mt-1">
-                      <Bot className="w-4 h-4 text-indigo-400" />
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0 border border-white/5 mt-1 shadow-inner">
+                      <Bot className="w-5 h-5 text-indigo-400" />
                     </div>
                   )}
                   <div
-                    className={`rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow-sm transition-all duration-300 ${
-                      msg.role === "user"
-                        ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-tr-sm shadow-indigo-500/10"
-                        : "bg-muted/50 text-foreground border border-white/5 rounded-tl-sm backdrop-blur-md"
-                    }`}
+                    className={`rounded-[2rem] px-5 py-4 max-w-[88%] text-sm shadow-2xl transition-all duration-500 ${msg.role === "user"
+                      ? "gradient-primary-vibrant text-white rounded-tr-lg"
+                      : "bg-white/5 text-white/90 border border-white/10 rounded-tl-lg backdrop-blur-3xl"
+                      }`}
                   >
                     {renderMessageContent(msg)}
                     <div
-                      className={`text-[9px] mt-1.5 opacity-60 font-medium ${
-                        msg.role === "user"
-                          ? "text-indigo-100"
-                          : "text-muted-foreground"
-                      }`}
+                      className={`text-[9px] mt-2.5 font-black uppercase tracking-[0.2em] opacity-40 ${msg.role === "user" ? "text-white" : "text-white"
+                        }`}
                     >
-                      {format(msg.timestamp, "h:mm a")}
+                      {format(msg.timestamp, "h:mm a")} • {msg.role === "user" ? "Deciphered" : "Cortex Log"}
                     </div>
                   </div>
                 </div>
               ))}
               {isTyping && (
-                <div className="flex gap-3 animate-in fade-in duration-300">
-                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-white/5">
-                    <Bot className="w-4 h-4 text-indigo-400" />
+                <div className="flex gap-4 animate-in fade-in duration-500">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0 border border-white/5">
+                    <Bot className="w-5 h-5 text-indigo-400" />
                   </div>
-                  <div className="bg-muted/30 rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-1.5 h-10">
-                    <span
-                      className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0ms" }}
-                    />
-                    <span
-                      className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "150ms" }}
-                    />
-                    <span
-                      className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "300ms" }}
-                    />
+                  <div className="bg-white/5 rounded-[2rem] rounded-tl-lg px-6 py-4 border border-white/5 flex items-center gap-2 h-12 shadow-2xl backdrop-blur-3xl">
+                    <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               )}
@@ -586,13 +581,13 @@ export const AIInsights = ({
           {/* Floating Input Area */}
           <div className="p-4 sm:p-5 pb-safe pt-2 bg-gradient-to-t from-background via-background to-transparent z-10 shrink-0">
             {messages.length === 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide mb-1 px-1">
+              <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-2 px-1">
                 {SUGGESTED_PROMPTS.map((prompt) => (
                   <Button
                     key={prompt}
                     variant="outline"
                     size="sm"
-                    className="whitespace-nowrap rounded-full text-xs h-7 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:text-indigo-400"
+                    className="whitespace-nowrap rounded-2xl text-[10px] font-black uppercase tracking-widest h-8 border-white/5 bg-white/5 hover:bg-indigo-500/10 hover:text-indigo-400 transition-all font-sans"
                     onClick={() => handleSendMessage(prompt)}
                   >
                     {prompt}
@@ -601,12 +596,12 @@ export const AIInsights = ({
               </div>
             )}
 
-            <div className="flex items-end gap-2 p-1.5 bg-muted/40 border border-white/10 rounded-[28px] shadow-lg backdrop-blur-xl transition-all focus-within:ring-1 focus-within:ring-indigo-500/30 focus-within:bg-muted/60">
+            <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl backdrop-blur-3xl transition-all focus-within:ring-2 focus-within:ring-indigo-500/30">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={clearChat}
-                className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full ml-0.5"
+                className="h-10 w-10 shrink-0 text-white/20 hover:text-rose-400 hover:bg-rose-500/10 rounded-full transition-colors"
                 title="Clear Chat"
               >
                 <Trash2 className="w-4 h-4" />
@@ -621,22 +616,24 @@ export const AIInsights = ({
                 <Input
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask FinBot..."
-                  className="border-0 bg-transparent focus-visible:ring-0 px-2 h-10 py-2.5 text-base placeholder:text-muted-foreground/60"
+                  placeholder="Ask Cortex Assistant..."
+                  className="border-0 bg-transparent focus-visible:ring-0 px-2 h-10 text-sm font-semibold placeholder:text-white/20 text-white"
                 />
               </form>
               <Button
                 onClick={() => handleSendMessage(inputValue)}
                 size="icon"
-                className={`h-9 w-9 rounded-full shrink-0 transition-all duration-300 ${
-                  inputValue.trim() || isTyping
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25"
-                    : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
-                }`}
+                className={`h-10 w-10 rounded-full shrink-0 transition-all duration-500 ${inputValue.trim() || isTyping
+                  ? "gradient-primary-vibrant shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+                  : "bg-white/5 text-white/10 opacity-50 cursor-not-allowed"
+                  }`}
                 disabled={!inputValue.trim() || isTyping}
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-4 h-4 ml-0.5" />
               </Button>
+            </div>
+            <div className="mt-4 text-center">
+              <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em]">Powered by Cortex Engine</span>
             </div>
           </div>
         </SheetContent>

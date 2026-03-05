@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Receipt, Trash2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Receipt, Trash2, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -178,8 +178,8 @@ const MonthlyTransactionListComponent = ({
                   >
                     <div
                       className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl sm:rounded-[1.8rem] flex items-center justify-center flex-shrink-0 shadow-2xl transition-all duration-700 group-hover:rotate-[15deg] group-hover:scale-110 ${transaction.type === "income"
-                          ? "gradient-success-vibrant"
-                          : "bg-white/5 text-white/60 border border-white/5"
+                        ? "gradient-success-vibrant"
+                        : "bg-white/5 text-white/60 border border-white/5"
                         }`}
                     >
                       {transaction.type === "income" ? (
@@ -196,8 +196,8 @@ const MonthlyTransactionListComponent = ({
                         </p>
                         <span
                           className={`font-black text-lg sm:text-xl tracking-tighter ${transaction.type === "income"
-                              ? "text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                              : "text-white"
+                            ? "text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                            : "text-white"
                             }`}
                         >
                           {transaction.type === "income" ? "+" : "-"}₹
