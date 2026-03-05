@@ -52,7 +52,7 @@
     "framer-motion": "^12.23.25",
     "html-to-image": "^1.11.13",
     "input-otp": "^1.4.2",
-    "jspdf": "^4.1.0",
+    "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
@@ -69,7 +69,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "^6.0.1",
     "vaul": "^0.9.9",
-    "vite-plugin-pwa": "^1.1.0",
+    "vite-plugin-pwa": "^0.19.8",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -87,7 +87,7 @@
     "globals": "^15.15.0",
     "lovable-tagger": "^1.1.11",
     "postcss": "^8.5.6",
-    "supabase": "^2.64.2",
+    "supabase": "^2.76.16",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
