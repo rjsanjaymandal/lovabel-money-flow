@@ -65,7 +65,7 @@ export function BudgetView({
       setTotalBudget(budgetsWithSpent.reduce((sum, b) => sum + b.amount, 0));
       setTotalSpent(budgetsWithSpent.reduce((sum, b) => sum + b.spent, 0));
     }
-  }, [userId]);
+  }, [userId, selectedMonth]);
 
   useEffect(() => {
     fetchBudgets();

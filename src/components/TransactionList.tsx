@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,13 +19,7 @@ export const TransactionList = ({ userId, limit }: { userId: string; limit?: num
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    if (userId) {
-      fetchTransactions();
-    }
-  }, [userId, limit]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     let query = supabase
       .from("transactions")
       .select("*")
@@ -38,7 +32,13 @@ export const TransactionList = ({ userId, limit }: { userId: string; limit?: num
 
     const { data } = await query;
     if (data) setTransactions(data);
-  };
+  }, [userId, limit]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchTransactions();
+    }
+  }, [userId, limit, fetchTransactions]);
 
   const filteredTransactions = transactions.filter(
     (t) =>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Mic, X, Check, Loader2, Sparkles, AudioWaveform } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,13 +57,74 @@ export function VoiceCommand({
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
+  const handleCommand = useCallback(async (text: string) => {
+    setIsProcessing(true);
+    setFeedback("Processing...");
+    const lowerText = text.toLowerCase();
+
+    try {
+      const amountMatch = lowerText.match(/(\d+)/);
+      if (!amountMatch) {
+        throw new Error("Could not find an amount.");
+      }
+      const amount = parseFloat(amountMatch[0]);
+
+      let type: "expense" | "income" = "expense";
+      if (
+        lowerText.includes("income") ||
+        lowerText.includes("received") ||
+        lowerText.includes("salary") ||
+        lowerText.includes("got")
+      ) {
+        type = "income";
+      }
+
+      let note = "Voice Entry";
+      let category = "Others";
+
+      const splitWords = lowerText.split(/on |for |from /);
+      if (splitWords.length > 1) {
+        note = splitWords[1].trim();
+      }
+
+      if (note.match(/food|pizza|burger|meal|lunch|dinner/)) category = "Food";
+      else if (note.match(/uber|ola|taxi|bus|train|fuel/)) category = "Travel";
+      else if (note.match(/movie|netflix|game|fun/)) category = "Entertainment";
+      else if (note.match(/salary|paycheck/)) category = "Salary";
+      else if (note.match(/grocery|milk|veg/)) category = "Grocery";
+
+      const { error } = await supabase.from("transactions").insert({
+        user_id: userId,
+        amount: amount,
+        type: type,
+        category: category,
+        description: note,
+        date: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
+      setFeedback("Success!");
+      speak(`Logged ${amount} for ${note}`);
+      toast.success(`Logged: ${amount} (${category})`);
+
+      setTimeout(() => {
+        setIsOpen(false);
+        setTranscript("");
+        if (onTransactionAdded) onTransactionAdded();
+      }, 1500);
+    } catch (err: unknown) {
+      console.error(err);
+      setFeedback("I didn't understand. Try 'Spent 500 on Food'.");
+      speak("Sorry, I couldn't understand that transaction.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [userId, onTransactionAdded]);
+
   useEffect(() => {
-    // Initialize Speech Recognition
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const win = window as unknown as Record<
-        string,
-        new () => SpeechRecognition
-      >;
+      const win = window as unknown as Record<string, new () => SpeechRecognition>;
       const SpeechRecognitionConstructor =
         win.webkitSpeechRecognition || win.SpeechRecognition;
       recognitionRef.current =
@@ -85,7 +146,6 @@ export function VoiceCommand({
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
-        // If we have a final transcript, process it
         if (transcript.length > 2) {
           handleCommand(transcript);
         } else {
@@ -99,83 +159,11 @@ export function VoiceCommand({
         setFeedback("Error accessing microphone.");
       };
     }
-  }, [transcript]);
+  }, [handleCommand, transcript]);
 
   const speak = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(utterance);
-  };
-
-  const handleCommand = async (text: string) => {
-    setIsProcessing(true);
-    setFeedback("Processing...");
-    const lowerText = text.toLowerCase();
-
-    try {
-      // PARSE COMMAND
-      // Patterns: "Spent 500 on Pizza", "Paid 20 for Taxi", "Add 1000 to Salary"
-
-      const amountMatch = lowerText.match(/(\d+)/);
-      if (!amountMatch) {
-        throw new Error("Could not find an amount.");
-      }
-      const amount = parseFloat(amountMatch[0]);
-
-      let type: "expense" | "income" = "expense";
-      if (
-        lowerText.includes("income") ||
-        lowerText.includes("received") ||
-        lowerText.includes("salary") ||
-        lowerText.includes("got")
-      ) {
-        type = "income";
-      }
-
-      // Extract "Category/Note" - simplistically taking words after "on" or "for"
-      let note = "Voice Entry";
-      let category = "Others";
-
-      const splitWords = lowerText.split(/on |for |from /);
-      if (splitWords.length > 1) {
-        note = splitWords[1].trim(); // "Pizza"
-      }
-
-      // Auto-Categorize based on keywords
-      if (note.match(/food|pizza|burger|meal|lunch|dinner/)) category = "Food";
-      else if (note.match(/uber|ola|taxi|bus|train|fuel/)) category = "Travel";
-      else if (note.match(/movie|netflix|game|fun/)) category = "Entertainment";
-      else if (note.match(/salary|paycheck/)) category = "Salary";
-      else if (note.match(/grocery|milk|veg/)) category = "Grocery";
-
-      // Insert into Supabase
-      const { error } = await supabase.from("transactions").insert({
-        user_id: userId,
-        amount: amount,
-        type: type,
-        category: category,
-        description: note, // Using description as note
-        date: new Date().toISOString(),
-      });
-
-      if (error) throw error;
-
-      // Success Feedback
-      setFeedback("Success!");
-      speak(`Logged ${amount} for ${note}`);
-      toast.success(`Logged: ${amount} (${category})`);
-
-      setTimeout(() => {
-        setIsOpen(false);
-        setTranscript("");
-        if (onTransactionAdded) onTransactionAdded();
-      }, 1500);
-    } catch (err: unknown) {
-      console.error(err);
-      setFeedback("I didn't understand. Try 'Spent 500 on Food'.");
-      speak("Sorry, I couldn't understand that transaction.");
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   const toggleListening = () => {

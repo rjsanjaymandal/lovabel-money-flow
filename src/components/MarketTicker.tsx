@@ -244,7 +244,7 @@ export function MarketTicker() {
 
     const interval = setInterval(fetchIndianStocks, 60000); // 1 min refresh is safer for free proxies
     return () => clearInterval(interval);
-  }, []); // Only on mount
+  }, [fetchIndianStocks]);
 
   return (
     <div className="w-full bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 overflow-hidden h-10 flex items-center relative z-50">

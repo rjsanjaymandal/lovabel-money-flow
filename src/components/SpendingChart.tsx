@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart,
@@ -33,7 +33,7 @@ export const SpendingChart = ({
     }
   }, [userId, selectedMonth]);
 
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     const startDate = format(startOfMonth(selectedMonth), "yyyy-MM-dd");
     const endDate = format(endOfMonth(selectedMonth), "yyyy-MM-dd");
 
@@ -68,7 +68,13 @@ export const SpendingChart = ({
       .slice(0, 8);
 
     setChartData(data);
-  };
+  }, [userId, selectedMonth]);
+
+  useEffect(() => {
+    if (userId && selectedMonth) {
+      fetchChartData();
+    }
+  }, [userId, selectedMonth, fetchChartData]);
 
   if (chartData.length === 0) {
     return (

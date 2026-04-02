@@ -57,13 +57,7 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (userId && personName) {
-      fetchRecords();
-    }
-  }, [userId, personName]);
-
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     const { data } = await supabase
       .from("lend_borrow")
       .select("*")
@@ -72,7 +66,13 @@ export const PersonDetails = ({ personName, userId }: PersonDetailsProps) => {
       .order("date", { ascending: false });
 
     if (data) setRecords(data);
-  };
+  }, [userId, personName]);
+
+  useEffect(() => {
+    if (userId && personName) {
+      fetchRecords();
+    }
+  }, [userId, personName, fetchRecords]);
 
   const handleQuickAdd = async (type: "lent" | "borrowed") => {
     playHaptic();

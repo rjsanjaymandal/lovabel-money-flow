@@ -223,7 +223,7 @@ export function NewsView() {
 
   useEffect(() => {
     fetchNews();
-  }, []); // Re-fetch isn't strictly needed on interest change, but could be added
+  }, [fetchNews]);
 
   // Track Interest
   const handleCardClick = (item: NewsItem) => {
