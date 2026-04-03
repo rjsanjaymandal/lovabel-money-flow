@@ -24,3 +24,18 @@ dist-ssr
 *.sw?
 package-lock.json
 package-lock.json
+
+# Agent context
+.agent/
+
+# Local logs and reports
+*_report*.txt
+*_output.txt
+audit_*.txt
+tsc_*.txt
+lint_*.txt
+*.json.
+!package.json
+!composer.json
+!tsconfig.json
+!components.json
