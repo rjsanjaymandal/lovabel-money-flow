@@ -9,8 +9,8 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface BudgetViewProps {
   userId: string;
-  categories: string[];
-  selectedMonth: Date;
+  categories?: string[];
+  selectedMonth?: Date;
 }
 
 interface Budget {

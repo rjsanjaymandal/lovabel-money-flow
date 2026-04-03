@@ -51,9 +51,9 @@ interface Person {
 }
 
 interface LendBorrowViewProps {
-  people: Person[];
+  people?: Person[];
   userId: string;
-  onPersonAdded: () => void;
+  onPersonAdded?: () => void;
 }
 
 export function LendBorrowView({

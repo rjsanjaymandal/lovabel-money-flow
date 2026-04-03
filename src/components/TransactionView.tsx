@@ -23,13 +23,13 @@ import { Transaction } from "@/types/finance";
 
 interface TransactionViewProps {
   userId: string;
-  user?: User | null; // Add user prop
-  categories: string[];
-  onTransactionAdded: () => void;
+  user?: User | null;
+  categories?: string[];
+  onTransactionAdded?: () => void;
   searchQuery?: string;
   onClearSearch?: () => void;
-  selectedMonth: Date;
-  onMonthChange: (date: Date) => void;
+  selectedMonth?: Date;
+  onMonthChange?: (date: Date) => void;
 }
 
 export function TransactionView({
